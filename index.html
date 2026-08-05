@@ -125,6 +125,24 @@
 <div class="chart-body"><canvas id="chartTrend"></canvas></div>
 <div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ค่าเฉลี่ยทั้งปี, แกนนอน (X) = ปี ค.ศ. (พ.ศ.) ค่า slope ใน legend บอกอัตราเปลี่ยนแปลงต่อทศวรรษ (slope บวก = เพิ่มขึ้น, slope ลบ = ลดลง)</div>
 </div>
+
+<div class="chart-panel chart-wide">
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
+<div class="chart-caption">เส้นน้ำเงิน = SST Anomaly (แกนซ้าย) | เส้นเขียว = Chl-a Anomaly (แกนขวา, กลับด้าน) | เมื่อเส้นทั้งสองไปในทิศทางเดียวกัน = สัมพันธ์ลบ</div></div>
+<div class="chart-body"><canvas id="chartDual"></canvas></div>
+<div class="chart-desc"><strong>Insight:</strong> กราฟนี้แสดง Anomaly (ค่าเบี่ยงเบนจากปกติ) ของ SST และ Chl-a ซ้อนกัน โดย <u>แกนขวา (Chl-a) ถูกกลับด้าน</u> ดังนั้นถ้าเส้นทั้งสองเคลื่อนไหวไปด้วยกัน = ยืนยันว่าเมื่อ SST สูงกว่าปกติ Chl-a จะต่ำกว่าปกติ (inverse relationship) ยิ่งเส้นซ้อนทับกันมากยิ่งสัมพันธ์แน่น</div>
+</div>
+
+<!-- Insight Summary -->
+<div class="insight-box">
+<div class="insight-icon"><span class="material-icons-outlined">lightbulb</span></div>
+<div class="insight-content">
+<h4>สรุปข้อค้นพบ (Key Findings)</h4>
+<ul id="insightList">
+<li>กำลังคำนวณ...</li>
+</ul>
+</div>
+</div>
 </div>
 
 <!-- References -->
@@ -212,6 +230,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .corr-matrix th{padding:8px 6px;font-size:.68rem;font-weight:600;color:var(--text2);background:var(--bg);border:1px solid var(--border)}
 .corr-matrix td{padding:8px 4px;border:1px solid var(--border);font-weight:500;min-width:50px}
 .corr-matrix .row-header{font-weight:600;color:var(--text2);background:var(--bg);text-align:right;padding-right:10px;font-family:var(--font);font-size:.72rem}
+.insight-box{background:var(--white);border:2px solid #dbeafe;border-radius:var(--r);padding:20px 24px;margin-bottom:32px;display:flex;gap:16px;align-items:flex-start;box-shadow:var(--shadow)}
+.insight-icon{width:40px;height:40px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#d97706;font-size:22px;flex-shrink:0}
+.insight-content h4{font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:8px}
+.insight-content ul{list-style:none;padding:0}
+.insight-content li{font-size:.8rem;color:var(--text2);padding:4px 0;padding-left:16px;position:relative;line-height:1.5}
+.insight-content li::before{content:"\25CF";position:absolute;left:0;color:var(--blue);font-size:.5rem;top:8px}
 .ref-content{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
 .ref-table{width:100%;border-collapse:collapse;font-size:.78rem}
 .ref-table th{text-align:left;padding:7px 10px;background:var(--bg);color:var(--text2);font-weight:600;border-bottom:2px solid var(--border);font-size:.7rem;text-transform:uppercase}
@@ -392,6 +416,68 @@ function renderTrend(zone){
   c4=new Chart(ctx,{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets:[{label:'ค่าเฉลี่ยรายปี (Annual Mean)',data:means.map(v=>v!==null?+v.toFixed(3):null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,fill:true,tension:.3},{label:'เส้นแนวโน้ม (slope: '+(slope*10).toFixed(4)+' '+d.u+'/decade)',data:trend,borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>' '+c.dataset.label.split(' (s')[0]+': '+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:9}},title:{display:true,text:'Year',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}});
 }
 
+let c5;
+function renderDual(zone,yr){
+  const ctx=document.getElementById('chartDual').getContext('2d');if(c5)c5.destroy();
+  // Use ANOMALY data so seasonal cycle is removed
+  const sstAn=zone==='overall'?sstAnomaly[yr]:sstZoneAnom[zone][yr];
+  const chlAn=zone==='overall'?chlAnomaly[yr]:chlZoneAnom[zone][yr];
+  c5=new Chart(ctx,{type:'line',data:{labels:months,datasets:[
+    {label:'SST Anomaly (°C)',data:sstAn,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#2563eb',fill:true,tension:.4,yAxisID:'y'},
+    {label:'Chl-a Anomaly (mg/m³) [กลับด้าน]',data:chlAn,borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#059669',pointStyle:'rect',fill:true,tension:.4,yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,usePointStyle:true,padding:12}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:function(c){const v=c.parsed.y;return ' '+c.dataset.label.split(' [')[0]+': '+(v>0?'+':'')+v?.toFixed(3);}}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{type:'linear',position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#2563eb',font:{weight:'500'}},title:{display:true,text:'SST Anomaly (°C)',color:'#2563eb',font:{size:11,weight:'600'}}},y1:{type:'linear',position:'right',reverse:true,grid:{drawOnChartArea:false},ticks:{color:'#059669',font:{weight:'500'}},title:{display:true,text:'Chl-a Anomaly (กลับด้าน)',color:'#059669',font:{size:11,weight:'600'}}}}}});
+  // Generate insights
+  generateInsights(zone,yr);
+}
+
+function generateInsights(zone,yr){
+  const sstAn=zone==='overall'?sstAnomaly[yr]:sstZoneAnom[zone][yr];
+  const chlAn=zone==='overall'?chlAnomaly[yr]:chlZoneAnom[zone][yr];
+  const sstMo=zone==='overall'?sstMonthly[yr]:sstZone[zone][yr];
+  const chlMo=zone==='overall'?chlMonthly[yr]:chlZone[zone][yr];
+  
+  // Pearson r
+  const pairs=[];
+  for(let i=0;i<12;i++){if(sstAn[i]!==null&&chlAn[i]!==null)pairs.push([sstAn[i],chlAn[i]]);}
+  let r=0;
+  if(pairs.length>=3){
+    const n=pairs.length,xm=pairs.reduce((a,p)=>a+p[0],0)/n,ym=pairs.reduce((a,p)=>a+p[1],0)/n;
+    let num=0,dx=0,dy=0;
+    pairs.forEach(p=>{num+=(p[0]-xm)*(p[1]-ym);dx+=(p[0]-xm)**2;dy+=(p[1]-ym)**2;});
+    r=dx&&dy?num/Math.sqrt(dx*dy):0;
+  }
+
+  // Find warmest/coolest month
+  const sstMax=Math.max(...sstMo.filter(v=>v!==null));
+  const sstMin=Math.min(...sstMo.filter(v=>v!==null));
+  const maxMonth=monthsFull[sstMo.indexOf(sstMax)];
+  const minMonth=monthsFull[sstMo.indexOf(sstMin)];
+  
+  // Mean anomaly
+  const sstAnMean=(sstAn.filter(v=>v!==null).reduce((a,b)=>a+b,0)/sstAn.filter(v=>v!==null).length);
+  const chlAnMean=(chlAn.filter(v=>v!==null).reduce((a,b)=>a+b,0)/chlAn.filter(v=>v!==null).length);
+
+  const insights=[];
+  // Correlation insight
+  if(r<-0.3) insights.push('SST กับ Chl-a มีสหสัมพันธ์เชิงลบ (r = '+r.toFixed(2)+') — เดือนที่น้ำอุ่นผิดปกติ สาหร่ายมักลดลง');
+  else if(r>0.3) insights.push('SST กับ Chl-a มีสหสัมพันธ์เชิงบวก (r = '+r.toFixed(2)+') — อาจเกิดจาก runoff พาทั้งความร้อนและธาตุอาหารลงทะเลพร้อมกัน');
+  else insights.push('SST กับ Chl-a ไม่มีสหสัมพันธ์เชิงเส้นชัดเจน (r = '+r.toFixed(2)+') ในปีนี้ — Chl-a อาจถูก drive ด้วยปัจจัยอื่น เช่น น้ำท่า ลม หรือ upwelling เฉพาะจุด');
+
+  // SST anomaly summary
+  if(sstAnMean<-0.5) insights.push('ปี '+yr+' SST ต่ำกว่าปกติตลอดทั้งปี (mean anomaly = '+sstAnMean.toFixed(2)+' °C) → บ่งชี้สภาวะ La Niña หรือ upwelling เพิ่ม');
+  else if(sstAnMean>0.5) insights.push('ปี '+yr+' SST สูงกว่าปกติตลอดทั้งปี (mean anomaly = +'+sstAnMean.toFixed(2)+' °C) → บ่งชี้สภาวะ El Niño หรือ marine heatwave');
+  else insights.push('ปี '+yr+' SST ใกล้เคียงปกติ (mean anomaly = '+(sstAnMean>0?'+':'')+sstAnMean.toFixed(2)+' °C)');
+
+  // Chl-a trend
+  if(chlAnMean>0.03) insights.push('Chl-a สูงกว่าปกติ (mean anomaly = +'+chlAnMean.toFixed(3)+' mg/m³) → ผลผลิตขั้นปฐมภูมิเพิ่ม อาจเกี่ยวข้องกับ nutrient enrichment');
+  else if(chlAnMean<-0.03) insights.push('Chl-a ต่ำกว่าปกติ (mean anomaly = '+chlAnMean.toFixed(3)+' mg/m³) → ผลผลิตขั้นปฐมภูมิลด อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น');
+
+  // Peak info
+  insights.push('เดือนที่ร้อนที่สุด: '+maxMonth+' ('+sstMax.toFixed(1)+' °C) | เดือนที่เย็นที่สุด: '+minMonth+' ('+sstMin.toFixed(1)+' °C)');
+
+  document.getElementById('insightList').innerHTML=insights.map(t=>'<li>'+t+'</li>').join('');
+}
+
 function updateKPI(zone,yr){
   const d=D(),mo=gM(zone,yr,d),an=gA(zone,yr,d);
   let last=11;for(let i=11;i>=0;i--){if(mo[i]!==null){last=i;break;}}
@@ -419,7 +505,7 @@ function updateKPI(zone,yr){
 
 function renderAll(){
   const z=document.getElementById('zoneSelect').value,y=document.getElementById('yearSelect').value;
-  renderMain(z,y);renderScatter(z,y);renderBar(z,y);renderTrend(z);updateKPI(z,y);
+  renderMain(z,y);renderScatter(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);
 }
 
 document.querySelectorAll('.param-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.param-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentParam=b.dataset.param;renderAll();});});

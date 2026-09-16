@@ -142,10 +142,10 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <div class="chart-panel chart-wide map-panel" id="mapSection">
 <div class="chart-header">
   <div class="chart-title">
-    <span class="fig-num">Fig. 1</span> ภาพดาวเทียม Anomaly แบบ Interactive (Raster Map)
+    <span class="fig-num">Fig. 1</span> <span id="mapTitle">ภาพดาวเทียม Anomaly แบบ Interactive (Raster Map)</span>
     <span class="map-param-badge" id="mapParamBadge">Chl-a Anomaly</span>
   </div>
-  <div class="chart-caption">คลิกบนแผนที่เพื่อดูค่า Anomaly ของจุดนั้น · สีน้ำเงิน = ต่ำกว่าปกติ · สีแดง = สูงกว่าปกติ · ข้อมูลจาก VIIRS SNAP</div>
+  <div class="chart-caption" id="mapCaption">คลิกบนแผนที่เพื่อดูค่า Anomaly ของจุดนั้น · สีน้ำเงิน = ต่ำกว่าปกติ · สีแดง = สูงกว่าปกติ · ข้อมูลจาก VIIRS SNAP</div>
 </div>
 <div class="map-controls-bar">
   <div class="map-ctrl-group">
@@ -810,10 +810,36 @@ function updateMapUI() {
   const param = currentParam === 'sst' ? 'sst' : 'chl';
   const pal = PALETTES[param];
   
+  // Update parameter badge
   document.getElementById('mapParamBadge').textContent = pal.label;
   document.getElementById('mapParamBadge').className = 'map-param-badge' + (param === 'sst' ? ' sst' : '');
   
   document.getElementById('mapMonthDisplay').textContent = monthsFull[currentMapMonth - 1];
+  
+  // Update map title and caption dynamically
+  let title = '';
+  let caption = '';
+  
+  if (currentView === 'absolute') {
+    if (param === 'sst') {
+      title = 'ภาพดาวเทียมอุณหภูมิผิวน้ำทะเล (SST) แบบ Interactive';
+      caption = 'แสดงค่าอุณหภูมิผิวน้ำทะเลเฉลี่ยรายเดือน (°C) จากดาวเทียม VIIRS โดยสีแดงเข้มแสดงอุณหภูมิสูง และสีน้ำเงินเข้มแสดงอุณหภูมิต่ำ คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
+    } else {
+      title = 'ภาพดาวเทียมคลอโรฟิลล์-เอ แบบ Interactive';
+      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (mg/m³) จากดาวเทียม VIIRS โดยสีเขียว-เหลืองแสดงความเข้มข้นสูง (แพลงก์ตอนมาก) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
+    }
+  } else { // anomaly
+    if (param === 'sst') {
+      title = 'ภาพดาวเทียม SST Anomaly แบบ Interactive';
+      caption = 'แสดงความผิดปกติของอุณหภูมิผิวน้ำทะเล (°C) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดงแสดงอุณหภูมิสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
+    } else {
+      title = 'ภาพดาวเทียม Chlorophyll-a Anomaly แบบ Interactive';
+      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (mg/m³) เทียบกับค่าเฉลี่ยระยะยาว โดยสีเขียว-เหลืองแสดงความเข้มข้นสูงกว่าปกติ สีม่วง-น้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
+    }
+  }
+  
+  document.getElementById('mapTitle').textContent = title;
+  document.getElementById('mapCaption').innerHTML = caption;
   
   document.getElementById('legendTitle').textContent = pal.label + ' (' + pal.unit + ')';
   

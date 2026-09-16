@@ -190,11 +190,11 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 
 <!-- Fig 2, 3 & 4 -->
 <div class="chart-grid" id="charts">
-<div class="chart-panel">
+<div class="chart-panel chart-wide">
 <div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
-<div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative)</div></div>
-<div class="chart-body"><canvas id="chartAnomaly"></canvas></div>
-<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ขนาดค่าเบี่ยงเบน (Anomaly), แกนนอน (X) = เดือน ความสูงของแท่งบอกว่าเดือนนั้นมีค่าต่างจากปกติมากเพียงใด</div>
+<div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative) | เส้นประกลาง = ค่าเป็นศูนย์ (ปกติ)</div></div>
+<div class="chart-body chart-body-anomaly"><canvas id="chartAnomaly"></canvas></div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = เดือน ม.ค.–ธ.ค., แกนนอน (X) = ขนาดค่าเบี่ยงเบน (Anomaly) แท่งยาวไปทางขวา = สูงกว่าปกติ แท่งยาวไปทางซ้าย = ต่ำกว่าปกติ</div>
 </div>
 
 <div class="chart-panel chart-wide">
@@ -304,6 +304,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .chart-caption{font-size:.7rem;color:var(--dim);margin-top:2px}
 .chart-body{padding:16px 20px 20px;height:340px;position:relative}
 .chart-body-lg{height:400px}
+.chart-body-anomaly{padding:16px 20px 20px;height:380px;position:relative}
 .chart-desc{padding:12px 20px 14px;border-top:1px solid var(--border-lt);background:#f9fafb;font-size:.73rem;color:var(--text2);line-height:1.6}
 .chart-desc strong{color:var(--accent)}
 .corr-matrix{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.72rem;text-align:center}
@@ -483,7 +484,73 @@ function renderBar(zone,yr){
   const ctx=document.getElementById('chartAnomaly').getContext('2d');if(c3)c3.destroy();
   document.getElementById('anomBadge').textContent=yr;
   const d=D(),data=gA(zone,yr,d);
-  c3=new Chart(ctx,{type:'bar',data:{labels:months,datasets:[{data,backgroundColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,0.75)':'rgba(3,105,161,0.75)')),borderColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,1)':'rgba(3,105,161,1)')),borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>'Anomaly: '+(c.parsed.y>0?'+':'')+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{display:false},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',callback:v=>(v>0?'+':'')+v.toFixed(currentParam==='chl'?2:1)},title:{display:true,text:'Anomaly ('+d.u+')',color:'#1e293b',font:{size:11,weight:'600'}}}}}});
+  const monthLabels=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  c3=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:monthLabels,
+      datasets:[{
+        data,
+        backgroundColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,0.80)':'rgba(3,105,161,0.80)')),
+        borderColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,1)':'rgba(3,105,161,1)')),
+        borderWidth:1.5,
+        borderRadius:4,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#fff',
+          titleColor:'#1e293b',
+          bodyColor:'#475569',
+          borderColor:'#e2e8f0',
+          borderWidth:1,
+          cornerRadius:6,
+          callbacks:{
+            title:c=>monthLabels[c[0].dataIndex],
+            label:c=>'Anomaly: '+(c.parsed.x>0?'+':'')+c.parsed.x?.toFixed(3)+' '+d.u
+          }
+        },
+        annotation:{
+          annotations:{
+            zeroline:{
+              type:'line',
+              xMin:0,xMax:0,
+              borderColor:'rgba(100,116,139,0.6)',
+              borderWidth:1.5,
+              borderDash:[4,3]
+            }
+          }
+        }
+      },
+      scales:{
+        y:{
+          grid:{display:false},
+          ticks:{color:'#374151',font:{size:11,weight:'500'}},
+          title:{display:false}
+        },
+        x:{
+          grid:{color:'#f1f5f9'},
+          ticks:{
+            color:'#374151',
+            font:{size:10},
+            callback:v=>(v>0?'+':'')+v.toFixed(currentParam==='chl'?2:1)
+          },
+          title:{
+            display:true,
+            text:'Anomaly ('+d.u+')',
+            color:'#1e293b',
+            font:{size:11,weight:'600'}
+          }
+        }
+      }
+    }
+  });
 }
 
 function renderTrend(zone){
@@ -747,9 +814,9 @@ async function loadMapGeoTIFF() {
 
     currentMapLayer = new GeoRasterLayer({
       georaster: georaster,
-      opacity: 0.80,
+      opacity: 0.85,
       pixelValuesToColorFn: pixelValuesToColorFn,
-      resolution: 256
+      resolution: 512
     });
 
     currentMapLayer.addTo(leafletMap);

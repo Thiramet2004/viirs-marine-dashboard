@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIIRS Marine Dashboard — Web GIS</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Georaster dependencies -->
+<script src="https://unpkg.com/georaster@1.6.0/dist/georaster.browser.bundle.min.js"></script>
+<script src="https://unpkg.com/proj4@2.11.0/dist/proj4.js"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+<style>
+:root{--bg:#f8f9fb;--bg2:#f1f5f9;--white:#fff;--border:#e2e8f0;--text:#1e293b;--text2:#475569;--dim:#64748b;--accent:#1e3a5f;--blue:#2563eb;--blue-bg:#eff6ff;--red:#dc2626;--green:#059669;--shadow:0 4px 12px rgba(0,0,0,.08);--r:12px;--font:'IBM Plex Sans Thai',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px;overflow-x:hidden}
+
+.header{background:var(--accent);color:#fff;padding:20px 24px;box-shadow:var(--shadow)}
+.header h1{font-size:1.5rem;margin-bottom:4px}
+.header p{font-size:.85rem;color:rgba(255,255,255,.7)}
+
+.container{max-width:1600px;margin:0 auto;padding:20px}
+
+.controls-panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;align-items:end}
+.control-group{display:flex;flex-direction:column;gap:6px}
+.control-group label{font-size:.8rem;font-weight:600;color:var(--text2)}
+.control-group select,.control-group input{background:var(--bg);border:1px solid var(--border);padding:8px 12px;border-radius:6px;font-family:var(--font);font-size:.88rem;cursor:pointer}
+.control-group select:focus,.control-group input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+
+.btn{background:var(--blue);color:#fff;border:none;padding:10px 18px;border-radius:6px;font-family:var(--font);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.btn .material-icons-outlined{font-size:18px}
+
+.map-container{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px}
+.map-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.map-title{font-size:1.1rem;font-weight:700;color:var(--accent)}
+.param-badge{display:inline-block;font-size:.7rem;font-weight:700;color:#fff;background:var(--green);padding:3px 10px;border-radius:4px;margin-left:10px;text-transform:uppercase}
+.param-badge.sst{background:var(--red)}
+
+.map-wrapper{position:relative;height:600px}
+#map{height:100%;width:100%}
+
+.map-legend{position:absolute;bottom:20px;right:16px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;min-width:200px;z-index:1000;box-shadow:var(--shadow)}
+.legend-title{font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:8px;text-align:center}
+.legend-gradient{height:16px;border-radius:4px;margin-bottom:6px;border:1px solid var(--border)}
+.legend-ticks{display:flex;justify-content:space-between;font-size:.62rem;font-family:var(--mono);color:var(--dim);margin-bottom:8px}
+.legend-unit{font-size:.68rem;color:var(--text2);text-align:center;font-weight:500}
+
+.click-info{position:absolute;top:20px;right:16px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid var(--blue);border-radius:var(--r);padding:12px 16px;z-index:1000;box-shadow:0 4px 16px rgba(37,99,235,.2);display:none;min-width:220px}
+.click-info.show{display:block}
+.click-info-title{font-size:.7rem;font-weight:700;color:var(--blue);margin-bottom:6px;text-transform:uppercase}
+.click-info-row{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;padding:4px 0;border-bottom:1px solid var(--border)}
+.click-info-row:last-child{border-bottom:none;margin-bottom:0}
+.click-info-label{color:var(--dim);font-weight:500}
+.click-info-value{color:var(--text);font-weight:700;font-family:var(--mono);font-size:.8rem}
+.click-info-value.anomaly{color:var(--blue)}
+.click-info-value.anomaly.positive{color:var(--red)}
+.click-info-value.anomaly.negative{color:var(--blue)}
+
+.loading-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9999}
+.loading-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.month-nav{display:flex;align-items:center;gap:12px}
+.month-btn{background:var(--white);border:1px solid var(--border);padding:8px;border-radius:6px;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center}
+.month-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.month-btn .material-icons-outlined{font-size:20px}
+.month-display{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:6px 14px;border-radius:6px;min-width:140px;text-align:center}
+
+.info-box{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:var(--r);padding:16px 20px;margin-bottom:20px}
+.info-box-title{font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.info-box-content{font-size:.82rem;color:var(--text2);line-height:1.6}
+.info-box-content ul{margin:8px 0 0 20px}
+.info-box-content li{margin-bottom:4px}
+
+.footer{text-align:center;padding:20px;color:var(--dim);font-size:.78rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌊 VIIRS Marine Dashboard — Interactive Web GIS</h1>
+  <p>อ่าวไทย & ทะเลอันดามัน | Sea Surface Temperature & Chlorophyll-a Anomaly</p>
+</div>
+
+<div class="container">
+
+<div class="info-box">
+  <div class="info-box-title">
+    <span class="material-icons-outlined">info</span>
+    วิธีใช้งาน
+  </div>
+  <div class="info-box-content">
+    <strong>คลิกบนแผนที่</strong> เพื่อดูค่า Anomaly ของจุดนั้น ๆ พร้อมพิกัด lat/lon
+    <ul>
+      <li>เลือก Parameter: <strong>SST</strong> (อุณหภูมิผิวน้ำ) หรือ <strong>Chl-a</strong> (คลอโรฟิลล์-เอ)</li>
+      <li>เลือกปีและเดือนจาก dropdown หรือใช้ปุ่ม ◀ ▶ เลื่อนดูแต่ละเดือน</li>
+      <li>ข้อมูล: <strong>Anomaly</strong> = ส่วนต่างจากค่าเฉลี่ย Climatology (2018-2025)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="controls-panel">
+  <div class="controls-grid">
+    <div class="control-group">
+      <label>Parameter</label>
+      <select id="paramSelect">
+        <option value="chl" selected>Chlorophyll-a (Chl-a)</option>
+        <option value="sst">Sea Surface Temperature (SST)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Year / ปี พ.ศ.</label>
+      <select id="yearSelect">
+        <option value="2025">2568 (2025)</option>
+        <option value="2024">2567 (2024)</option>
+        <option value="2023">2566 (2023)</option>
+        <option value="2022">2565 (2022)</option>
+        <option value="2021">2564 (2021)</option>
+        <option value="2020">2563 (2020)</option>
+        <option value="2019">2562 (2019)</option>
+        <option value="2018">2561 (2018)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Month / เดือน</label>
+      <div class="month-nav">
+        <button class="month-btn" id="prevMonth"><span class="material-icons-outlined">chevron_left</span></button>
+        <div class="month-display" id="monthDisplay">มกราคม</div>
+        <button class="month-btn" id="nextMonth"><span class="material-icons-outlined">chevron_right</span></button>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>&nbsp;</label>
+      <button class="btn" id="loadBtn">
+        <span class="material-icons-outlined">refresh</span>
+        โหลดข้อมูล
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="map-container">
+  <div class="map-header">
+    <div>
+      <span class="map-title">Satellite Data Viewer</span>
+      <span class="param-badge" id="paramBadge">Chl-a Anomaly</span>
+    </div>
+    <div style="font-size:.75rem;color:var(--dim)">
+      <span id="currentDataInfo">กำลังรอโหลด...</span>
+    </div>
+  </div>
+  <div class="map-wrapper">
+    <div id="map"></div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="click-info" id="clickInfo">
+      <div class="click-info-title">Pixel Information</div>
+      <div class="click-info-row">
+        <span class="click-info-label">Latitude:</span>
+        <span class="click-info-value" id="clickLat">—</span>
+      </div>
+      <div class="click-info-row">
+        <span class="click-info-label">Longitude:</span>
+        <span class="click-info-value" id="clickLon">—</span>
+      </div>
+      <div class="click-info-row">
+        <span class="click-info-label">Value:</span>
+        <span class="click-info-value anomaly" id="clickValue">—</span>
+      </div>
+    </div>
+
+    <div class="map-legend" id="mapLegend">
+      <div class="legend-title" id="legendTitle">Chl-a Anomaly</div>
+      <div class="legend-gradient" id="legendGradient"></div>
+      <div class="legend-ticks" id="legendTicks">
+        <span>-5</span><span>-2.5</span><span>0</span><span>+2.5</span><span>+5</span>
+      </div>
+      <div class="legend-unit" id="legendUnit">mg/m³</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  VIIRS Marine Dashboard v4.0 · Data from Suomi NPP / NOAA-20 VIIRS · Processing: SNAP
+</div>
+
+<script>
+// =============================================
+// CONFIG
+// =============================================
+
+const API_BASE = 'http://localhost:5001/api';
+
+const monthsTH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// Color palettes from .cpd files
+const PALETTES = {
+  chl: {
+    label: 'Chl-a Anomaly',
+    unit: 'mg/m³',
+    min: -5.0,
+    max: 5.0,
+    stops: [
+      [-5.0, [0,0,100]], [-4.5, [5,5,130]], [-4.0, [20,20,165]], [-3.5, [30,42,195]],
+      [-3.0, [33,70,225]], [-2.5, [37,110,249]], [-2.0, [48,153,255]], [-1.5, [75,200,255]],
+      [-1.0, [140,235,255]], [-0.5, [200,250,255]], [0.0, [255,255,255]],
+      [0.5, [255,250,170]], [1.0, [255,237,80]], [1.5, [255,210,30]], [2.0, [255,160,10]],
+      [2.5, [250,105,4]], [3.0, [240,53,1]], [3.5, [210,16,0]], [4.0, [165,3,0]],
+      [4.5, [135,0,0]], [5.0, [110,0,0]]
+    ]
+  },
+  sst: {
+    label: 'SST Anomaly',
+    unit: '°C',
+    min: -20.0,
+    max: 20.0,
+    stops: [
+      [-20.0, [91,10,118]], [-19.8, [34,8,238]], [-17.7, [8,8,179]], [-15.6, [8,70,104]],
+      [-13.4, [8,113,155]], [-11.5, [8,172,172]], [-9.3, [8,225,225]], [-7.2, [8,231,178]],
+      [-5.1, [8,193,115]], [-3.1, [8,143,79]], [-1.0, [47,151,8]], [1.2, [110,206,8]],
+      [3.3, [223,229,8]], [5.3, [224,166,8]], [7.4, [223,70,8]], [9.5, [182,8,8]],
+      [11.6, [112,19,19]], [13.6, [134,64,63]], [15.7, [158,112,111]], [17.9, [182,159,159]],
+      [20.0, [0,0,0]]
+    ]
+  }
+};
+
+// =============================================
+// STATE
+// =============================================
+
+let currentParam = 'chl';
+let currentYear = 2025;
+let currentMonth = 1;
+let currentLayer = null;
+let map = null;
+
+// =============================================
+// INIT MAP
+// =============================================
+
+function initMap() {
+  map = L.map('map', {
+    center: [7.5, 101.25],
+    zoom: 6,
+    minZoom: 5,
+    maxZoom: 11,
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    opacity: 0.4
+  }).addTo(map);
+
+  // Click handler
+  map.on('click', onMapClick);
+}
+
+// =============================================
+// LOAD GEOTIFF
+// =============================================
+
+async function loadGeoTIFF() {
+  const url = `${API_BASE}/tif/${currentParam}/${currentYear}/${currentMonth}`;
+  
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('clickInfo').classList.remove('show');
+  
+  // Remove old layer
+  if (currentLayer) {
+    map.removeLayer(currentLayer);
+    currentLayer = null;
+  }
+
+  try {
+    // Fetch GeoTIFF
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const georaster = await parseGeoraster(arrayBuffer);
+
+    console.log('GeoTIFF loaded:', georaster);
+
+    // Get palette
+    const pal = PALETTES[currentParam];
+    
+    // Create custom pixelValuesToColorFn
+    const pixelValuesToColorFn = values => {
+      const val = values[0]; // Band 1 = actual anomaly value
+      if (val === null || val === undefined || isNaN(val)) return null;
+      
+      // Interpolate color from palette
+      return interpolateColor(val, pal.stops);
+    };
+
+    // Create georaster layer
+    currentLayer = new GeoRasterLayer({
+      georaster: georaster,
+      opacity: 0.8,
+      pixelValuesToColorFn: pixelValuesToColorFn,
+      resolution: 256
+    });
+
+    currentLayer.addTo(map);
+    
+    // Fit bounds
+    const bounds = [
+      [georaster.ymin, georaster.xmin],
+      [georaster.ymax, georaster.xmax]
+    ];
+    map.fitBounds(bounds);
+
+    document.getElementById('currentDataInfo').textContent = 
+      `${pal.label} · ${monthsTH[currentMonth-1]} ${currentYear}`;
+
+    document.getElementById('loadingOverlay').classList.remove('show');
+
+  } catch (error) {
+    console.error('Error loading GeoTIFF:', error);
+    alert(`ไม่สามารถโหลดข้อมูลได้\n${error.message}\n\nตรวจสอบว่า server กำลังรันอยู่ที่ http://localhost:5000`);
+    document.getElementById('loadingOverlay').classList.remove('show');
+  }
+}
+
+// =============================================
+// COLOR INTERPOLATION
+// =============================================
+
+function interpolateColor(value, stops) {
+  // Find surrounding stops
+  let lower = stops[0];
+  let upper = stops[stops.length - 1];
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (value >= stops[i][0] && value <= stops[i + 1][0]) {
+      lower = stops[i];
+      upper = stops[i + 1];
+      break;
+    }
+  }
+
+  if (value < stops[0][0]) {
+    return `rgb(${stops[0][1].join(',')})`;
+  }
+  if (value > stops[stops.length - 1][0]) {
+    return `rgb(${stops[stops.length - 1][1].join(',')})`;
+  }
+
+  // Linear interpolation
+  const [v1, c1] = lower;
+  const [v2, c2] = upper;
+  const t = (value - v1) / (v2 - v1);
+
+  const r = Math.round(c1[0] + t * (c2[0] - c1[0]));
+  const g = Math.round(c1[1] + t * (c2[1] - c1[1]));
+  const b = Math.round(c1[2] + t * (c2[2] - c1[2]));
+
+  return `rgb(${r},${g},${b})`;
+}
+
+// =============================================
+// MAP CLICK
+// =============================================
+
+function onMapClick(e) {
+  if (!currentLayer || !currentLayer.georaster) return;
+
+  const lat = e.latlng.lat;
+  const lon = e.latlng.lng;
+
+  // Get pixel value at clicked location
+  try {
+    const values = geoblaze.identify(currentLayer.georaster, [lon, lat]);
+    
+    if (values && values[0] !== null && values[0] !== undefined) {
+      const val = values[0];
+      const pal = PALETTES[currentParam];
+      
+      document.getElementById('clickLat').textContent = lat.toFixed(4) + '°';
+      document.getElementById('clickLon').textContent = lon.toFixed(4) + '°';
+      
+      const valueEl = document.getElementById('clickValue');
+      const formatted = val.toFixed(3) + ' ' + pal.unit;
+      valueEl.textContent = (val > 0 ? '+' : '') + formatted;
+      valueEl.className = 'click-info-value anomaly ' + (val > 0 ? 'positive' : 'negative');
+      
+      document.getElementById('clickInfo').classList.add('show');
+    }
+  } catch (error) {
+    console.error('Error getting pixel value:', error);
+  }
+}
+
+// =============================================
+// UI CONTROLS
+// =============================================
+
+function updateUI() {
+  const pal = PALETTES[currentParam];
+  
+  // Update badges
+  document.getElementById('paramBadge').textContent = pal.label;
+  document.getElementById('paramBadge').className = 'param-badge' + (currentParam === 'sst' ? ' sst' : '');
+  
+  // Update month display
+  document.getElementById('monthDisplay').textContent = monthsTH[currentMonth - 1];
+  
+  // Update legend
+  document.getElementById('legendTitle').textContent = pal.label;
+  document.getElementById('legendUnit').textContent = pal.unit;
+  
+  // Update gradient
+  const stops = pal.stops;
+  const min = stops[0][0];
+  const max = stops[stops.length - 1][0];
+  const range = max - min;
+  
+  const gradientStops = stops.map(([val, rgb]) => {
+    const pct = ((val - min) / range * 100).toFixed(1);
+    return `rgb(${rgb.join(',')}) ${pct}%`;
+  }).join(', ');
+  
+  document.getElementById('legendGradient').style.background = 
+    `linear-gradient(to right, ${gradientStops})`;
+  
+  // Update ticks
+  const ticks = [];
+  for (let i = 0; i <= 4; i++) {
+    const val = min + (max - min) * i / 4;
+    ticks.push((val > 0 ? '+' : '') + val.toFixed(1));
+  }
+  document.getElementById('legendTicks').innerHTML = 
+    ticks.map(t => `<span>${t}</span>`).join('');
+}
+
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+  if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+  
+  document.getElementById('yearSelect').value = currentYear;
+  updateUI();
+}
+
+// =============================================
+// EVENT LISTENERS
+// =============================================
+
+document.getElementById('paramSelect').addEventListener('change', function() {
+  currentParam = this.value;
+  updateUI();
+});
+
+document.getElementById('yearSelect').addEventListener('change', function() {
+  currentYear = parseInt(this.value);
+  updateUI();
+});
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  changeMonth(-1);
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+  changeMonth(1);
+});
+
+document.getElementById('loadBtn').addEventListener('click', () => {
+  loadGeoTIFF();
+});
+
+// =============================================
+// INIT
+// =============================================
+
+initMap();
+updateUI();
+loadGeoTIFF();
+
+</script>
+
+<!-- Geoblaze for pixel query -->
+<script src="https://unpkg.com/geoblaze@2.8.0/dist/geoblaze.min.js"></script>
+
+</body>
+</html>

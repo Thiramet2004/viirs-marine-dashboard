@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+
+# Logs
+*.log
+conversion_log.txt
+conversion_with_mask_log.txt
+
+# Backup files
+*.backup
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Development files (keep these in repo)
+# add_raster_map.py - helper script
+# fix_map_rgb.py - helper script
+# reorder_map.py - helper script
+# update_fig_numbers.py - helper script

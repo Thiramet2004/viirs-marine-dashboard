@@ -242,14 +242,18 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 </div>
 </div>
 </section>
+</div><!-- close chart-grid -->
+</div><!-- close report-container -->
 
 <footer class="report-footer">
 <div class="footer-inner">
-<div class="footer-left"><p class="footer-org">ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยเทคโนโลยีภูมิสารสนเทศ</p><p class="footer-sub">Marine Environment Monitoring using Geoinformatics</p></div>
-<div class="footer-right"><p>v3.0</p></div>
+  <div class="footer-left">
+    <p class="footer-org">ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยเทคโนโลยีภูมิสารสนเทศ</p>
+    <p class="footer-sub">Marine Environment Monitoring using Geoinformatics</p>
+  </div>
+  <div class="footer-right"><p>VIIRS SNPP/NOAA-20 · Level-3 Monthly · v3.0</p></div>
 </div>
 </footer>
-</div>
 
 <style>
 :root{--bg:#f8f9fb;--bg2:#f1f5f9;--white:#fff;--border:#e2e8f0;--border-lt:#f1f5f9;--text:#1e293b;--text2:#475569;--dim:#64748b;--accent:#1e3a5f;--blue:#2563eb;--blue-bg:#eff6ff;--red:#dc2626;--red-bg:#fef2f2;--green:#059669;--green-bg:#ecfdf5;--shadow:0 4px 12px rgba(0,0,0,.08);--shadow-hover:0 8px 24px rgba(0,0,0,.12);--r:12px;--font:'IBM Plex Sans Thai',sans-serif;--mono:'JetBrains Mono',monospace}
@@ -574,7 +578,14 @@ function updateSummary(zone,yr){
   const maxVal=Math.max(...validMo), minVal=Math.min(...validMo);
   const maxAnom=Math.max(...validAn), minAnom=Math.min(...validAn);
   const monthLabels=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const maxMonth=monthLabels[mo.indexOf(maxVal)], minMonth=monthLabels[mo.indexOf(minVal)];
+  // ใช้ findIndex แทน indexOf เพื่อหลีกเลี่ยง floating point mismatch
+  const maxMonthIdx=mo.findIndex(v=>v===maxVal);
+  const minMonthIdx=mo.findIndex(v=>v===minVal);
+  const maxMonth=maxMonthIdx>=0?monthLabels[maxMonthIdx]:'—';
+  const minMonth=minMonthIdx>=0?monthLabels[minMonthIdx]:'—';
+  // เดือนที่ anomaly มากที่สุด (absolute)
+  const peakAnomIdx=an.reduce((bi,v,i)=>v!==null&&Math.abs(v)>Math.abs(an[bi]??0)?i:bi, 0);
+  const peakAnomMonth=monthLabels[peakAnomIdx];
 
   const zoneNames={overall:'ภาพรวม',upper_gulf:'อ่าวไทยตอนบน',rayong:'อ่าวระยอง',trat:'อ่าวตราด',central_gulf:'อ่าวไทยตอนกลาง',lower_gulf:'อ่าวไทยตอนล่าง',andaman:'ทะเลอันดามัน'};
   const zoneName=zoneNames[zone]||zone;
@@ -609,9 +620,7 @@ function updateSummary(zone,yr){
       meanAnom>0?'rgba(220,38,38,.25)':'rgba(3,105,161,.25)');
     statsHtml+=statCard('Max Anomaly',(maxAnom>=0?'+':'')+maxAnom.toFixed(p),d.u,'rgba(220,38,38,.18)');
     statsHtml+=statCard('Min Anomaly',(minAnom>=0?'+':'')+minAnom.toFixed(p),d.u,'rgba(3,105,161,.18)');
-    statsHtml+=statCard('เดือนที่ผิดปกติมากสุด',
-      validAn.indexOf(Math.abs(maxAnom)>Math.abs(minAnom)?maxAnom:minAnom)>=0
-        ? monthLabels[an.indexOf(Math.abs(maxAnom)>Math.abs(minAnom)?maxAnom:minAnom)]:'—','');
+    statsHtml+=statCard('เดือนผิดปกติมากสุด',peakAnomMonth,'');
   }
   document.getElementById('summaryStats').innerHTML=statsHtml;
 
@@ -657,6 +666,7 @@ function updateKPI(zone,yr){
     document.getElementById('kpiLab3').textContent='Min Anomaly';
     document.getElementById('kpiLab4').textContent='Max Anomaly ('+d.u+')';
   }
+}
   document.getElementById('paramIndicator').textContent=d.n+' | '+(currentView==='absolute'?'Absolute':'Anomaly');
 }
 

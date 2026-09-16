@@ -193,7 +193,7 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <div class="chart-panel chart-wide" style="overflow:visible">
 <div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
 <div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative) | เส้นประกลาง = ค่าเป็นศูนย์ (ปกติ)</div></div>
-<div class="chart-body chart-body-anomaly"><canvas id="chartAnomaly"></canvas></div>
+<div id="anomalyBarChart" style="padding:4px 0 8px 0;"></div>
 <div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = เดือน ม.ค.–ธ.ค., แกนนอน (X) = ขนาดค่าเบี่ยงเบน (Anomaly) แท่งยาวไปทางขวา = สูงกว่าปกติ แท่งยาวไปทางซ้าย = ต่ำกว่าปกติ</div>
 </div>
 
@@ -481,74 +481,56 @@ function renderHeatmap(zone){
 }
 
 function renderBar(zone,yr){
-  const ctx=document.getElementById('chartAnomaly').getContext('2d');if(c3)c3.destroy();
+  if(c3){c3.destroy();c3=null;}
   document.getElementById('anomBadge').textContent=yr;
   const d=D(),data=gA(zone,yr,d);
   const monthLabels=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  c3=new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:monthLabels,
-      datasets:[{
-        data,
-        backgroundColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,0.80)':'rgba(3,105,161,0.80)')),
-        borderColor:data.map(v=>v===null?'transparent':(v>=0?'rgba(220,38,38,1)':'rgba(3,105,161,1)')),
-        borderWidth:1.5,
-        borderRadius:4,
-        borderSkipped:false,
-        minBarLength:3,
-        barThickness:20
-      }]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      layout:{padding:{left:10,right:24,top:8,bottom:8}},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#fff',
-          titleColor:'#1e293b',
-          bodyColor:'#475569',
-          borderColor:'#e2e8f0',
-          borderWidth:1,
-          cornerRadius:6,
-          callbacks:{
-            title:c=>monthLabels[c[0].dataIndex],
-            label:c=>'Anomaly: '+(c.parsed.x>0?'+':'')+c.parsed.x?.toFixed(3)+' '+d.u
-          }
-        }
-      },
-      scales:{
-        y:{
-          grid:{display:false},
-          ticks:{
-            color:'#1e293b',
-            font:{size:12,weight:'600'},
-            padding:12
-          },
-          afterFit(scale){ scale.width = 120; },
-          title:{display:false}
-        },
-        x:{
-          grid:{color:'#f1f5f9'},
-          border:{dash:[4,3]},
-          ticks:{
-            color:'#374151',
-            font:{size:10},
-            callback:v=>(v>0?'+':'')+v.toFixed(currentParam==='chl'?2:1)
-          },
-          title:{
-            display:true,
-            text:'Anomaly ('+d.u+')',
-            color:'#1e293b',
-            font:{size:11,weight:'600'}
-          }
-        }
-      }
-    }
+
+  // หาค่าสูงสุดสำหรับ scale
+  const absMax = Math.max(...data.filter(v=>v!==null).map(v=>Math.abs(v)), 0.001);
+  const scale = absMax * 1.15; // เพิ่ม margin 15%
+
+  // สร้าง HTML bar chart แทน canvas
+  const container = document.getElementById('anomalyBarChart');
+  let html = `<div style="font-family:var(--font);padding:12px 16px;">`;
+
+  // header row แสดง scale
+  const tickVals = [-scale, -scale*0.5, 0, scale*0.5, scale];
+  html += `<div style="display:flex;margin-left:110px;margin-bottom:6px;position:relative;height:18px;">`;
+  tickVals.forEach(v=>{
+    const pct = ((v + scale) / (scale*2) * 100).toFixed(1);
+    html += `<span style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:10px;color:#64748b;font-family:var(--mono)">${(v>0?'+':'')+v.toFixed(currentParam==='chl'?2:1)}</span>`;
   });
+  html += `</div>`;
+
+  // zero line position (%)
+  const zeroPct = (scale / (scale*2) * 100).toFixed(2);
+
+  data.forEach((v,i)=>{
+    const isNull = v===null;
+    const isPos = v !== null && v >= 0;
+    const barColor = isPos ? 'rgba(220,38,38,0.82)' : 'rgba(3,105,161,0.82)';
+    const barBorder = isPos ? '#dc2626' : '#035a9d';
+    const pct = isNull ? 0 : (Math.abs(v)/scale*50);
+    const leftPct = isPos ? zeroPct : (parseFloat(zeroPct) - pct).toFixed(2);
+
+    html += `
+    <div style="display:flex;align-items:center;margin-bottom:5px;">
+      <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${monthLabels[i]}</div>
+      <div style="flex:1;position:relative;height:22px;background:#f8fafc;border-radius:3px;overflow:hidden;">
+        <!-- grid lines -->
+        <div style="position:absolute;left:${zeroPct}%;top:0;bottom:0;width:2px;background:rgba(100,116,139,0.35);z-index:1;"></div>
+        ${isNull ? '' : `<div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${monthLabels[i]}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>`}
+      </div>
+      <div style="width:64px;flex-shrink:0;text-align:right;font-size:11px;font-family:var(--mono);color:${isPos?'#dc2626':'#035a9d'};padding-left:8px;font-weight:600;">
+        ${isNull ? '—' : (v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
+      </div>
+    </div>`;
+  });
+
+  html += `<div style="margin-left:110px;font-size:11px;color:#64748b;margin-top:4px;font-weight:600;text-align:center;">Anomaly (${d.u})</div>`;
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
 function renderTrend(zone){

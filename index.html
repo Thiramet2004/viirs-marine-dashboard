@@ -212,9 +212,10 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 
 
 
-<!-- References -->
+<!-- References + Dynamic Summary -->
 <section class="section" id="references">
 <h3 class="section-title"><span class="section-num">3</span> แหล่งข้อมูลและข้อจำกัด</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
 <div class="ref-content">
 <table class="ref-table"><thead><tr><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody>
 <tr><td>Sensor</td><td>VIIRS (Visible Infrared Imaging Radiometer Suite)</td></tr>
@@ -226,12 +227,26 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <tr><td>Limitation</td><td>Cloud-masked pixels excluded; coastal land contamination possible</td></tr>
 </tbody></table>
 </div>
+
+<!-- Dynamic Summary Box -->
+<div id="dynamicSummary" style="background:var(--accent);border-radius:var(--r);padding:22px 24px;color:#fff;box-shadow:var(--shadow);min-height:220px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+    <div>
+      <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);margin-bottom:4px;">สรุปภาพรวม</div>
+      <div id="summaryTitle" style="font-size:1rem;font-weight:700;color:#fff;line-height:1.4;">—</div>
+    </div>
+    <div id="summaryBadge" style="font-size:.65rem;font-weight:700;background:rgba(255,255,255,.15);border-radius:5px;padding:4px 10px;white-space:nowrap;">—</div>
+  </div>
+  <div id="summaryStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
+  <div id="summaryInsight" style="font-size:.78rem;line-height:1.7;color:rgba(255,255,255,.85);border-top:1px solid rgba(255,255,255,.15);padding-top:12px;"></div>
+</div>
+</div>
 </section>
 
 <footer class="report-footer">
 <div class="footer-inner">
 <div class="footer-left"><p class="footer-org">ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยเทคโนโลยีภูมิสารสนเทศ</p><p class="footer-sub">Marine Environment Monitoring using Geoinformatics</p></div>
-<div class="footer-right"><p>Report generated: 24 June 2026 | v3.0</p></div>
+<div class="footer-right"><p>v3.0</p></div>
 </div>
 </footer>
 </div>
@@ -548,6 +563,78 @@ function renderDual(zone,yr){
 
 function generateInsights(zone,yr){}
 
+function updateSummary(zone,yr){
+  const d=D();
+  const mo=gM(zone,yr,d), an=gA(zone,yr,d);
+  const validMo=mo.filter(v=>v!==null), validAn=an.filter(v=>v!==null);
+  if(!validMo.length) return;
+
+  const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;
+  const meanVal=avg(validMo), meanAnom=avg(validAn);
+  const maxVal=Math.max(...validMo), minVal=Math.min(...validMo);
+  const maxAnom=Math.max(...validAn), minAnom=Math.min(...validAn);
+  const monthLabels=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const maxMonth=monthLabels[mo.indexOf(maxVal)], minMonth=monthLabels[mo.indexOf(minVal)];
+
+  const zoneNames={overall:'ภาพรวม',upper_gulf:'อ่าวไทยตอนบน',rayong:'อ่าวระยอง',trat:'อ่าวตราด',central_gulf:'อ่าวไทยตอนกลาง',lower_gulf:'อ่าวไทยตอนล่าง',andaman:'ทะเลอันดามัน'};
+  const zoneName=zoneNames[zone]||zone;
+  const isSST=currentParam==='sst';
+  const isAbs=currentView==='absolute';
+  const p=isSST?2:3;
+
+  // Title
+  document.getElementById('summaryTitle').textContent=
+    (isSST?'อุณหภูมิผิวน้ำทะเล (SST)':'คลอโรฟิลล์-เอ (Chl-a)')+' · '+zoneName+' · ปี '+(parseInt(yr)+543);
+
+  // Badge
+  const anomSign=meanAnom>=0?'▲ สูงกว่าปกติ':'▼ ต่ำกว่าปกติ';
+  document.getElementById('summaryBadge').textContent=isAbs?'Absolute':'Anomaly · '+anomSign;
+
+  // Stats grid
+  const statCard=(label,val,unit,color='rgba(255,255,255,.12)')=>`
+    <div style="background:${color};border-radius:6px;padding:10px 12px;">
+      <div style="font-size:.62rem;color:rgba(255,255,255,.55);font-weight:600;margin-bottom:3px;">${label}</div>
+      <div style="font-size:1rem;font-weight:700;color:#fff;font-family:var(--mono);">${val} <span style="font-size:.65rem;font-weight:400">${unit}</span></div>
+    </div>`;
+
+  let statsHtml='';
+  if(isAbs){
+    statsHtml+=statCard('ค่าเฉลี่ยทั้งปี',meanVal.toFixed(p),d.u);
+    statsHtml+=statCard('Anomaly เฉลี่ย',(meanAnom>=0?'+':'')+meanAnom.toFixed(p),d.u,
+      meanAnom>0?'rgba(220,38,38,.25)':'rgba(3,105,161,.25)');
+    statsHtml+=statCard('สูงสุด: '+maxMonth,maxVal.toFixed(p),d.u,'rgba(220,38,38,.18)');
+    statsHtml+=statCard('ต่ำสุด: '+minMonth,minVal.toFixed(p),d.u,'rgba(3,105,161,.18)');
+  } else {
+    statsHtml+=statCard('Mean Anomaly',(meanAnom>=0?'+':'')+meanAnom.toFixed(p),d.u,
+      meanAnom>0?'rgba(220,38,38,.25)':'rgba(3,105,161,.25)');
+    statsHtml+=statCard('Max Anomaly',(maxAnom>=0?'+':'')+maxAnom.toFixed(p),d.u,'rgba(220,38,38,.18)');
+    statsHtml+=statCard('Min Anomaly',(minAnom>=0?'+':'')+minAnom.toFixed(p),d.u,'rgba(3,105,161,.18)');
+    statsHtml+=statCard('เดือนที่ผิดปกติมากสุด',
+      validAn.indexOf(Math.abs(maxAnom)>Math.abs(minAnom)?maxAnom:minAnom)>=0
+        ? monthLabels[an.indexOf(Math.abs(maxAnom)>Math.abs(minAnom)?maxAnom:minAnom)]:'—','');
+  }
+  document.getElementById('summaryStats').innerHTML=statsHtml;
+
+  // Insight text
+  let insight='';
+  if(isAbs){
+    if(isSST){
+      if(meanAnom>0.5) insight=`⚠ SST ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> เฉลี่ย ${meanAnom>0?'+':''}${meanAnom.toFixed(2)} °C อาจบ่งชี้สภาวะ El Niño หรือ Marine Heatwave`;
+      else if(meanAnom<-0.5) insight=`🌊 SST ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> เฉลี่ย ${meanAnom.toFixed(2)} °C อาจบ่งชี้สภาวะ La Niña หรือ Upwelling เพิ่มขึ้น`;
+      else insight=`SST ปี ${parseInt(yr)+543} ใกล้เคียงค่าเฉลี่ยปกติ · ช่วงแกว่ง ${minVal.toFixed(1)}–${maxVal.toFixed(1)} °C`;
+    } else {
+      if(meanAnom>0.05) insight=`🌿 Chl-a ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> (+${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิเพิ่มขึ้น อาจเกิดจาก nutrient enrichment หรือ upwelling`;
+      else if(meanAnom<-0.05) insight=`Chl-a ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> (${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิลดลง อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น`;
+      else insight=`Chl-a ปี ${parseInt(yr)+543} ใกล้เคียงค่าปกติ · ช่วง ${minVal.toFixed(3)}–${maxVal.toFixed(3)} mg/m³`;
+    }
+  } else {
+    const posCount=validAn.filter(v=>v>0).length, negCount=validAn.filter(v=>v<0).length;
+    insight=`${posCount} เดือนมีค่า<strong>สูงกว่าปกติ</strong> · ${negCount} เดือนมีค่า<strong>ต่ำกว่าปกติ</strong>`;
+    if(Math.abs(meanAnom)>0.3) insight+=` · Anomaly เฉลี่ย<strong>${meanAnom>=0?' เป็นบวก':' เป็นลบ'}</strong>ตลอดปี`;
+  }
+  document.getElementById('summaryInsight').innerHTML=insight;
+}
+
 function updateKPI(zone,yr){
   const d=D(),mo=gM(zone,yr,d),an=gA(zone,yr,d);
   let last=11;for(let i=11;i>=0;i--){if(mo[i]!==null){last=i;break;}}
@@ -575,7 +662,7 @@ function updateKPI(zone,yr){
 
 function renderAll(){
   const z=document.getElementById('zoneSelect').value,y=document.getElementById('yearSelect').value;
-  renderMain(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);
+  renderMain(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);updateSummary(z,y);
 }
 
 document.querySelectorAll('.param-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.param-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentParam=b.dataset.param;renderAll();});});

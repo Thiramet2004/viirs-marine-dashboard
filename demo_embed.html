@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo: VIIRS Dashboard Embedding Examples</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'IBM Plex Sans Thai', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #1e293b;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.header p {
+  font-size: 1.1rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.demo-section {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.demo-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.demo-section .subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.code-block {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.code-block code {
+  color: #22d3ee;
+}
+
+.iframe-container {
+  margin-top: 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.badge.recommended {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge.height {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.info-box {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.info-box strong {
+  color: #1e40af;
+}
+
+.footer {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.footer a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .demo-section h2 {
+    font-size: 1.4rem;
+  }
+  
+  .tabs {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>🌊 VIIRS Dashboard Embedding Demo</h1>
+    <p>
+      ตัวอย่างการนำ Dashboard ไปใส่ใน Marine GIS Portal หรือเว็บไซต์อื่นๆ<br>
+      ลองเปลี่ยน Tab เพื่อดูโหมดต่างๆ และดู Code ตัวอย่าง
+    </p>
+  </div>
+
+  <!-- Demo 1: Full Dashboard -->
+  <div class="demo-section">
+    <h2>
+      1. Dashboard เต็มรูปแบบ 
+      <span class="badge recommended">แนะนำ</span>
+      <span class="badge height">1200px</span>
+    </h2>
+    <p class="subtitle">แสดงแผนที่ + กราฟทั้งหมด 6 รูป (เหมาะสำหรับหน้า Dashboard หลัก)</p>
+    
+    <div class="code-block">
+&lt;iframe 
+  src="<code>http://localhost:5001/embed_dashboard.html</code>" 
+  width="100%" 
+  height="1200px" 
+  frameborder="0"
+  style="border: 1px solid #e2e8f0; border-radius: 8px;"
+  title="VIIRS Marine Dashboard"
+&gt;&lt;/iframe&gt;
+    </div>
+    
+    <div class="iframe-container">
+      <iframe 
+        src="http://localhost:5001/embed_dashboard.html" 
+        width="100%" 
+        height="1200px" 
+        frameborder="0"
+        title="VIIRS Marine Dashboard Full"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- Demo 2: Map Only -->
+  <div class="demo-section">
+    <h2>
+      2. เฉพาะแผนที่ (Map Only)
+      <span class="badge height">600px</span>
+    </h2>
+    <p class="subtitle">แสดงเฉพาะ Interactive Raster Map (เหมาะสำหรับหน้า Map Viewer)</p>
+    
+    <div class="code-block">
+&lt;iframe 
+  src="<code>http://localhost:5001/embed_dashboard.html?mode=map</code>" 
+  width="100%" 
+  height="600px" 
+  frameborder="0"
+  title="VIIRS Satellite Map"
+&gt;&lt;/iframe&gt;
+    </div>
+    
+    <div class="iframe-container">
+      <iframe 
+        src="http://localhost:5001/embed_dashboard.html?mode=map" 
+        width="100%" 
+        height="600px" 
+        frameborder="0"
+        title="VIIRS Satellite Map"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- Demo 3: Charts Only -->
+  <div class="demo-section">
+    <h2>
+      3. เฉพาะกราฟ (Charts Only)
+      <span class="badge height">800px</span>
+    </h2>
+    <p class="subtitle">แสดงเฉพาะกราฟวิเคราะห์ทางสถิติ (เหมาะสำหรับหน้า Reports)</p>
+    
+    <div class="code-block">
+&lt;iframe 
+  src="<code>http://localhost:5001/embed_dashboard.html?mode=charts</code>" 
+  width="100%" 
+  height="800px" 
+  frameborder="0"
+  title="VIIRS Statistical Analysis"
+&gt;&lt;/iframe&gt;
+    </div>
+    
+    <div class="iframe-container">
+      <iframe 
+        src="http://localhost:5001/embed_dashboard.html?mode=charts" 
+        width="100%" 
+        height="800px" 
+        frameborder="0"
+        title="VIIRS Statistical Analysis"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- Demo 4: Standalone -->
+  <div class="demo-section">
+    <h2>
+      4. Standalone Mode
+      <span class="badge height">1200px</span>
+    </h2>
+    <p class="subtitle">ซ่อน notice bar ที่บอกให้เปิดหน้าใหม่ (เหมาะสำหรับ Full Integration)</p>
+    
+    <div class="info-box">
+      <strong>💡 เคล็ดลับ:</strong> ใช้ <code>?standalone=true</code> เมื่อต้องการให้ดูเหมือนเป็นส่วนหนึ่งของเว็บไซต์ ไม่ใช่ embed จากที่อื่น
+    </div>
+    
+    <div class="code-block">
+&lt;iframe 
+  src="<code>http://localhost:5001/embed_dashboard.html?standalone=true</code>" 
+  width="100%" 
+  height="1200px" 
+  frameborder="0"
+  title="VIIRS Marine Dashboard"
+&gt;&lt;/iframe&gt;
+    </div>
+    
+    <div class="iframe-container">
+      <iframe 
+        src="http://localhost:5001/embed_dashboard.html?standalone=true" 
+        width="100%" 
+        height="1200px" 
+        frameborder="0"
+        title="VIIRS Marine Dashboard Standalone"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- Quick Reference -->
+  <div class="demo-section">
+    <h2>📚 Quick Reference</h2>
+    
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background: #f8fafc; text-align: left;">
+            <th style="padding: 12px; border: 1px solid #e2e8f0;">โหมด</th>
+            <th style="padding: 12px; border: 1px solid #e2e8f0;">URL</th>
+            <th style="padding: 12px; border: 1px solid #e2e8f0;">ความสูงแนะนำ</th>
+            <th style="padding: 12px; border: 1px solid #e2e8f0;">ใช้เมื่อไร</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Full</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>/embed_dashboard.html</code></td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">1200px</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">หน้า Dashboard หลัก</td>
+          </tr>
+          <tr style="background: #f8fafc;">
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Map</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>/embed_dashboard.html?mode=map</code></td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">600px</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Map Viewer, Gallery</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Charts</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>/embed_dashboard.html?mode=charts</code></td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">800px</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Reports, Analytics</td>
+          </tr>
+          <tr style="background: #f8fafc;">
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Standalone</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>/embed_dashboard.html?standalone=true</code></td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">1200px</td>
+            <td style="padding: 12px; border: 1px solid #e2e8f0;">Full Integration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="info-box" style="margin-top: 20px;">
+      <strong>🔗 URL Parameters:</strong><br>
+      • <code>mode</code> - เลือกโหมด: <code>map</code>, <code>charts</code>, หรือไม่ระบุ (full)<br>
+      • <code>standalone</code> - ซ่อน notice: <code>true</code> หรือ <code>false</code><br><br>
+      <strong>ตัวอย่าง:</strong> <code>?mode=map&standalone=true</code>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p style="font-size: 1.1rem; margin-bottom: 12px;">
+      📖 อ่านคู่มือฉบับเต็ม: 
+      <a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/EMBED_GUIDE.md" target="_blank">
+        EMBED_GUIDE.md
+      </a>
+    </p>
+    <p style="color: #64748b; font-size: 0.9rem;">
+      GitHub Repository: 
+      <a href="https://github.com/Thiramet2004/viirs-marine-dashboard" target="_blank">
+        Thiramet2004/viirs-marine-dashboard
+      </a>
+    </p>
+  </div>
+</div>
+
+<script>
+// Check if server is running
+fetch('http://localhost:5001/api/available/absolute/sst')
+  .then(response => {
+    if (!response.ok) {
+      console.warn('Server may not be running on port 5001');
+    }
+  })
+  .catch(error => {
+    console.error('Cannot connect to server. Make sure Flask server is running:', error);
+  });
+</script>
+
+</body>
+</html>

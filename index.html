@@ -191,28 +191,21 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <!-- Fig 2, 3 & 4 -->
 <div class="chart-grid" id="charts">
 <div class="chart-panel">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ความสัมพันธ์ SST กับ Chl-a (Scatter Plot)</div>
-<div class="chart-caption">แต่ละจุด = 1 เดือน | เส้นประแดง = Linear Regression | แสดงค่า R² ในกราฟ</div></div>
-<div class="chart-body"><canvas id="chartScatter"></canvas></div>
-<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = Chl-a, แกนนอน (X) = SST ของโซนและปีที่เลือก แต่ละจุดคือ 1 เดือน เส้น regression บอกแนวโน้มความสัมพันธ์ R² ยิ่งสูง = ความสัมพันธ์เชิงเส้นยิ่งชัด</div>
-</div>
-
-<div class="chart-panel">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
 <div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative)</div></div>
 <div class="chart-body"><canvas id="chartAnomaly"></canvas></div>
 <div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ขนาดค่าเบี่ยงเบน (Anomaly), แกนนอน (X) = เดือน ความสูงของแท่งบอกว่าเดือนนั้นมีค่าต่างจากปกติมากเพียงใด</div>
 </div>
 
 <div class="chart-panel chart-wide">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> แนวโน้มรายปี (Inter-annual Trend)</div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> แนวโน้มรายปี (Inter-annual Trend)</div>
 <div class="chart-caption">จุดสีน้ำเงิน = ค่าเฉลี่ยรายปี | เส้นประสีแดง = เส้นแนวโน้มเชิงเส้น (Linear Regression)</div></div>
 <div class="chart-body"><canvas id="chartTrend"></canvas></div>
 <div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ค่าเฉลี่ยทั้งปี, แกนนอน (X) = ปี ค.ศ. (พ.ศ.) ค่า slope ใน legend บอกอัตราเปลี่ยนแปลงต่อทศวรรษ (slope บวก = เพิ่มขึ้น, slope ลบ = ลดลง)</div>
 </div>
 
 <div class="chart-panel chart-wide">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 6</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
 <div class="chart-caption">เส้นน้ำเงิน = SST Anomaly (แกนซ้าย) | เส้นเขียว = Chl-a Anomaly (แกนขวา, กลับด้าน) | เมื่อเส้นทั้งสองไปในทิศทางเดียวกัน = สัมพันธ์ลบ</div></div>
 <div class="chart-body"><canvas id="chartDual"></canvas></div>
 <div class="chart-desc"><strong>Insight:</strong> กราฟนี้แสดง Anomaly (ค่าเบี่ยงเบนจากปกติ) ของ SST และ Chl-a ซ้อนกัน โดย <u>แกนขวา (Chl-a) ถูกกลับด้าน</u> ดังนั้นถ้าเส้นทั้งสองเคลื่อนไหวไปด้วยกัน = ยืนยันว่าเมื่อ SST สูงกว่าปกติ Chl-a จะต่ำกว่าปกติ (inverse relationship) ยิ่งเส้นซ้อนทับกันมากยิ่งสัมพันธ์แน่น</div>

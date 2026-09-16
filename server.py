@@ -41,6 +41,11 @@ def index():
     """Serve index.html"""
     return send_file('index.html')
 
+@app.route('/embed')
+def embed():
+    """Serve embeddable dashboard"""
+    return send_file('embed_dashboard.html')
+
 @app.route('/<path:path>')
 def static_files(path):
     """Serve static files (CSS, JS, etc)"""

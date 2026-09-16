@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VIIRS Marine Dashboard - ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยข้อมูลดาวเทียม">
+<title>VIIRS Marine Dashboard | GitHub Pages</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #1e293b;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  background: white;
+  border-radius: 20px;
+  padding: 60px 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section p, .section li {
+  line-height: 1.8;
+  color: #475569;
+}
+
+.code-block {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.code-inline {
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #0f172a;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn.secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  box-shadow: none;
+}
+
+.btn.secondary:hover {
+  background: #f8fafc;
+}
+
+.alert {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.alert strong {
+  color: #92400e;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.feature-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+ol, ul {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 40px 24px; }
+  h1 { font-size: 2rem; }
+  .btn-group { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🌊 VIIRS Marine Dashboard</h1>
+  <p class="subtitle">
+    ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยข้อมูลดาวเทียม VIIRS<br>
+    SST & Chlorophyll-a | Gulf of Thailand & Andaman Sea
+  </p>
+
+  <div class="alert">
+    <strong>⚠️ หมายเหตุสำคัญ:</strong> Dashboard แบบเต็มรูปแบบต้องรัน <strong>Flask Server</strong> 
+    เนื่องจากต้องประมวลผลข้อมูล GeoTIFF ขนาดใหญ่ (277 MB) แบบเรียลไทม์ 
+    GitHub Pages รองรับเฉพาะ Static Files เท่านั้น
+  </div>
+
+  <div class="btn-group">
+    <a href="https://github.com/Thiramet2004/viirs-marine-dashboard" class="btn" target="_blank">
+      📚 View on GitHub
+    </a>
+    <a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/README.md" class="btn secondary" target="_blank">
+      📖 Read Documentation
+    </a>
+    <a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/EMBED_GUIDE.md" class="btn secondary" target="_blank">
+      🔗 Embed Guide
+    </a>
+  </div>
+
+  <div class="section">
+    <h2>✨ Features</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>🗺️ Interactive Map</h3>
+        <p>แผนที่แบบ Interactive พร้อม pixel query และ land masking</p>
+      </div>
+      <div class="feature-card">
+        <h3>📊 6 Charts</h3>
+        <p>กราฟวิเคราะห์ครบครัน Time Series, Scatter, Anomaly, Trend</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔄 Dual Views</h3>
+        <p>ทั้ง Absolute และ Anomaly views สำหรับ SST & Chl-a</p>
+      </div>
+      <div class="feature-card">
+        <h3>📅 8-Year Archive</h3>
+        <p>ข้อมูล 2018-2025 (96 เดือน) พร้อม climatology baseline</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🚀 Quick Start</h2>
+    <p>เพื่อรัน Dashboard แบบเต็มรูปแบบ:</p>
+    
+    <ol>
+      <li><strong>Clone repository:</strong></li>
+    </ol>
+    <div class="code-block">git clone https://github.com/Thiramet2004/viirs-marine-dashboard.git
+cd viirs-marine-dashboard</div>
+
+    <ol start="2">
+      <li><strong>Install Python dependencies:</strong></li>
+    </ol>
+    <div class="code-block">pip3 install flask flask-cors rasterio geopandas numpy pandas</div>
+
+    <ol start="3">
+      <li><strong>Run Flask server:</strong></li>
+    </ol>
+    <div class="code-block">python3 server.py</div>
+
+    <ol start="4">
+      <li><strong>Open in browser:</strong></li>
+    </ol>
+    <div class="code-block">http://localhost:5001</div>
+  </div>
+
+  <div class="section">
+    <h2>🌐 Embedding</h2>
+    <p>หลังจากรัน server แล้ว สามารถ embed ลงใน Marine GIS Portal ได้:</p>
+    
+    <p><strong>Dashboard เต็มรูปแบบ:</strong></p>
+    <div class="code-block">&lt;iframe 
+  src="http://localhost:5001/embed_dashboard.html?standalone=true" 
+  width="100%" 
+  height="1200px" 
+  frameborder="0"
+&gt;&lt;/iframe&gt;</div>
+
+    <p><strong>เฉพาะแผนที่:</strong></p>
+    <div class="code-block">&lt;iframe 
+  src="http://localhost:5001/embed_dashboard.html?mode=map&standalone=true" 
+  width="100%" 
+  height="600px" 
+  frameborder="0"
+&gt;&lt;/iframe&gt;</div>
+
+    <p><strong>เฉพาะกราฟ:</strong></p>
+    <div class="code-block">&lt;iframe 
+  src="http://localhost:5001/embed_dashboard.html?mode=charts&standalone=true" 
+  width="100%" 
+  height="800px" 
+  frameborder="0"
+&gt;&lt;/iframe&gt;</div>
+  </div>
+
+  <div class="section">
+    <h2>📊 Data</h2>
+    <ul>
+      <li><strong>Sensor:</strong> VIIRS (Suomi NPP / NOAA-20)</li>
+      <li><strong>Level:</strong> L3 Monthly Composite</li>
+      <li><strong>Resolution:</strong> 4 km (~0.04167°)</li>
+      <li><strong>Parameters:</strong> SST (°C) & Chlorophyll-a (mg/m³)</li>
+      <li><strong>Period:</strong> January 2018 - December 2025 (96 months)</li>
+      <li><strong>Coverage:</strong> Gulf of Thailand & Andaman Sea</li>
+      <li><strong>Files:</strong> 192 RGB GeoTIFF (277 MB total)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🔧 Technical Stack</h2>
+    <ul>
+      <li><strong>Backend:</strong> Flask + rasterio + geopandas</li>
+      <li><strong>Frontend:</strong> Leaflet + georaster-layer-for-leaflet + Chart.js</li>
+      <li><strong>Data Format:</strong> RGB GeoTIFF (LZW compressed)</li>
+      <li><strong>Coordinate System:</strong> EPSG:4326 (WGS84)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>📚 Documentation</h2>
+    <ul>
+      <li><a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/README.md" target="_blank">README.md</a> - Complete documentation</li>
+      <li><a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/EMBED_GUIDE.md" target="_blank">EMBED_GUIDE.md</a> - Embedding instructions</li>
+      <li><a href="https://github.com/Thiramet2004/viirs-marine-dashboard" target="_blank">GitHub Repository</a> - Source code & data</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <p>
+      Built with ❤️ for marine environmental monitoring in Thailand 🇹🇭<br>
+      <strong>GitHub:</strong> 
+      <a href="https://github.com/Thiramet2004/viirs-marine-dashboard" target="_blank" style="color: #667eea;">
+        Thiramet2004/viirs-marine-dashboard
+      </a>
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

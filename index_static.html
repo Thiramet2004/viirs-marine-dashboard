@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIIRS Marine Dashboard - Static Version</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/georaster@1.6.0/dist/georaster.browser.bundle.min.js"></script>
+<script src="https://unpkg.com/proj4@2.11.0/dist/proj4.js"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+/* เหมือนกับ index.html แต่ปรับให้เหมาะกับ static */
+html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f8fafc; }
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  background: linear-gradient(135deg, #0369a1 0%, #0c4a6e 100%);
+  color: white;
+  padding: 40px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0 0 8px 0;
+  font-size: 2rem;
+}
+
+.info-box {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.map-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+}
+
+#map {
+  height: 600px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  background: white;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+}
+
+.footer a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🌊 VIIRS Marine Dashboard</h1>
+    <p>ระบบติดตามสิ่งแวดล้อมทางทะเล - Static Version for GitHub Pages</p>
+  </div>
+
+  <div class="info-box">
+    <strong>⚠️ นี่คือ Static Version:</strong> Dashboard แบบเต็มรูปแบบต้องรัน Flask Server ตาม 
+    <a href="https://github.com/Thiramet2004/viirs-marine-dashboard" target="_blank" style="color: #3b82f6;">
+      README.md
+    </a>
+  </div>
+
+  <div class="map-container">
+    <h2>Interactive Map Demo</h2>
+    <div class="controls">
+      <button class="btn active" onclick="switchParam('sst')">SST</button>
+      <button class="btn" onclick="switchParam('chl')">Chlorophyll-a</button>
+      <button class="btn" onclick="switchView('absolute')">Absolute</button>
+      <button class="btn active" onclick="switchView('anomaly')">Anomaly</button>
+    </div>
+    <div id="map"></div>
+    <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+      💡 คลิกบนแผนที่เพื่อดูค่า | เลื่อน Zoom ได้ | 
+      <strong>Demo: แสดง SST Anomaly มกราคม 2024</strong>
+    </p>
+  </div>
+
+  <div class="map-container">
+    <h2>📚 วิธีใช้ Dashboard แบบเต็มรูปแบบ</h2>
+    <ol style="line-height: 1.8;">
+      <li><strong>Clone repository:</strong><br>
+        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">
+          git clone https://github.com/Thiramet2004/viirs-marine-dashboard.git
+        </code>
+      </li>
+      <li><strong>Install dependencies:</strong><br>
+        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">
+          pip3 install flask flask-cors rasterio geopandas
+        </code>
+      </li>
+      <li><strong>Run server:</strong><br>
+        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">
+          python3 server.py
+        </code>
+      </li>
+      <li><strong>Open:</strong> 
+        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">
+          http://localhost:5001
+        </code>
+      </li>
+    </ol>
+  </div>
+
+  <div class="map-container">
+    <h2>🌐 Embed Code</h2>
+    <p>หลังจากรัน server แล้ว ใช้ code นี้เพื่อ embed:</p>
+    <pre style="background: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto;"><code>&lt;!-- Dashboard เต็มรูปแบบ --&gt;
+&lt;iframe 
+  src="http://localhost:5001/embed_dashboard.html?standalone=true" 
+  width="100%" 
+  height="1200px" 
+  frameborder="0"
+&gt;&lt;/iframe&gt;
+
+&lt;!-- เฉพาะแผนที่ --&gt;
+&lt;iframe 
+  src="http://localhost:5001/embed_dashboard.html?mode=map&standalone=true" 
+  width="100%" 
+  height="600px" 
+  frameborder="0"
+&gt;&lt;/iframe&gt;</code></pre>
+  </div>
+
+  <div class="footer">
+    <p>
+      📖 Documentation: 
+      <a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/README.md" target="_blank">README</a> | 
+      <a href="https://github.com/Thiramet2004/viirs-marine-dashboard/blob/main/EMBED_GUIDE.md" target="_blank">Embed Guide</a>
+    </p>
+    <p>GitHub: <a href="https://github.com/Thiramet2004/viirs-marine-dashboard" target="_blank">Thiramet2004/viirs-marine-dashboard</a></p>
+  </div>
+</div>
+
+<script>
+// Initialize map
+const map = L.map('map').setView([10.0, 100.5], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Demo: Load one sample GeoTIFF from relative path
+// (In production, this would load from your data folder)
+const demoMarker = L.marker([13.7563, 100.5018]).addTo(map)
+  .bindPopup('<strong>Demo Mode</strong><br>Dashboard แบบเต็มต้องรัน server<br>ดูที่ README.md');
+
+map.on('click', function(e) {
+  const popup = L.popup()
+    .setLatLng(e.latlng)
+    .setContent(`
+      <div style="font-size: 0.85rem;">
+        <strong>📍 Coordinates</strong><br>
+        Lat: ${e.latlng.lat.toFixed(4)}°<br>
+        Lon: ${e.latlng.lng.toFixed(4)}°<br>
+        <br>
+        <em>⚠️ ค่าจริงต้องรัน Flask server</em>
+      </div>
+    `)
+    .openOn(map);
+});
+
+function switchParam(param) {
+  alert(`Switch to ${param.toUpperCase()}\n\n⚠️ Function นี้ใช้งานได้ใน Full Dashboard เท่านั้น\nกรุณารัน Flask server ตาม README.md`);
+}
+
+function switchView(view) {
+  alert(`Switch to ${view}\n\n⚠️ Function นี้ใช้งานได้ใน Full Dashboard เท่านั้น\nกรุณารัน Flask server ตาม README.md`);
+}
+</script>
+
+</body>
+</html>

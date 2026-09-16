@@ -190,7 +190,7 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 
 <!-- Fig 2, 3 & 4 -->
 <div class="chart-grid" id="charts">
-<div class="chart-panel chart-wide">
+<div class="chart-panel chart-wide" style="overflow:visible">
 <div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
 <div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative) | เส้นประกลาง = ค่าเป็นศูนย์ (ปกติ)</div></div>
 <div class="chart-body chart-body-anomaly"><canvas id="chartAnomaly"></canvas></div>
@@ -504,7 +504,7 @@ function renderBar(zone,yr){
       indexAxis:'y',
       responsive:true,
       maintainAspectRatio:false,
-      layout:{padding:{left:0,right:20,top:8,bottom:8}},
+      layout:{padding:{left:10,right:24,top:8,bottom:8}},
       plugins:{
         legend:{display:false},
         tooltip:{
@@ -526,9 +526,9 @@ function renderBar(zone,yr){
           ticks:{
             color:'#1e293b',
             font:{size:12,weight:'600'},
-            padding:8
+            padding:12
           },
-          afterFit(scale){ scale.width = 110; },
+          afterFit(scale){ scale.width = 120; },
           title:{display:false}
         },
         x:{

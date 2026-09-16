@@ -479,35 +479,6 @@ function renderHeatmap(zone){
   table.innerHTML=html;
 }
 
-function renderScatter(zone,yr){
-  const ctx=document.getElementById('chartScatter').getContext('2d');if(c2)c2.destroy();
-  const sstData=zone==='overall'?sstMonthly[yr]:sstZone[zone][yr];
-  const chlData=zone==='overall'?chlMonthly[yr]:chlZone[zone][yr];
-  // Build scatter points
-  const pts=[];
-  for(let i=0;i<12;i++){if(sstData[i]!==null&&chlData[i]!==null)pts.push({x:sstData[i],y:chlData[i],m:i});}
-  // Linear regression
-  const n=pts.length;
-  if(n<2){c2=null;return;}
-  const xm=pts.reduce((a,p)=>a+p.x,0)/n, ym=pts.reduce((a,p)=>a+p.y,0)/n;
-  let num=0,dx=0,dy=0;
-  pts.forEach(p=>{num+=(p.x-xm)*(p.y-ym);dx+=(p.x-xm)**2;dy+=(p.y-ym)**2;});
-  const slope=dx?num/dx:0, intercept=ym-slope*xm;
-  const r2=dx&&dy?(num*num)/(dx*dy):0;
-  const xMin=Math.min(...pts.map(p=>p.x)),xMax=Math.max(...pts.map(p=>p.x));
-  const yMin=Math.min(...pts.map(p=>p.y)),yMax=Math.max(...pts.map(p=>p.y));
-  const xPad=(xMax-xMin)*0.15||0.5, yPad=(yMax-yMin)*0.15||0.1;
-  const xLo=xMin-xPad, xHi=xMax+xPad, yLo=Math.max(0,yMin-yPad), yHi=yMax+yPad;
-  const regLine=[{x:xLo,y:slope*xLo+intercept},{x:xHi,y:slope*xHi+intercept}];
-  // Month colors
-  const mColors=['#2563eb','#3b82f6','#06b6d4','#10b981','#84cc16','#eab308','#f97316','#ef4444','#ec4899','#8b5cf6','#6366f1','#1e3a5f'];
-
-  c2=new Chart(ctx,{type:'scatter',data:{datasets:[
-    {label:'Monthly Data',data:pts.map(p=>({x:p.x,y:p.y})),backgroundColor:pts.map(p=>mColors[p.m]),borderColor:pts.map(p=>mColors[p.m]),pointRadius:7,pointHoverRadius:9},
-    {label:'Regression (R\u00B2='+r2.toFixed(3)+')',data:regLine,type:'line',borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{title:function(items){const idx=items[0].dataIndex;if(items[0].datasetIndex===0)return monthsFull[pts[idx].m];return'';},label:function(item){if(item.datasetIndex===0)return'SST: '+item.parsed.x.toFixed(2)+' \u00B0C | Chl-a: '+item.parsed.y.toFixed(3)+' mg/m\u00B3';return'';}}}},scales:{x:{min:xLo,max:xHi,title:{display:true,text:'SST (\u00B0C)',color:'#1e293b',font:{size:12,weight:'600'}},grid:{color:'#f1f5f9'},ticks:{color:'#374151'}},y:{min:yLo,max:yHi,title:{display:true,text:'Chl-a (mg/m\u00B3)',color:'#1e293b',font:{size:12,weight:'600'}},grid:{color:'#f1f5f9'},ticks:{color:'#374151'}}}}});
-}
-
 function renderBar(zone,yr){
   const ctx=document.getElementById('chartAnomaly').getContext('2d');if(c3)c3.destroy();
   document.getElementById('anomBadge').textContent=yr;
@@ -616,7 +587,7 @@ function updateKPI(zone,yr){
 
 function renderAll(){
   const z=document.getElementById('zoneSelect').value,y=document.getElementById('yearSelect').value;
-  renderMain(z,y);renderScatter(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);
+  renderMain(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);
 }
 
 document.querySelectorAll('.param-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.param-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentParam=b.dataset.param;renderAll();});});

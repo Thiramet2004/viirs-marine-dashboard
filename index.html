@@ -31,7 +31,7 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 .map-nav-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .map-nav-btn .material-icons-outlined{font-size:18px}
 .map-body{position:relative;height:480px}
-#leafletMap{height:100%;width:100%;background:#1a2744}
+#leafletMap{height:100%;width:100%;background:#a8c8e8}
 .map-legend{position:absolute;bottom:16px;right:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:180px;z-index:999;box-shadow:var(--shadow)}
 .legend-title{font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-align:center}
 .legend-gradient{height:14px;border-radius:4px;margin-bottom:4px;border:1px solid var(--border)}
@@ -342,7 +342,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .map-nav-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .map-nav-btn .material-icons-outlined{font-size:18px}
 .map-body{position:relative;height:480px}
-#leafletMap{height:100%;width:100%;background:#1a2744}
+#leafletMap{height:100%;width:100%;background:#a8c8e8}
 .map-legend{position:absolute;bottom:16px;right:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:180px;z-index:999;box-shadow:var(--shadow)}
 .legend-title{font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-align:center}
 .legend-gradient{height:14px;border-radius:4px;margin-bottom:4px;border:1px solid var(--border)}
@@ -742,9 +742,12 @@ function initLeafletMap() {
     maxZoom: 10,
   });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    opacity: 0.35
+  // CartoDB Positron — สว่าง สะอาด เหมาะกับ overlay ดาวเทียม
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+    opacity: 1.0
   }).addTo(leafletMap);
 
   leafletMap.on('click', onMapClick);

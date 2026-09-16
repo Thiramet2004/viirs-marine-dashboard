@@ -603,7 +603,31 @@ renderAll();
 const API_BASE = 'http://localhost:5001/api';
 
 const PALETTES = {
-  chl: {
+  chl_absolute: {
+    label: 'Chlorophyll-a',
+    unit: 'mg/m³',
+    min: 0.0,
+    max: 10.0,
+    stops: [
+      [0.0,  [8,29,88]],   [0.1,  [8,48,107]],  [0.2,  [8,81,156]],  [0.5,  [30,120,180]],
+      [1.0,  [65,182,196]], [1.5,  [110,206,178]], [2.0, [171,221,164]], [3.0, [230,245,152]],
+      [4.0,  [255,255,153]], [5.0, [254,204,92]],  [6.0, [253,141,60]],  [7.0, [240,59,32]],
+      [8.0,  [204,18,18]],  [9.0,  [153,0,0]],    [10.0, [80,0,0]]
+    ]
+  },
+  sst_absolute: {
+    label: 'SST',
+    unit: '°C',
+    min: 20.0,
+    max: 35.0,
+    stops: [
+      [20.0, [0,0,131]],   [21.0, [0,60,170]],   [22.0, [5,112,176]],  [23.0, [29,145,192]],
+      [24.0, [67,184,207]], [25.0, [116,211,218]], [26.0, [171,232,224]], [27.0, [224,243,219]],
+      [28.0, [255,255,191]], [29.0, [254,224,144]], [30.0, [253,174,97]], [31.0, [244,109,67]],
+      [32.0, [215,48,39]],  [33.0, [165,15,21]],  [34.0, [110,5,10]],   [35.0, [70,0,0]]
+    ]
+  },
+  chl_anomaly: {
     label: 'Chl-a Anomaly',
     unit: 'mg/m³',
     min: -5.0,
@@ -617,7 +641,7 @@ const PALETTES = {
       [4.5, [135,0,0]], [5.0, [110,0,0]]
     ]
   },
-  sst: {
+  sst_anomaly: {
     label: 'SST Anomaly',
     unit: '°C',
     min: -20.0,
@@ -632,6 +656,12 @@ const PALETTES = {
     ]
   }
 };
+
+// Helper: get correct palette based on current param + view
+function getCurrentPalette() {
+  const key = currentParam + '_' + currentView;
+  return PALETTES[key] || PALETTES['sst_anomaly'];
+}
 
 let leafletMap = null;
 let currentMapLayer = null;
@@ -752,16 +782,16 @@ function onMapClick(e) {
     
     if (values && values[0] !== null && values[0] !== undefined) {
       const val = values[0];
-      const param = currentParam === 'sst' ? 'sst' : 'chl';
-      const pal = PALETTES[param];
+      const pal = getCurrentPalette();
       
       document.getElementById('clickLat').textContent = lat.toFixed(4) + '°';
       document.getElementById('clickLon').textContent = lon.toFixed(4) + '°';
       
       const valueEl = document.getElementById('clickValue');
+      const isAnomaly = currentView === 'anomaly';
       const formatted = val.toFixed(3) + ' ' + pal.unit;
-      valueEl.textContent = (val > 0 ? '+' : '') + formatted;
-      valueEl.className = 'click-info-value anomaly ' + (val > 0 ? 'positive' : 'negative');
+      valueEl.textContent = (isAnomaly && val > 0 ? '+' : '') + formatted;
+      valueEl.className = 'click-info-value' + (isAnomaly ? ' anomaly ' + (val > 0 ? 'positive' : 'negative') : '');
       
       document.getElementById('clickInfo').classList.add('show');
     }
@@ -772,7 +802,7 @@ function onMapClick(e) {
 
 function updateMapUI() {
   const param = currentParam === 'sst' ? 'sst' : 'chl';
-  const pal = PALETTES[param];
+  const pal = getCurrentPalette();  // ← ใช้ palette ตาม param + view
   
   // Update parameter badge
   document.getElementById('mapParamBadge').textContent = pal.label;
@@ -787,10 +817,10 @@ function updateMapUI() {
   if (currentView === 'absolute') {
     if (param === 'sst') {
       title = 'ภาพดาวเทียมอุณหภูมิผิวน้ำทะเล (SST) แบบ Interactive';
-      caption = 'แสดงค่าอุณหภูมิผิวน้ำทะเลเฉลี่ยรายเดือน (°C) จากดาวเทียม VIIRS โดยสีแดงเข้มแสดงอุณหภูมิสูง และสีน้ำเงินเข้มแสดงอุณหภูมิต่ำ คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
+      caption = 'แสดงค่าอุณหภูมิผิวน้ำทะเลเฉลี่ยรายเดือน (°C) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงอุณหภูมิสูง (28-35°C) และสีน้ำเงินแสดงอุณหภูมิต่ำ (20-25°C) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     } else {
       title = 'ภาพดาวเทียมคลอโรฟิลล์-เอ แบบ Interactive';
-      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (mg/m³) จากดาวเทียม VIIRS โดยสีเขียว-เหลืองแสดงความเข้มข้นสูง (แพลงก์ตอนมาก) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
+      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (mg/m³) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงความเข้มข้นสูง (>5 mg/m³) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ (<0.5 mg/m³) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     }
   } else { // anomaly
     if (param === 'sst') {
@@ -798,7 +828,7 @@ function updateMapUI() {
       caption = 'แสดงความผิดปกติของอุณหภูมิผิวน้ำทะเล (°C) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดงแสดงอุณหภูมิสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     } else {
       title = 'ภาพดาวเทียม Chlorophyll-a Anomaly แบบ Interactive';
-      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (mg/m³) เทียบกับค่าเฉลี่ยระยะยาว โดยสีเขียว-เหลืองแสดงความเข้มข้นสูงกว่าปกติ สีม่วง-น้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
+      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (mg/m³) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดง-ส้มแสดงความเข้มข้นสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     }
   }
   
@@ -820,10 +850,12 @@ function updateMapUI() {
   document.getElementById('legendGradient').style.background = 
     `linear-gradient(to right, ${gradientStops})`;
   
+  // Legend ticks: anomaly shows +/- signs, absolute shows plain values
   const ticks = [];
   for (let i = 0; i <= 4; i++) {
     const val = min + (max - min) * i / 4;
-    ticks.push((val > 0 ? '+' : '') + val.toFixed(1));
+    const isAnomaly = currentView === 'anomaly';
+    ticks.push((isAnomaly && val > 0 ? '+' : '') + val.toFixed(1));
   }
   document.getElementById('legendTicks').innerHTML = 
     ticks.map(t => `<span>${t}</span>`).join('');

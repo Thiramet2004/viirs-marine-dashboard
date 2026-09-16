@@ -81,7 +81,6 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 </p>
 </div>
 <div class="report-info-card">
-<div class="info-row"><span class="info-label">วันที่ประมวลผล</span><span class="info-value">24 มิ.ย. 2569</span></div>
 <div class="info-row"><span class="info-label">Climatology</span><span class="info-value">2018–2025 (8-yr)</span></div>
 <div class="info-row"><span class="info-label">Processing</span><span class="info-value">Direct Raster Statistics</span></div>
 <div class="info-row"><span class="info-label">พื้นที่ศึกษา</span><span class="info-value">อ่าวไทย & อันดามัน</span></div>
@@ -212,18 +211,6 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 </div>
 
 
-
-<!-- Insight Summary -->
-<div class="insight-box">
-<div class="insight-icon"><span class="material-icons-outlined">lightbulb</span></div>
-<div class="insight-content">
-<h4>สรุปข้อค้นพบ (Key Findings)</h4>
-<ul id="insightList">
-<li>กำลังคำนวณ...</li>
-</ul>
-</div>
-</div>
-</div>
 
 <!-- References -->
 <section class="section" id="references">
@@ -559,53 +546,7 @@ function renderDual(zone,yr){
   generateInsights(zone,yr);
 }
 
-function generateInsights(zone,yr){
-  const sstAn=zone==='overall'?sstAnomaly[yr]:sstZoneAnom[zone][yr];
-  const chlAn=zone==='overall'?chlAnomaly[yr]:chlZoneAnom[zone][yr];
-  const sstMo=zone==='overall'?sstMonthly[yr]:sstZone[zone][yr];
-  const chlMo=zone==='overall'?chlMonthly[yr]:chlZone[zone][yr];
-  
-  // Pearson r
-  const pairs=[];
-  for(let i=0;i<12;i++){if(sstAn[i]!==null&&chlAn[i]!==null)pairs.push([sstAn[i],chlAn[i]]);}
-  let r=0;
-  if(pairs.length>=3){
-    const n=pairs.length,xm=pairs.reduce((a,p)=>a+p[0],0)/n,ym=pairs.reduce((a,p)=>a+p[1],0)/n;
-    let num=0,dx=0,dy=0;
-    pairs.forEach(p=>{num+=(p[0]-xm)*(p[1]-ym);dx+=(p[0]-xm)**2;dy+=(p[1]-ym)**2;});
-    r=dx&&dy?num/Math.sqrt(dx*dy):0;
-  }
-
-  // Find warmest/coolest month
-  const sstMax=Math.max(...sstMo.filter(v=>v!==null));
-  const sstMin=Math.min(...sstMo.filter(v=>v!==null));
-  const maxMonth=monthsFull[sstMo.indexOf(sstMax)];
-  const minMonth=monthsFull[sstMo.indexOf(sstMin)];
-  
-  // Mean anomaly
-  const sstAnMean=(sstAn.filter(v=>v!==null).reduce((a,b)=>a+b,0)/sstAn.filter(v=>v!==null).length);
-  const chlAnMean=(chlAn.filter(v=>v!==null).reduce((a,b)=>a+b,0)/chlAn.filter(v=>v!==null).length);
-
-  const insights=[];
-  // Correlation insight
-  if(r<-0.3) insights.push('SST กับ Chl-a มีสหสัมพันธ์เชิงลบ (r = '+r.toFixed(2)+') — เดือนที่น้ำอุ่นผิดปกติ สาหร่ายมักลดลง');
-  else if(r>0.3) insights.push('SST กับ Chl-a มีสหสัมพันธ์เชิงบวก (r = '+r.toFixed(2)+') — อาจเกิดจาก runoff พาทั้งความร้อนและธาตุอาหารลงทะเลพร้อมกัน');
-  else insights.push('SST กับ Chl-a ไม่มีสหสัมพันธ์เชิงเส้นชัดเจน (r = '+r.toFixed(2)+') ในปีนี้ — Chl-a อาจถูก drive ด้วยปัจจัยอื่น เช่น น้ำท่า ลม หรือ upwelling เฉพาะจุด');
-
-  // SST anomaly summary
-  if(sstAnMean<-0.5) insights.push('ปี '+yr+' SST ต่ำกว่าปกติตลอดทั้งปี (mean anomaly = '+sstAnMean.toFixed(2)+' °C) → บ่งชี้สภาวะ La Niña หรือ upwelling เพิ่ม');
-  else if(sstAnMean>0.5) insights.push('ปี '+yr+' SST สูงกว่าปกติตลอดทั้งปี (mean anomaly = +'+sstAnMean.toFixed(2)+' °C) → บ่งชี้สภาวะ El Niño หรือ marine heatwave');
-  else insights.push('ปี '+yr+' SST ใกล้เคียงปกติ (mean anomaly = '+(sstAnMean>0?'+':'')+sstAnMean.toFixed(2)+' °C)');
-
-  // Chl-a trend
-  if(chlAnMean>0.03) insights.push('Chl-a สูงกว่าปกติ (mean anomaly = +'+chlAnMean.toFixed(3)+' mg/m³) → ผลผลิตขั้นปฐมภูมิเพิ่ม อาจเกี่ยวข้องกับ nutrient enrichment');
-  else if(chlAnMean<-0.03) insights.push('Chl-a ต่ำกว่าปกติ (mean anomaly = '+chlAnMean.toFixed(3)+' mg/m³) → ผลผลิตขั้นปฐมภูมิลด อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น');
-
-  // Peak info
-  insights.push('เดือนที่ร้อนที่สุด: '+maxMonth+' ('+sstMax.toFixed(1)+' °C) | เดือนที่เย็นที่สุด: '+minMonth+' ('+sstMin.toFixed(1)+' °C)');
-
-  document.getElementById('insightList').innerHTML=insights.map(t=>'<li>'+t+'</li>').join('');
-}
+function generateInsights(zone,yr){}
 
 function updateKPI(zone,yr){
   const d=D(),mo=gM(zone,yr,d),an=gA(zone,yr,d);

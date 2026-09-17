@@ -799,7 +799,8 @@ function getCurrentPalette() {
 
 let leafletMap = null;
 let currentMapLayer = null;
-let landMaskLayer = null;
+let landMaskGeoJSON = null;
+let landMaskPromise = null;
 
 function initLeafletMap() {
   leafletMap = L.map('leafletMap', {
@@ -885,13 +886,15 @@ async function loadMapGeoTIFF() {
       georaster: georaster,
       opacity: 0.85,
       pixelValuesToColorFn: pixelValuesToColorFn,
-      resolution: 1024
+      resolution: 1024,
+      // Remove raster pixels over land without drawing a visible polygon
+      // layer. The original OpenStreetMap basemap remains fully visible.
+      mask: landMaskGeoJSON || undefined,
+      mask_srs: 'EPSG:4326',
+      mask_strategy: 'inside'
     });
 
     currentMapLayer.addTo(leafletMap);
-
-    // Keep the coastline mask above every newly loaded raster layer.
-    if (landMaskLayer) landMaskLayer.bringToFront();
     
     const bounds = [
       [georaster.ymin, georaster.xmin],
@@ -1042,40 +1045,33 @@ setTimeout(() => {
 // COASTLINE / LAND MASK
 // =============================================
 
-async function loadLandMask() {
-  try {
-    const response = await fetch('./land_mask_110m.geojson');
-    if (!response.ok) {
-      console.warn('Land mask not available:', response.status);
-      return;
-    }
+function loadLandMaskData() {
+  if (landMaskGeoJSON) return Promise.resolve(landMaskGeoJSON);
+  if (landMaskPromise) return landMaskPromise;
 
-    const geojson = await response.json();
+  landMaskPromise = fetch('./land_mask_110m.geojson')
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(geojson => {
+      landMaskGeoJSON = geojson;
+      console.log('Raster land mask data loaded');
+      return geojson;
+    })
+    .catch(error => {
+      console.warn('Could not load raster land mask:', error);
+      return null;
+    });
 
-    // The source viirs_marine_2025.geojson contains zone centroids (Points).
-    // Do not render those markers. Natural Earth polygons cover land so the
-    // raster remains visible only over the sea, with a clean coastline edge.
-    landMaskLayer = L.geoJSON(geojson, {
-      style: {
-        color: '#475569',
-        weight: 0.8,
-        opacity: 0.75,
-        fillColor: '#f8fafc',
-        fillOpacity: 1
-      },
-      interactive: false
-    }).addTo(leafletMap);
-
-    landMaskLayer.bringToFront();
-    console.log('Coastline land mask loaded');
-  } catch (error) {
-    console.warn('Could not load land mask:', error);
-  }
+  return landMaskPromise;
 }
 
-// Load the mask after map initialization. It is brought to front again every
-// time a new GeoTIFF layer is loaded.
-setTimeout(() => loadLandMask(), 1000);
+// Preload mask geometry only. It is used internally by GeoRasterLayer and is
+// never added as a visible Leaflet polygon layer.
+loadLandMaskData().then(mask => {
+  if (mask && currentMapLayer) loadMapGeoTIFF();
+});
 
 </script>
 </body>

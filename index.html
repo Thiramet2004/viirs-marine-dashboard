@@ -688,6 +688,17 @@ renderAll();
 // =============================================
 
 const API_BASE = 'http://localhost:5001/api';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/Thiramet2004/viirs-marine-dashboard/main';
+
+function getTifUrl(view, param, year, month) {
+  const mm = String(month).padStart(2, '0');
+  if (view === 'absolute') {
+    const folder = param === 'sst' ? 'SST' : 'Chlor_a';
+    const prefix = param === 'sst' ? 'SST' : 'Chlor_a';
+    return GITHUB_RAW + '/data/Monthly_RGB/' + folder + '/' + year + '/' + mm + '/' + prefix + '_Monthly_RGB_' + mm + '_' + year + '.tif';
+  }
+  return API_BASE + '/tif/' + view + '/' + param + '/' + year + '/' + month;
+}
 
 const PALETTES = {
   chl_absolute: {
@@ -802,7 +813,7 @@ async function loadMapGeoTIFF() {
   const param = currentParam === 'sst' ? 'sst' : 'chl';
   const year = document.getElementById('yearSelect').value;
   const view = currentView; // 'absolute' or 'anomaly'
-  const url = `${API_BASE}/tif/${view}/${param}/${year}/${currentMapMonth}`;
+  const url = getTifUrl(view, param, year, currentMapMonth);
   
   document.getElementById('mapLoading').classList.add('show');
   document.getElementById('clickInfo').classList.remove('show');
@@ -838,7 +849,7 @@ async function loadMapGeoTIFF() {
       georaster: georaster,
       opacity: 0.85,
       pixelValuesToColorFn: pixelValuesToColorFn,
-      resolution: 512
+      resolution: 1024
     });
 
     currentMapLayer.addTo(leafletMap);

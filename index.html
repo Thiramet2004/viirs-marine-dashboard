@@ -799,6 +799,7 @@ function getCurrentPalette() {
 
 let leafletMap = null;
 let currentMapLayer = null;
+let landMaskLayer = null;
 
 function initLeafletMap() {
   leafletMap = L.map('leafletMap', {
@@ -888,6 +889,9 @@ async function loadMapGeoTIFF() {
     });
 
     currentMapLayer.addTo(leafletMap);
+
+    // Keep the coastline mask above every newly loaded raster layer.
+    if (landMaskLayer) landMaskLayer.bringToFront();
     
     const bounds = [
       [georaster.ymin, georaster.xmin],
@@ -1035,51 +1039,43 @@ setTimeout(() => {
 
 
 // =============================================
-// MARINE ZONES OVERLAY
+// COASTLINE / LAND MASK
 // =============================================
 
-let marineZonesLayer = null;
-
-async function loadMarineZones() {
+async function loadLandMask() {
   try {
-    const response = await fetch('./viirs_marine_2025.geojson');
+    const response = await fetch('./land_mask_110m.geojson');
     if (!response.ok) {
-      console.warn('Marine zones not available:', response.status);
+      console.warn('Land mask not available:', response.status);
       return;
     }
-    
+
     const geojson = await response.json();
-    
-    marineZonesLayer = L.geoJSON(geojson, {
+
+    // The source viirs_marine_2025.geojson contains zone centroids (Points).
+    // Do not render those markers. Natural Earth polygons cover land so the
+    // raster remains visible only over the sea, with a clean coastline edge.
+    landMaskLayer = L.geoJSON(geojson, {
       style: {
-        color: '#fbbf24',
-        weight: 2,
-        opacity: 0.8,
-        fill: false,
-        dashArray: '5, 5'
+        color: '#475569',
+        weight: 0.8,
+        opacity: 0.75,
+        fillColor: '#f8fafc',
+        fillOpacity: 1
       },
-      onEachFeature: function(feature, layer) {
-        if (feature.properties) {
-          let popupContent = '<div style="font-size:0.85rem;font-weight:600;color:#1e3a5f">';
-          popupContent += 'Marine Zone</div>';
-          if (feature.properties.ZONE_NAME || feature.properties.name) {
-            popupContent += '<div style="font-size:0.75rem;margin-top:4px">';
-            popupContent += feature.properties.ZONE_NAME || feature.properties.name;
-            popupContent += '</div>';
-          }
-          layer.bindPopup(popupContent);
-        }
-      }
+      interactive: false
     }).addTo(leafletMap);
-    
-    console.log('Marine zones loaded');
+
+    landMaskLayer.bringToFront();
+    console.log('Coastline land mask loaded');
   } catch (error) {
-    console.warn('Could not load marine zones:', error);
+    console.warn('Could not load land mask:', error);
   }
 }
 
-// Load zones after map init
-setTimeout(() => loadMarineZones(), 1000);
+// Load the mask after map initialization. It is brought to front again every
+// time a new GeoTIFF layer is loaded.
+setTimeout(() => loadLandMask(), 1000);
 
 </script>
 </body>

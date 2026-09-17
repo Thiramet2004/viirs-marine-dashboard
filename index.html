@@ -175,7 +175,7 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <div class="chart-desc">
   <strong>วิธีใช้:</strong> คลิกบนแผนที่เพื่อดูค่า Anomaly ของจุดนั้น ๆ พร้อมพิกัด Lat/Lon ·
   ใช้ slider หรือปุ่ม ◀ ▶ เพื่อเปลี่ยนเดือน · ปีและพารามิเตอร์ตามตัวกรองด้านบน ·
-  ข้อมูล GeoTIFF โหลดจาก Flask server (http://localhost:5001)
+  ข้อมูล GeoTIFF โหลดจาก GitHub โดยตรง (ไม่ต้องรัน local server)
 </div>
 </div>
 
@@ -866,7 +866,7 @@ async function loadMapGeoTIFF() {
     console.error('Error loading GeoTIFF:', error);
     document.getElementById('mapLoading').classList.remove('show');
     if (!error.message.includes('404')) {
-      alert(`ไม่สามารถโหลด GeoTIFF ได้\n${error.message}\n\nตรวจสอบว่า Flask server รันอยู่ที่ http://localhost:5001`);
+      alert(`ไม่สามารถโหลด GeoTIFF ได้: ${error.message}`);
     }
   }
 }

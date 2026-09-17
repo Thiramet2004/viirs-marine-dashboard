@@ -31,3 +31,5 @@ conversion_with_mask_log.txt
 # fix_map_rgb.py - helper script
 # reorder_map.py - helper script
 # update_fig_numbers.py - helper script
+.venv/
+__pycache__/

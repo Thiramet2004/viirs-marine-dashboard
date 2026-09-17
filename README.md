@@ -17,7 +17,7 @@ This dashboard provides comprehensive visualization and analysis of VIIRS (Visib
 - 📈 **Dual Views** - Absolute (Monthly) and Anomaly views
 - 🏝️ **Land Masking** - Ocean-only display with transparent land areas
 - 🗾 **Marine Zones** - EEZ boundary overlays for 6 marine zones
-- 📅 **8-Year Archive** - Data from 2018-2025 (96 months)
+- 📅 **Time-series Archive** - Complete data from 2018-2025 plus January-July 2026 SST Absolute and SST/Chl-a Anomaly data
 
 ## 🚀 Quick Start
 
@@ -94,7 +94,10 @@ viirs-marine-dashboard/
 ├── data/
 │   └── Monthly_RGB/               # 192 RGB GeoTIFF files (277 MB)
 │       ├── Chlor_a/               # Chlorophyll-a (2018-2025)
-│       └── SST/                   # Sea Surface Temperature (2018-2025)
+│       └── SST/2026/              # SST Absolute, January-July 2026
+│   └── Anomaly_RGB/               # Anomaly RGB GeoTIFF files
+│       ├── Chlor_a/2026/          # Chlorophyll-a Anomaly, January-July 2026
+│       └── SST/2026/              # SST Anomaly, January-July 2026
 ├── static/
 │   ├── css/
 │   └── js/

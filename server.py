@@ -21,9 +21,16 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# Path config
-BASE_DATA_ANOMALY = "/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL"
-BASE_DATA_MONTHLY = "/Users/hellothiramet/viirs-marine-dashboard/data/Monthly_RGB"
+# Path config. Defaults are portable and can be overridden in deployment.
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DATA_ANOMALY = os.environ.get(
+    "VIIRS_ANOMALY_DIR",
+    os.path.join(PROJECT_DIR, "data", "Anomaly_RGB"),
+)
+BASE_DATA_MONTHLY = os.environ.get(
+    "VIIRS_MONTHLY_DIR",
+    os.path.join(PROJECT_DIR, "data", "Monthly_RGB"),
+)
 
 PARAMS = {
     "chl": "Chlor_a",
@@ -56,11 +63,14 @@ def get_marine_zones():
     """
     Return Marine Zones as GeoJSON
     """
-    import json
+    bundled_geojson = os.path.join(PROJECT_DIR, "viirs_marine_2025.geojson")
+    if os.path.exists(bundled_geojson):
+        return send_file(bundled_geojson, mimetype='application/geo+json')
+
     try:
         import geopandas as gpd
         
-        base = "/Volumes/New Volume/04_VIIRS_Monthly/EEZ_MarineZone"
+        base = os.environ.get("VIIRS_MARINE_ZONES_DIR", "")
         
         # รวม shapefile ทั้งหมด (ยกเว้น country_Asean)
         shapefiles = [
@@ -128,7 +138,10 @@ def get_tif(view, param, year, month):
         else:
             filename = f"SST_Monthly_RGB_{mm}_{year}.tif"
     
-    tif_path = os.path.join(base_data, folder, str(year), mm, filename)
+    if year == 2026:
+        tif_path = os.path.join(base_data, folder, str(year), filename)
+    else:
+        tif_path = os.path.join(base_data, folder, str(year), mm, filename)
     
     if not os.path.exists(tif_path):
         abort(404, f"File not found: {filename}")
@@ -169,7 +182,10 @@ def get_metadata(view, param, year, month):
             unit = "°C"
             label = "Sea Surface Temperature (Absolute)"
     
-    tif_path = os.path.join(base_data, folder, str(year), mm, filename)
+    if year == 2026:
+        tif_path = os.path.join(base_data, folder, str(year), filename)
+    else:
+        tif_path = os.path.join(base_data, folder, str(year), mm, filename)
     
     return jsonify({
         "view": view,
@@ -206,6 +222,18 @@ def get_available_dates(view, param):
                 continue
             
             year = int(year_dir)
+            if year == 2026:
+                for tif_name in sorted(os.listdir(year_path)):
+                    if not tif_name.lower().endswith(".tif"):
+                        continue
+                    parts = os.path.splitext(tif_name)[0].split("_")
+                    try:
+                        month = int(parts[-2])
+                    except (IndexError, ValueError):
+                        continue
+                    available.append({"year": year, "month": month})
+                continue
+
             for month_dir in sorted(os.listdir(year_path)):
                 month_path = os.path.join(year_path, month_dir)
                 if not os.path.isdir(month_path) or not month_dir.isdigit():

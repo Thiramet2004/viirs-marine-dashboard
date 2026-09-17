@@ -215,7 +215,7 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 <!-- References + Dynamic Summary -->
 <section class="section" id="references">
 <h3 class="section-title"><span class="section-num">3</span> แหล่งข้อมูลและข้อจำกัด</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch">
 <div class="ref-content">
 <table class="ref-table"><thead><tr><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody>
 <tr><td>Sensor</td><td>VIIRS (Visible Infrared Imaging Radiometer Suite)</td></tr>
@@ -229,16 +229,16 @@ body{margin:0;padding:0;width:100%;min-height:100vh;overflow-x:hidden}
 </div>
 
 <!-- Dynamic Summary Box -->
-<div id="dynamicSummary" style="background:var(--accent);border-radius:var(--r);padding:22px 24px;color:#fff;box-shadow:var(--shadow);min-height:220px;">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+<div id="dynamicSummary" style="background:var(--accent);border-radius:var(--r);padding:28px 28px;color:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:space-between;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
     <div>
       <div style="font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);margin-bottom:4px;">สรุปภาพรวม</div>
       <div id="summaryTitle" style="font-size:1rem;font-weight:700;color:#fff;line-height:1.4;">—</div>
     </div>
     <div id="summaryBadge" style="font-size:.65rem;font-weight:700;background:rgba(255,255,255,.15);border-radius:5px;padding:4px 10px;white-space:nowrap;">—</div>
   </div>
-  <div id="summaryStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
-  <div id="summaryInsight" style="font-size:.78rem;line-height:1.7;color:rgba(255,255,255,.85);border-top:1px solid rgba(255,255,255,.15);padding-top:12px;"></div>
+  <div id="summaryStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0;flex:1;align-content:start;margin-bottom:16px;"></div>
+  <div id="summaryInsight" style="font-size:.78rem;line-height:1.7;color:rgba(255,255,255,.85);border-top:1px solid rgba(255,255,255,.15);padding-top:14px;margin-top:auto;"></div>
 </div>
 </div>
 </section>
@@ -323,7 +323,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .insight-content ul{list-style:none;padding:0}
 .insight-content li{font-size:.8rem;color:var(--text2);padding:4px 0;padding-left:16px;position:relative;line-height:1.5}
 .insight-content li::before{content:"\25CF";position:absolute;left:0;color:var(--blue);font-size:.5rem;top:8px}
-.ref-content{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.ref-content{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);height:100%;box-sizing:border-box}
 .ref-table{width:100%;border-collapse:collapse;font-size:.78rem}
 .ref-table th{text-align:left;padding:7px 10px;background:var(--bg);color:var(--text2);font-weight:600;border-bottom:2px solid var(--border);font-size:.7rem;text-transform:uppercase}
 .ref-table td{padding:7px 10px;border-bottom:1px solid var(--border-lt);color:var(--dim)}

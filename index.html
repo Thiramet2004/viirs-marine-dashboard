@@ -799,8 +799,6 @@ function getCurrentPalette() {
 
 let leafletMap = null;
 let currentMapLayer = null;
-let landMaskGeoJSON = null;
-let landMaskPromise = null;
 
 function initLeafletMap() {
   leafletMap = L.map('leafletMap', {
@@ -886,12 +884,7 @@ async function loadMapGeoTIFF() {
       georaster: georaster,
       opacity: 0.85,
       pixelValuesToColorFn: pixelValuesToColorFn,
-      resolution: 1024,
-      // Remove raster pixels over land without drawing a visible polygon
-      // layer. The original OpenStreetMap basemap remains fully visible.
-      mask: landMaskGeoJSON || undefined,
-      mask_srs: 'EPSG:4326',
-      mask_strategy: 'inside'
+      resolution: 1024
     });
 
     currentMapLayer.addTo(leafletMap);
@@ -1040,38 +1033,6 @@ setTimeout(() => {
   setTimeout(() => leafletMap.invalidateSize(), 200);
 }, 500);
 
-
-// =============================================
-// COASTLINE / LAND MASK
-// =============================================
-
-function loadLandMaskData() {
-  if (landMaskGeoJSON) return Promise.resolve(landMaskGeoJSON);
-  if (landMaskPromise) return landMaskPromise;
-
-  landMaskPromise = fetch('./land_mask_110m.geojson')
-    .then(response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
-    })
-    .then(geojson => {
-      landMaskGeoJSON = geojson;
-      console.log('Raster land mask data loaded');
-      return geojson;
-    })
-    .catch(error => {
-      console.warn('Could not load raster land mask:', error);
-      return null;
-    });
-
-  return landMaskPromise;
-}
-
-// Preload mask geometry only. It is used internally by GeoRasterLayer and is
-// never added as a visible Leaflet polygon layer.
-loadLandMaskData().then(mask => {
-  if (mask && currentMapLayer) loadMapGeoTIFF();
-});
 
 </script>
 </body>

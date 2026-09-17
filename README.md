@@ -344,7 +344,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - VIIRS data courtesy of NASA/NOAA
 - SNAP ESA Toolbox for data processing
 - Marine zones from Thailand Department of Marine and Coastal Resources
-- Natural Earth country polygons for the coastline and land mask
 - Leaflet community for mapping tools
 - Chart.js for visualization components
 

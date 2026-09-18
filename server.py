@@ -68,7 +68,7 @@ def get_marine_zones():
         
         base = os.environ.get(
             "VIIRS_MARINE_ZONES_DIR",
-            "/Volumes/New Volume/04_VIIRS_Monthly/EEZ_MarineZone",
+            "/Volumes/New Volume/EEZ_MarineZone",
         )
         
         # รวม shapefile ทั้งหมด (ยกเว้น country_Asean)
@@ -91,15 +91,13 @@ def get_marine_zones():
         
         if gdfs:
             combined = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True))
+            combined = combined[combined.geometry.geom_type.isin(["Polygon", "MultiPolygon"])]
+            if combined.empty:
+                return jsonify({"error": "EEZ shapefiles contain no polygon geometries"}), 404
             geojson = combined.to_json()
             return geojson, 200, {'Content-Type': 'application/json'}
 
-        fallback = os.path.join(PROJECT_DIR, "viirs_marine_2025.geojson")
-        if os.path.exists(fallback):
-            return send_file(fallback, mimetype='application/geo+json')
-
-        else:
-            return jsonify({"error": "No shapefiles found"}), 404
+        return jsonify({"error": "No EEZ polygon shapefiles found"}), 404
             
     except ImportError:
         return jsonify({"error": "geopandas not installed"}), 500

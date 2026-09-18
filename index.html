@@ -783,6 +783,19 @@ let leafletMap = null;
 let currentMapLayer = null;
 let currentMapMonth = 1;
 
+function syncMapMonthRange() {
+  const zone = document.getElementById('zoneSelect').value;
+  const year = document.getElementById('yearSelect').value;
+  const data = currentView === 'absolute' ? D().mo : D().an;
+  const values = zone === 'overall' ? data[year] : (currentView === 'absolute' ? D().zone[zone][year] : D().za[zone][year]);
+  const availableMonths = values.reduce((last, value, index) => value !== null ? index + 1 : last, 0);
+  const maxMonth = Math.max(1, availableMonths);
+  const slider = document.getElementById('mapMonthSlider');
+  slider.max = maxMonth;
+  if (currentMapMonth > maxMonth) currentMapMonth = maxMonth;
+  slider.value = currentMapMonth;
+}
+
 function initLeafletMap() {
   leafletMap = L.map('leafletMap', {
     center: [7.5, 101.25],
@@ -980,9 +993,10 @@ function updateMapUI() {
 }
 
 function changeMapMonth(delta) {
+  const maxMonth = parseInt(document.getElementById('mapMonthSlider').max, 10) || 12;
   currentMapMonth += delta;
-  if (currentMapMonth < 1) currentMapMonth = 12;
-  if (currentMapMonth > 12) currentMapMonth = 1;
+  if (currentMapMonth < 1) currentMapMonth = maxMonth;
+  if (currentMapMonth > maxMonth) currentMapMonth = 1;
   document.getElementById('mapMonthSlider').value = currentMapMonth;
   updateMapUI();
   loadMapGeoTIFF();
@@ -1002,6 +1016,7 @@ const origRenderAll = renderAll;
 renderAll = function() {
   origRenderAll();
   if (leafletMap) {
+    syncMapMonthRange();
     updateMapUI();
     loadMapGeoTIFF();
   }
@@ -1010,6 +1025,7 @@ renderAll = function() {
 // Init map หลัง DOM ready
 setTimeout(() => {
   initLeafletMap();
+  syncMapMonthRange();
   updateMapUI();
   loadMapGeoTIFF();
   setTimeout(() => leafletMap.invalidateSize(), 200);

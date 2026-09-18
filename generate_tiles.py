@@ -22,7 +22,10 @@ from PIL import Image
 # =============================================
 # CONFIG
 # =============================================
-BASE_DATA = "/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL"
+BASE_DATA = os.environ.get(
+    "VIIRS_ANOMALY_DIR",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "Anomaly_RGB"),
+)
 OUT_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiles")
 
 # Crop bounding box: ครอบ อ่าวไทย + อันดามัน

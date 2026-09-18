@@ -12,39 +12,46 @@ import os
 import sys
 from pathlib import Path
 
-# Color palettes for Absolute values (inspired by SNAP ocean color palettes)
-# Chl-a: 0-5 mg/m³ (typical range, with extended range up to 10 for coastal outliers)
+PROJECT_DIR = Path(__file__).resolve().parent
+SOURCE_MONTHLY_DIR = os.environ.get(
+    "VIIRS_SOURCE_MONTHLY_DIR",
+    "/Volumes/New Volume/04_VIIRS_Monthly/Monthly",
+)
+SOURCE_ANOMALY_DIR = os.environ.get(
+    "VIIRS_SOURCE_ANOMALY_DIR",
+    os.path.join(PROJECT_DIR, "data", "Anomaly_RGB"),
+)
+OUTPUT_MONTHLY_DIR = os.environ.get(
+    "VIIRS_MONTHLY_DIR",
+    os.path.join(PROJECT_DIR, "data", "Monthly_RGB"),
+)
+
+# Color palettes copied from SLD_wq/chlor_a_seadas.sld and sst_seadas.sld.
 CHLOR_A_PALETTE = [
-    (0.0, (0, 0, 100)),      # Dark blue
-    (0.05, (20, 20, 165)),
-    (0.1, (33, 70, 225)),
-    (0.2, (48, 153, 255)),
-    (0.3, (140, 235, 255)),  # Light blue
-    (0.5, (200, 250, 255)),  # Very light blue
-    (0.7, (255, 250, 170)),  # Pale yellow
-    (1.0, (255, 210, 30)),   # Yellow
-    (1.5, (250, 105, 4)),    # Orange
-    (2.0, (240, 53, 1)),     # Red-orange
-    (3.0, (210, 16, 0)),     # Red
-    (5.0, (165, 3, 0)),      # Dark red
-    (10.0, (110, 0, 0)),     # Very dark red (coastal/outliers)
+    (0.000, (147, 0, 108)), (0.010, (147, 0, 108)),
+    (0.014, (111, 0, 144)), (0.021, (72, 0, 183)),
+    (0.031, (33, 0, 222)), (0.046, (0, 10, 255)),
+    (0.065, (0, 74, 255)), (0.096, (0, 144, 255)),
+    (0.142, (0, 213, 255)), (0.209, (0, 255, 215)),
+    (0.299, (0, 255, 119)), (0.440, (0, 255, 15)),
+    (0.649, (96, 255, 0)), (0.956, (200, 255, 0)),
+    (1.368, (255, 235, 0)), (2.014, (255, 183, 0)),
+    (2.968, (255, 131, 0)), (4.373, (255, 79, 0)),
+    (6.256, (255, 31, 0)), (9.211, (230, 0, 0)),
+    (13.573, (165, 0, 0)), (20.000, (105, 0, 0)),
 ]
 
-# SST: 20-35°C (extended range to handle outliers, typical 25-32°C)
 SST_PALETTE = [
-    (20.0, (0, 0, 100)),     # Dark blue (cold outliers)
-    (24.0, (20, 20, 165)),
-    (25.0, (33, 70, 225)),
-    (26.0, (48, 153, 255)),  # Blue
-    (27.0, (75, 200, 255)),
-    (28.0, (140, 235, 255)), # Light blue
-    (29.0, (200, 250, 255)), # Very light blue
-    (29.5, (255, 250, 170)), # Pale yellow
-    (30.0, (255, 210, 30)),  # Yellow
-    (30.5, (250, 105, 4)),   # Orange
-    (31.0, (240, 53, 1)),    # Red-orange
-    (32.0, (210, 16, 0)),    # Red
-    (35.0, (165, 3, 0)),     # Dark red (warm outliers)
+    (0.000, (0, 0, 255)), (0.214, (35, 7, 241)), (2.606, (10, 5, 181)),
+    (5.003, (9, 69, 105)), (7.400, (7, 111, 162)),
+    (9.614, (14, 170, 168)), (12.006, (16, 220, 230)),
+    (14.403, (18, 225, 179)), (16.800, (15, 189, 113)),
+    (19.014, (10, 142, 74)), (21.406, (45, 153, 3)),
+    (23.803, (116, 203, 11)), (26.200, (222, 229, 8)),
+    (28.414, (220, 167, 5)), (30.806, (217, 73, 9)),
+    (33.203, (178, 10, 5)), (35.600, (106, 22, 17)),
+    (37.814, (129, 67, 62)), (40.206, (159, 110, 109)),
+    (42.603, (183, 159, 159)), (45.000, (0, 0, 0)),
 ]
 
 
@@ -148,19 +155,34 @@ def get_land_mask_from_anomaly(param, year, month):
     month_str = f"{int(month):02d}"
     
     if param == 'Chlor_a':
-        anomaly_path = f"/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL/Chlor_a/{year}/{month_str}/Chlor_a_Anomaly_RGB_{month_str}_{year}.tif"
+        candidates = [
+            os.path.join(SOURCE_ANOMALY_DIR, "Chlor_a", str(year), month_str, f"Chlor_a_Anomaly_RGB_{month_str}_{year}.tif"),
+            os.path.join(SOURCE_ANOMALY_DIR, "Chlor_a_Monthly_Anomaly", str(year), month_str, f"Chlor_a_Monthly_Anomaly_{month_str}_{year}_msk.tif"),
+            os.path.join(SOURCE_ANOMALY_DIR, "Chlor_a_Monthly_Anomaly", str(year), month_str, f"Chlor_a_Monthly_Anomaly_{month_str}_{year}_RGB.tif"),
+        ]
     else:
-        anomaly_path = f"/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL/SST/{year}/{month_str}/SST_Anomaly_RGB_{month_str}_{year}.tif"
-    
-    if not os.path.exists(anomaly_path):
+        candidates = [
+            os.path.join(SOURCE_ANOMALY_DIR, "SST", str(year), month_str, f"SST_Anomaly_RGB_{month_str}_{year}.tif"),
+            os.path.join(SOURCE_ANOMALY_DIR, "SST_Monthly_Anomaly", str(year), month_str, f"SST_Monthly_Anomaly_{month_str}_{year}_msk.tif"),
+            os.path.join(SOURCE_ANOMALY_DIR, "SST_Monthly_Anomaly", str(year), month_str, f"SST_Monthly_Anomaly_{month_str}_{year}_RGB.tif"),
+        ]
+
+    anomaly_path = next((path for path in candidates if os.path.exists(path)), None)
+    if anomaly_path is None:
         return None
     
     try:
         with rasterio.open(anomaly_path) as src:
-            rgb = src.read()  # (3, height, width)
-            # Land pixels are (0,0,0) in Anomaly RGB
-            land_mask = (rgb[0] == 0) & (rgb[1] == 0) & (rgb[2] == 0)
-            ocean_mask = ~land_mask  # True = ocean, False = land
+            if src.count == 1:
+                values = src.read(1, masked=True)
+                ocean_mask = ~np.ma.getmaskarray(values)
+                if np.ma.is_masked(values):
+                    ocean_mask &= np.isfinite(values.filled(np.nan))
+            else:
+                rgb = src.read()  # (3, height, width)
+                # Land pixels are (0,0,0) in Anomaly RGB
+                land_mask = (rgb[0] == 0) & (rgb[1] == 0) & (rgb[2] == 0)
+                ocean_mask = ~land_mask  # True = ocean, False = land
             return ocean_mask
     except:
         return None
@@ -186,13 +208,13 @@ def convert_monthly_to_rgb(param, year, month):
     
     # Input paths
     if param == 'Chlor_a':
-        base_dir = f"/Volumes/New Volume/04_VIIRS_Monthly/Monthly/Chlor_a_4km/{year}"
+        base_dir = os.path.join(SOURCE_MONTHLY_DIR, "Chlor_a_4km", str(year))
         data_folder = f"Chlor_a_VIIRS_{month_str}_{month_name}_{year}_4km.data"
         img_file = "chlor_a_mean.img"
         hdr_file = "chlor_a_mean.hdr"
         palette = CHLOR_A_PALETTE
     else:  # SST
-        base_dir = f"/Volumes/New Volume/04_VIIRS_Monthly/Monthly/SST_4km/{year}"
+        base_dir = os.path.join(SOURCE_MONTHLY_DIR, "SST_4km", str(year))
         data_folder = f"SST_VIIRS_{month_str}_{month_name}_{year}_4km.data"
         img_file = "sst_mean.img"
         hdr_file = "sst_mean.hdr"
@@ -230,7 +252,7 @@ def convert_monthly_to_rgb(param, year, month):
     rgb = apply_color_palette(data, palette)
     
     # Output path (write to workspace since NTFS volume is read-only)
-    output_dir = f"/Users/hellothiramet/viirs-marine-dashboard/data/Monthly_RGB/{param}/{year}/{month_str}"
+    output_dir = os.path.join(OUTPUT_MONTHLY_DIR, param, str(year), month_str)
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f"{param}_Monthly_RGB_{month_str}_{year}.tif")
     
@@ -278,7 +300,7 @@ def main():
         print("Converting all Monthly data to RGB GeoTIFF...")
         print("=" * 60)
         
-        years = range(2018, 2026)  # 2018-2025
+        years = range(2018, 2027)  # 2018-2026
         months = range(1, 13)
         params = ['Chlor_a', 'SST']
         

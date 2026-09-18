@@ -12,12 +12,12 @@ This dashboard provides comprehensive visualization and analysis of VIIRS (Visib
 
 **Features:**
 - 🗺️ **Interactive Raster Map** - Browse satellite imagery with pixel-level query capability
-- 📊 **Statistical Charts** - 6 comprehensive charts analyzing marine parameters
+- 📊 **Statistical Charts** - 4 interactive charts analyzing marine parameters
 - 🌡️ **Dual Parameters** - Sea Surface Temperature (SST) and Chlorophyll-a
 - 📈 **Dual Views** - Absolute (Monthly) and Anomaly views
 - 🏝️ **Land Masking** - Ocean-only display with transparent land areas
 - 🗾 **Marine Zones** - EEZ boundary overlays for 6 marine zones
-- 📅 **Time-series Archive** - Complete data from 2018-2025 plus January-July 2026 SST Absolute and SST/Chl-a Anomaly data
+- 📅 **Time-series Archive** - Data from 2018-2025 plus January-July 2026 SST absolute and SST/Chl-a anomaly data
 
 ## 🚀 Quick Start
 
@@ -63,22 +63,17 @@ This dashboard provides comprehensive visualization and analysis of VIIRS (Visib
 - 8-year average reference line
 - Individual year trends
 
-### Figure 3: SST vs Chlorophyll-a Scatter Plot
-- Correlation analysis with R² coefficient
-- Linear regression trend line
-- Monthly data points
-
-### Figure 4: Monthly Anomaly Bar Chart
+### Figure 3: Monthly Anomaly Bar Chart
 - Positive (red) and negative (blue) anomalies
 - Deviation from long-term mean
 - Quick identification of unusual patterns
 
-### Figure 5: Inter-annual Trend
+### Figure 4: Inter-annual Trend
 - Year-to-year changes
 - Linear trend with slope calculation
 - Long-term climate analysis
 
-### Figure 6: SST-Chl-a Inverse Relationship
+### Figure 5: SST-Chl-a Inverse Relationship
 - Dual-axis overlay chart
 - Inverse correlation visualization
 - Anomaly comparison
@@ -94,13 +89,9 @@ viirs-marine-dashboard/
 ├── data/
 │   └── Monthly_RGB/               # 192 RGB GeoTIFF files (277 MB)
 │       ├── Chlor_a/               # Chlorophyll-a (2018-2025)
-│       └── SST/2026/              # SST Absolute, January-July 2026
-│   └── Anomaly_RGB/               # Anomaly RGB GeoTIFF files
-│       ├── Chlor_a/2026/          # Chlorophyll-a Anomaly, January-July 2026
-│       └── SST/2026/              # SST Anomaly, January-July 2026
-├── static/
-│   ├── css/
-│   └── js/
+│       └── SST/                   # Sea Surface Temperature (2018-2025)
+├── data/
+│   └── Anomaly_RGB/               # SST and Chlorophyll-a anomaly GeoTIFF files
 └── README.md
 ```
 
@@ -150,7 +141,7 @@ GET /api/tif/<view>/<param>/<year>/<month>
 ```
 - `view`: `absolute` or `anomaly`
 - `param`: `chl` or `sst`
-- `year`: 2018-2025
+- `year`: 2018-2026, depending on available data
 - `month`: 1-12
 
 **Example:**
@@ -184,7 +175,7 @@ Returns list of all available year-month combinations.
 ### Option 1: Full iframe (Recommended)
 ```html
 <iframe 
-  src="http://localhost:5001/embed" 
+  src="http://localhost:5001/embed_dashboard.html"
   width="100%" 
   height="1200px" 
   frameborder="0"
@@ -195,7 +186,7 @@ Returns list of all available year-month combinations.
 ### Option 2: Map Only
 ```html
 <iframe 
-  src="http://localhost:5001/embed?mode=map" 
+  src="http://localhost:5001/embed_dashboard.html?mode=map"
   width="100%" 
   height="600px" 
   frameborder="0"
@@ -205,7 +196,7 @@ Returns list of all available year-month combinations.
 ### Option 3: Charts Only
 ```html
 <iframe 
-  src="http://localhost:5001/embed?mode=charts" 
+  src="http://localhost:5001/embed_dashboard.html?mode=charts"
   width="100%" 
   height="800px" 
   frameborder="0"
@@ -238,9 +229,9 @@ The converter:
 
 ### Data Requirements
 
-**Source data location:**
+**Source data location:** Set `VIIRS_SOURCE_MONTHLY_DIR` to the folder containing the ENVI source data:
 ```
-/Volumes/New Volume/04_VIIRS_Monthly/Monthly/
+<source>/Monthly/
 ├── Chlor_a_4km/YYYY/
 │   └── Chlor_a_VIIRS_MM_MonthName_YYYY_4km.data/
 │       └── chlor_a_mean.img
@@ -249,9 +240,9 @@ The converter:
         └── sst_mean.img
 ```
 
-**Land mask reference:**
+**Land mask reference:** Set `VIIRS_SOURCE_ANOMALY_DIR` when the source anomaly rasters are outside the repository:
 ```
-/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL/
+<source>/Anomaly/RGB_FINAL/
 ```
 
 ## 📝 Configuration
@@ -265,8 +256,8 @@ app.run(debug=True, host='0.0.0.0', port=5001)
 ### Data Paths
 Edit `server.py`:
 ```python
-BASE_DATA_ANOMALY = "/Volumes/New Volume/04_VIIRS_Monthly/Anomaly/RGB_FINAL"
-BASE_DATA_MONTHLY = "/Users/hellothiramet/viirs-marine-dashboard/data/Monthly_RGB"
+VIIRS_ANOMALY_DIR=/path/to/data/Anomaly_RGB
+VIIRS_MONTHLY_DIR=/path/to/data/Monthly_RGB
 ```
 
 ### Color Palettes

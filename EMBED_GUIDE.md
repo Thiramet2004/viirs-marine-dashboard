@@ -6,7 +6,7 @@
 
 ### แบบที่ 1: Embed Dashboard เต็มรูปแบบ (แนะนำ)
 
-แสดงทั้งแผนที่ + กราฟทั้งหมด 6 รูป
+แสดงทั้งแผนที่ + กราฟทั้งหมด 5 ส่วน
 
 ```html
 <iframe 
@@ -50,7 +50,7 @@
 
 ### แบบที่ 3: Embed เฉพาะกราฟ (Charts Only)
 
-แสดงเฉพาะกราฟวิเคราะห์ทางสถิติ (Fig. 2-6)
+แสดงเฉพาะกราฟวิเคราะห์ทางสถิติ (Fig. 2-5)
 
 ```html
 <iframe 
@@ -175,7 +175,7 @@ Dashboard ปรับขนาดอัตโนมัติตามหน้�
 
 2. **ติดตั้ง Dependencies**
    ```bash
-   pip3 install flask flask-cors rasterio geopandas numpy pandas
+    pip3 install -r requirements.txt
    ```
 
 3. **Run Server (Production)**

@@ -2,7 +2,7 @@
 """
 server.py
 ---------
-Flask server เสิร์ฟ GeoTIFF files จาก /Volumes/New Volume/04_VIIRS_Monthly/
+Flask server เสิร์ฟ GeoTIFF files จากโฟลเดอร์ data ใน repository
 พร้อม CORS สำหรับ web GIS
 รองรับทั้ง Anomaly และ Absolute (Monthly) views
 
@@ -63,14 +63,13 @@ def get_marine_zones():
     """
     Return Marine Zones as GeoJSON
     """
-    bundled_geojson = os.path.join(PROJECT_DIR, "viirs_marine_2025.geojson")
-    if os.path.exists(bundled_geojson):
-        return send_file(bundled_geojson, mimetype='application/geo+json')
-
     try:
         import geopandas as gpd
         
-        base = os.environ.get("VIIRS_MARINE_ZONES_DIR", "")
+        base = os.environ.get(
+            "VIIRS_MARINE_ZONES_DIR",
+            "/Volumes/New Volume/04_VIIRS_Monthly/EEZ_MarineZone",
+        )
         
         # รวม shapefile ทั้งหมด (ยกเว้น country_Asean)
         shapefiles = [
@@ -94,6 +93,11 @@ def get_marine_zones():
             combined = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True))
             geojson = combined.to_json()
             return geojson, 200, {'Content-Type': 'application/json'}
+
+        fallback = os.path.join(PROJECT_DIR, "viirs_marine_2025.geojson")
+        if os.path.exists(fallback):
+            return send_file(fallback, mimetype='application/geo+json')
+
         else:
             return jsonify({"error": "No shapefiles found"}), 404
             
@@ -138,10 +142,9 @@ def get_tif(view, param, year, month):
         else:
             filename = f"SST_Monthly_RGB_{mm}_{year}.tif"
     
-    if year == 2026:
+    tif_path = os.path.join(base_data, folder, str(year), mm, filename)
+    if not os.path.exists(tif_path):
         tif_path = os.path.join(base_data, folder, str(year), filename)
-    else:
-        tif_path = os.path.join(base_data, folder, str(year), mm, filename)
     
     if not os.path.exists(tif_path):
         abort(404, f"File not found: {filename}")
@@ -182,10 +185,9 @@ def get_metadata(view, param, year, month):
             unit = "°C"
             label = "Sea Surface Temperature (Absolute)"
     
-    if year == 2026:
+    tif_path = os.path.join(base_data, folder, str(year), mm, filename)
+    if not os.path.exists(tif_path):
         tif_path = os.path.join(base_data, folder, str(year), filename)
-    else:
-        tif_path = os.path.join(base_data, folder, str(year), mm, filename)
     
     return jsonify({
         "view": view,
@@ -222,18 +224,6 @@ def get_available_dates(view, param):
                 continue
             
             year = int(year_dir)
-            if year == 2026:
-                for tif_name in sorted(os.listdir(year_path)):
-                    if not tif_name.lower().endswith(".tif"):
-                        continue
-                    parts = os.path.splitext(tif_name)[0].split("_")
-                    try:
-                        month = int(parts[-2])
-                    except (IndexError, ValueError):
-                        continue
-                    available.append({"year": year, "month": month})
-                continue
-
             for month_dir in sorted(os.listdir(year_path)):
                 month_path = os.path.join(year_path, month_dir)
                 if not os.path.isdir(month_path) or not month_dir.isdigit():
@@ -253,6 +243,8 @@ def get_available_dates(view, param):
                         tif_name = f"SST_Monthly_RGB_{month:02d}_{year}.tif"
                 
                 tif_path = os.path.join(month_path, tif_name)
+                if not os.path.exists(tif_path):
+                    tif_path = os.path.join(year_path, tif_name)
                 if os.path.exists(tif_path):
                     available.append({"year": year, "month": month})
     

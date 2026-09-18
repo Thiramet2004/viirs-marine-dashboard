@@ -31,6 +31,10 @@ BASE_DATA_MONTHLY = os.environ.get(
     "VIIRS_MONTHLY_DIR",
     os.path.join(PROJECT_DIR, "data", "Monthly_RGB"),
 )
+BASE_DATA_YEARLY = os.environ.get(
+    "VIIRS_YEARLY_DIR",
+    os.path.join(PROJECT_DIR, "data", "Yearly_RGB"),
+)
 
 PARAMS = {
     "chl": "Chlor_a",
@@ -52,6 +56,11 @@ def index():
 def embed():
     """Serve embeddable dashboard"""
     return send_file('embed_dashboard.html')
+
+@app.route('/yearly')
+def yearly():
+    """Serve the annual anomaly dashboard."""
+    return send_file('index_yearly.html')
 
 @app.route('/<path:path>')
 def static_files(path):
@@ -103,6 +112,26 @@ def get_marine_zones():
         return jsonify({"error": "geopandas not installed"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/yearly/<param>/<int:year>')
+def get_yearly_raster(param, year):
+    """Serve a yearly anomaly RGB GeoTIFF."""
+    if param not in PARAMS:
+        abort(404, f"Invalid param: {param}")
+    prefix = "SST" if param == "sst" else "Chlor_a"
+    filename = f"{param}_Yearly_Anomaly_RGB_{year}.tif"
+    tif_path = os.path.join(BASE_DATA_YEARLY, param, filename)
+    if not os.path.exists(tif_path):
+        abort(404, f"File not found: {filename}")
+    return send_file(tif_path, mimetype='image/tiff')
+
+@app.route('/api/yearly/stats')
+def get_yearly_stats():
+    """Return precomputed annual anomaly statistics."""
+    stats_path = os.path.join(BASE_DATA_YEARLY, "stats.json")
+    if not os.path.exists(stats_path):
+        abort(404, "Yearly statistics are not available")
+    return send_file(stats_path, mimetype='application/json')
 
 @app.route('/api/tif/<view>/<param>/<int:year>/<int:month>')
 def get_tif(view, param, year, month):

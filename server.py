@@ -14,7 +14,11 @@ Access:
 """
 
 import os
+from io import BytesIO
 import pandas as pd
+import numpy as np
+import rasterio
+from PIL import Image
 from flask import Flask, send_file, abort, send_from_directory, jsonify
 from flask_cors import CORS
 
@@ -75,10 +79,12 @@ def get_marine_zones():
     try:
         import geopandas as gpd
         
-        base = os.environ.get(
-            "VIIRS_MARINE_ZONES_DIR",
-            "/Volumes/New Volume/EEZ_MarineZone",
+        default_zones_dir = (
+            r"E:\SST_Chlor\EEZ_MarineZone"
+            if os.path.exists(r"E:\SST_Chlor\EEZ_MarineZone")
+            else "/Volumes/New Volume/EEZ_MarineZone"
         )
+        base = os.environ.get("VIIRS_MARINE_ZONES_DIR", default_zones_dir)
         
         # รวม shapefile ทั้งหมด (ยกเว้น country_Asean)
         shapefiles = [
@@ -92,10 +98,12 @@ def get_marine_zones():
         ]
         
         gdfs = []
-        for shp in shapefiles:
+        zone_ids = ["eez_overall", "upper_gulf", "rayong", "trat", "central_gulf", "lower_gulf", "andaman"]
+        for zone_id, shp in zip(zone_ids, shapefiles):
             path = os.path.join(base, shp)
             if os.path.exists(path):
                 gdf = gpd.read_file(path)
+                gdf["zone_id"] = zone_id
                 gdfs.append(gdf)
         
         if gdfs:
@@ -118,12 +126,66 @@ def get_yearly_raster(param, year):
     """Serve a yearly anomaly RGB GeoTIFF."""
     if param not in PARAMS:
         abort(404, f"Invalid param: {param}")
-    prefix = "SST" if param == "sst" else "Chlor_a"
     filename = f"{param}_Yearly_Anomaly_RGB_{year}.tif"
     tif_path = os.path.join(BASE_DATA_YEARLY, param, filename)
     if not os.path.exists(tif_path):
         abort(404, f"File not found: {filename}")
     return send_file(tif_path, mimetype='image/tiff')
+
+@app.route('/api/yearly/absolute/<param>/<int:year>')
+def get_yearly_absolute_raster(param, year):
+    """Serve a yearly absolute RGB GeoTIFF calculated from monthly rasters."""
+    if param not in PARAMS:
+        abort(404, f"Invalid param: {param}")
+    filename = f"{param}_Yearly_Absolute_RGB_{year}.tif"
+    tif_path = os.path.join(BASE_DATA_YEARLY, "absolute", param, filename)
+    if not os.path.exists(tif_path):
+        abort(404, f"File not found: {filename}")
+    return send_file(tif_path, mimetype='image/tiff')
+
+def yearly_raster_path(param, year, view):
+    if param not in PARAMS or view not in ('anomaly', 'absolute'):
+        abort(404, "Invalid yearly raster")
+    filename = f"{param}_Yearly_{'Absolute' if view == 'absolute' else 'Anomaly'}_RGB_{year}.tif"
+    folder = os.path.join(BASE_DATA_YEARLY, "absolute" if view == "absolute" else "", param)
+    path = os.path.join(folder, filename)
+    if not os.path.exists(path):
+        abort(404, f"File not found: {filename}")
+    return path
+
+@app.route('/api/yearly/image/<view>/<param>/<int:year>')
+def get_yearly_image(view, param, year):
+    """Serve a browser-native PNG preview of an annual RGB GeoTIFF."""
+    path = yearly_raster_path(param, year, view)
+    with rasterio.open(path) as src:
+        rgb = src.read((1, 2, 3))
+        data = rgb.transpose(1, 2, 0)
+        valid = np.any(rgb != 0, axis=0)
+        if not np.any(valid):
+            abort(404, "Raster contains no valid pixels")
+        alpha = np.where(valid, 255, 0).astype('uint8')
+        image = Image.fromarray(data, mode='RGB').convert('RGBA')
+        image.putalpha(Image.fromarray(alpha, mode='L'))
+        output = BytesIO()
+        image.save(output, format='PNG', optimize=True)
+        output.seek(0)
+    return send_file(output, mimetype='image/png')
+
+@app.route('/api/yearly/bounds/<view>/<param>/<int:year>')
+def get_yearly_bounds(view, param, year):
+    path = yearly_raster_path(param, year, view)
+    with rasterio.open(path) as src:
+        rgb = src.read((1, 2, 3))
+        valid = np.any(rgb != 0, axis=0)
+        if not np.any(valid):
+            abort(404, "Raster contains no valid pixels")
+        west, south, east, north = src.bounds
+        return jsonify({
+            "west": west,
+            "south": south,
+            "east": east,
+            "north": north
+        })
 
 @app.route('/api/yearly/stats')
 def get_yearly_stats():

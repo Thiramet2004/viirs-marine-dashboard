@@ -162,36 +162,6 @@ def main():
                 values = np.ma.masked_invalid(values)
                 monthly_arrays[param][year] = arrays
                 annual_arrays[param][year] = values
-                valid = np.ma.array(
-                    values,
-                    mask=np.ma.getmaskarray(values) | eez_mask,
-                ).compressed()
-                if not valid.size:
-                    continue
-                monthly_year_records = monthly_records[param].get(year, [])
-                record = {
-                    "mean": float(valid.mean()),
-                    "min": float(min(item["mean"] for item in monthly_year_records)),
-                    "max": float(max(item["mean"] for item in monthly_year_records)),
-                    "zones": {},
-                }
-                for zone_id, zone_mask in zone_masks.items():
-                    zone_valid = np.ma.array(values, mask=np.ma.getmaskarray(values) | zone_mask).compressed()
-                    if zone_valid.size:
-                        record["zones"][zone_id] = float(zone_valid.mean())
-                stats["absolute"][param][str(year)] = record
-                output = OUTPUT_DIR / "absolute" / param / f"{param}_Yearly_Absolute_RGB_{year}.tif"
-                output.parent.mkdir(parents=True, exist_ok=True)
-                profile = template.profile.copy()
-                profile.update(
-                    driver="GTiff",
-                    count=3,
-                    dtype="uint8",
-                    compress="lzw",
-                    crs=template.crs,
-                )
-                with rasterio.open(output, "w", **profile) as target:
-                    target.write(colorize(values, *ranges[param]))
     for param in ("sst", "chl"):
         available = monthly_records[param]
         stats["trend"]["absolute"][param] = {}
@@ -265,14 +235,6 @@ def main():
                     ]
                     for zone_id in ZONE_FILES
                 }
-                stats["trend"]["anomaly"][param][str(year)] = {
-                    "mean": float(np.mean(anomaly_values)) if anomaly_values.size else None,
-                    "zones": {
-                        zone_id: float(np.mean(values))
-                        for zone_id, values in anomaly_zone_values.items()
-                        if values
-                    },
-                }
                 anomaly_zones = {}
                 with rasterio.open(source_files(param, year)[0]) as template:
                     for zone_id, geometry in zones:
@@ -280,15 +242,36 @@ def main():
                         zone_values = np.ma.array(anomaly_array, mask=np.ma.getmaskarray(anomaly_array) | zone_mask).compressed()
                         if zone_values.size:
                             anomaly_zones[zone_id] = float(zone_values.mean())
+                record = {
+                    "mean": float(np.mean(anomaly_values)) if anomaly_values.size else None,
+                    "min": float(np.min(anomaly_values)) if anomaly_values.size else None,
+                    "max": float(np.max(anomaly_values)) if anomaly_values.size else None,
+                    "zones": anomaly_zones,
+                }
+                stats["absolute"][param][str(year)] = record
+                stats[param][str(year)] = record
+                stats["trend"]["absolute"][param][str(year)] = {
+                    "mean": record["mean"],
+                    "zones": {
+                        zone_id: float(np.mean(values))
+                        for zone_id, values in anomaly_zone_values.items()
+                        if values
+                    },
+                }
+                stats["trend"]["anomaly"][param][str(year)] = {
+                    "mean": record["mean"],
+                    "zones": {
+                        zone_id: float(np.mean(values))
+                        for zone_id, values in anomaly_zone_values.items()
+                        if values
+                    },
+                }
             else:
                 anomaly_values = np.array([])
                 anomaly_zones = {}
-            if anomaly_values.size:
-                stats[param][str(year)] = {
-                    "mean": float(np.mean(anomaly_values)),
-                    "min": float(np.min(anomaly_values)),
-                    "max": float(np.max(anomaly_values)),
-                    "zones": anomaly_zones,
+            if not anomaly_values.size:
+                stats["absolute"][param][str(year)] = {
+                    "mean": None, "min": None, "max": None, "zones": {}
                 }
         for year, arrays in monthly_arrays[param].items():
             anomaly = np.ma.mean(
@@ -296,6 +279,8 @@ def main():
                 axis=0,
             )
             anomaly = np.ma.masked_invalid(anomaly)
+            absolute_output = OUTPUT_DIR / "absolute" / param / f"{param}_Yearly_Absolute_RGB_{year}.tif"
+            absolute_output.parent.mkdir(parents=True, exist_ok=True)
             output = OUTPUT_DIR / param / f"{param}_Yearly_Anomaly_RGB_{year}.tif"
             output.parent.mkdir(parents=True, exist_ok=True)
             template_path = source_files(param, year)[0]
@@ -308,6 +293,8 @@ def main():
                     compress="lzw",
                     crs=template.crs,
                 )
+                with rasterio.open(absolute_output, "w", **profile) as target:
+                    target.write(colorize_anomaly(anomaly, param))
                 with rasterio.open(output, "w", **profile) as target:
                     target.write(colorize_anomaly(anomaly, param))
     stats_path.write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เธฃเธฒเธขเธเธฒเธเธเนเธญเธกเธนเธฅเธ”เธฒเธงเน€เธ—เธตเธขเธก VIIRS | SST & Chlorophyll-a</title>
+<title>รายงานข้อมูลดาวเทียม VIIRS | SST & Chlorophyll-a</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -58,16 +58,16 @@ body.embed-charts #mapSection{display:none}
 <div class="nav-brand">
 <div class="agency-logo"><span class="material-icons-outlined">public</span></div>
 <div class="agency-text">
-<span class="agency-name">เธฃเธฐเธเธเธ•เธดเธ”เธ•เธฒเธกเธชเธดเนเธเนเธงเธ”เธฅเนเธญเธกเธ—เธฒเธเธ—เธฐเน€เธฅ</span>
+<span class="agency-name">ระบบติดตามสิ่งแวดล้อมทางทะเล</span>
 <span class="agency-sub">Marine Environment Monitoring System</span>
 </div>
 </div>
 <div class="nav-links">
-<a href="yearly/" class="nav-link">เธฃเธฒเธขเธเธต</a>
-<a href="#methodology" class="nav-link">เธฃเธฐเน€เธเธตเธขเธเธงเธดเธเธต</a>
-<a href="#results" class="nav-link">เธเธฅเธเธฒเธฃเธงเธดเน€เธเธฃเธฒเธฐเธซเน</a>
-<a href="#charts" class="nav-link">เธเธฃเธฒเธ</a>
-<a href="#references" class="nav-link">เนเธซเธฅเนเธเธเนเธญเธกเธนเธฅ</a>
+<a href="yearly/" class="nav-link">รายปี</a>
+<a href="#methodology" class="nav-link">ระเบียบวิธี</a>
+<a href="#results" class="nav-link">ผลการวิเคราะห์</a>
+<a href="#charts" class="nav-link">กราฟ</a>
+<a href="#references" class="nav-link">แหล่งข้อมูล</a>
 </div>
 </div>
 </nav>
@@ -75,52 +75,52 @@ body.embed-charts #mapSection{display:none}
 <div class="report-header">
 <div class="report-title-block">
 <div class="report-badge">Technical Report</div>
-<h1>เธเนเธญเธกเธนเธฅเธ”เธฒเธงเน€เธ—เธตเธขเธก VIIRS เธชเธณเธซเธฃเธฑเธเธ•เธดเธ”เธ•เธฒเธกเธชเธดเนเธเนเธงเธ”เธฅเนเธญเธกเธ—เธฒเธเธ—เธฐเน€เธฅ</h1>
-<h2>เธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ (SST) เนเธฅเธฐ เธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ (Chlorophyll-a)</h2>
+<h1>ข้อมูลดาวเทียม VIIRS สำหรับติดตามสิ่งแวดล้อมทางทะเล</h1>
+<h2>อุณหภูมิผิวน้ำทะเล (SST) และ คลอโรฟิลล์-เอ (Chlorophyll-a)</h2>
 <p class="report-meta">
 <span><span class="material-icons-outlined">satellite_alt</span> Suomi NPP / NOAA-20 VIIRS</span>
-<span><span class="material-icons-outlined">date_range</span> เธกเธเธฃเธฒเธเธก 2561 โ€“ เธเธฃเธเธเธฒเธเธก 2569</span>
+<span><span class="material-icons-outlined">date_range</span> มกราคม 2561 – กรกฎาคม 2569</span>
 <span><span class="material-icons-outlined">layers</span> Level-3 Monthly Composite, 750 m</span>
 </p>
 </div>
 <div class="report-info-card">
-<div class="info-row"><span class="info-label">Climatology</span><span class="info-value">2018โ€“2025 (8-yr)</span></div>
+<div class="info-row"><span class="info-label">Climatology</span><span class="info-value">2018–2025 (8-yr)</span></div>
 <div class="info-row"><span class="info-label">Processing</span><span class="info-value">Direct Raster Statistics</span></div>
-<div class="info-row"><span class="info-label">เธเธทเนเธเธ—เธตเนเธจเธถเธเธฉเธฒ</span><span class="info-value">เธญเนเธฒเธงเนเธ—เธข & เธญเธฑเธเธ”เธฒเธกเธฑเธ</span></div>
+<div class="info-row"><span class="info-label">พื้นที่ศึกษา</span><span class="info-value">อ่าวไทย & อันดามัน</span></div>
 </div>
 </div>
 
 <section class="section" id="methodology">
-<h3 class="section-title"><span class="section-num">1</span> เธฃเธฐเน€เธเธตเธขเธเธงเธดเธเธต (Methodology)</h3>
+<h3 class="section-title"><span class="section-num">1</span> ระเบียบวิธี (Methodology)</h3>
 <div class="method-grid">
-<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">satellite</span></div><h4>Data Acquisition</h4><p>VIIRS sensor เธเธ Suomi NPP เธเธงเธฒเธกเธฅเธฐเน€เธญเธตเธขเธ” 750 m เธเธฃเธฐเธกเธงเธฅเธเธฅเน€เธเนเธ Monthly Composite (Level-3)</p></div>
-<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">analytics</span></div><h4>Parameters</h4><p><strong>SST</strong> (ยฐC): เธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ | <strong>Chl-a</strong> (mg/mยณ): เธเธงเธฒเธกเน€เธเนเธกเธเนเธเธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ</p></div>
-<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">map</span></div><h4>Zonal Statistics</h4><p>6 เนเธเธเธ—เธฐเน€เธฅ: เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธ, เธญเนเธฒเธงเธฃเธฐเธขเธญเธ, เธญเนเธฒเธงเธ•เธฃเธฒเธ”, เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธฅเธฒเธ, เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธฅเนเธฒเธ, เธ—เธฐเน€เธฅเธญเธฑเธเธ”เธฒเธกเธฑเธ</p></div>
+<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">satellite</span></div><h4>Data Acquisition</h4><p>VIIRS sensor บน Suomi NPP ความละเอียด 750 m ประมวลผลเป็น Monthly Composite (Level-3)</p></div>
+<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">analytics</span></div><h4>Parameters</h4><p><strong>SST</strong> (°C): อุณหภูมิผิวน้ำทะเล | <strong>Chl-a</strong> (mg/m³): ความเข้มข้นคลอโรฟิลล์-เอ</p></div>
+<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">map</span></div><h4>Zonal Statistics</h4><p>6 โซนทะเล: อ่าวไทยตอนบน, อ่าวระยอง, อ่าวตราด, อ่าวไทยตอนกลาง, อ่าวไทยตอนล่าง, ทะเลอันดามัน</p></div>
 </div>
 </section>
 
 <section class="section" id="results">
-<h3 class="section-title"><span class="section-num">2</span> เธเธฅเธเธฒเธฃเธงเธดเน€เธเธฃเธฒเธฐเธซเน (Results)</h3>
+<h3 class="section-title"><span class="section-num">2</span> ผลการวิเคราะห์ (Results)</h3>
 <div class="param-tabs">
-<button class="param-tab active" data-param="sst"><span class="material-icons-outlined">thermostat</span> SST (เธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ)</button>
-<button class="param-tab" data-param="chl"><span class="material-icons-outlined">grass</span> Chlorophyll-a (เธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ)</button>
+<button class="param-tab active" data-param="sst"><span class="material-icons-outlined">thermostat</span> SST (อุณหภูมิผิวน้ำทะเล)</button>
+<button class="param-tab" data-param="chl"><span class="material-icons-outlined">grass</span> Chlorophyll-a (คลอโรฟิลล์-เอ)</button>
 </div>
 <div class="view-tabs">
-<button class="view-tab active" data-view="absolute"><span class="material-icons-outlined">straighten</span> เธเนเธฒเธชเธฑเธกเธเธนเธฃเธ“เน (Absolute)</button>
-<button class="view-tab" data-view="anomaly"><span class="material-icons-outlined">swap_vert</span> เธเนเธฒเธเธดเธ”เธเธเธ•เธด (Anomaly)</button>
+<button class="view-tab active" data-view="absolute"><span class="material-icons-outlined">straighten</span> ค่าสัมบูรณ์ (Absolute)</button>
+<button class="view-tab" data-view="anomaly"><span class="material-icons-outlined">swap_vert</span> ค่าผิดปกติ (Anomaly)</button>
 </div>
 <div class="controls-panel">
-<div class="control-item"><label for="zoneSelect">เธเธทเนเธเธ—เธตเน:</label>
+<div class="control-item"><label for="zoneSelect">พื้นที่:</label>
 <select id="zoneSelect">
-<option value="overall">เธ เธฒเธเธฃเธงเธก (Overall)</option>
-<option value="upper_gulf">เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธ</option>
-<option value="rayong">เธญเนเธฒเธงเธฃเธฐเธขเธญเธ</option>
-<option value="trat">เธญเนเธฒเธงเธ•เธฃเธฒเธ”</option>
-<option value="central_gulf">เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธฅเธฒเธ</option>
-<option value="lower_gulf">เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธฅเนเธฒเธ</option>
-<option value="andaman">เธ—เธฐเน€เธฅเธญเธฑเธเธ”เธฒเธกเธฑเธ</option>
+<option value="overall">ภาพรวม (Overall)</option>
+<option value="upper_gulf">อ่าวไทยตอนบน</option>
+<option value="rayong">อ่าวระยอง</option>
+<option value="trat">อ่าวตราด</option>
+<option value="central_gulf">อ่าวไทยตอนกลาง</option>
+<option value="lower_gulf">อ่าวไทยตอนล่าง</option>
+<option value="andaman">ทะเลอันดามัน</option>
 </select></div>
-<div class="control-item"><label for="yearSelect">เธเธต:</label>
+<div class="control-item"><label for="yearSelect">ปี:</label>
 <select id="yearSelect">
 <option value="2026">2569 (2026)</option><option value="2025">2568 (2025)</option><option value="2024">2567 (2024)</option>
 <option value="2023">2566 (2023)</option><option value="2022">2565 (2022)</option>
@@ -133,10 +133,10 @@ body.embed-charts #mapSection{display:none}
 
 <!-- Stats -->
 <div class="stats-row">
-<div class="stat-card"><div class="stat-icon"><span class="material-icons-outlined">thermostat</span></div><div class="stat-body"><div class="stat-value" id="kpiVal1">โ€”</div><div class="stat-label" id="kpiLab1">Mean (Latest Month)</div></div></div>
-<div class="stat-card"><div class="stat-icon clim"><span class="material-icons-outlined">equalizer</span></div><div class="stat-body"><div class="stat-value" id="kpiVal2">โ€”</div><div class="stat-label">Climatology Mean</div></div></div>
-<div class="stat-card"><div class="stat-icon anom"><span class="material-icons-outlined">swap_vert</span></div><div class="stat-body"><div class="stat-value" id="kpiVal3">โ€”</div><div class="stat-label" id="kpiLab3">Anomaly</div></div></div>
-<div class="stat-card"><div class="stat-icon hot"><span class="material-icons-outlined">whatshot</span></div><div class="stat-body"><div class="stat-value" id="kpiVal4">โ€”</div><div class="stat-label" id="kpiLab4">Maximum</div></div></div>
+<div class="stat-card"><div class="stat-icon"><span class="material-icons-outlined">thermostat</span></div><div class="stat-body"><div class="stat-value" id="kpiVal1">—</div><div class="stat-label" id="kpiLab1">Mean (Latest Month)</div></div></div>
+<div class="stat-card"><div class="stat-icon clim"><span class="material-icons-outlined">equalizer</span></div><div class="stat-body"><div class="stat-value" id="kpiVal2">—</div><div class="stat-label">Climatology Mean</div></div></div>
+<div class="stat-card"><div class="stat-icon anom"><span class="material-icons-outlined">swap_vert</span></div><div class="stat-body"><div class="stat-value" id="kpiVal3">—</div><div class="stat-label" id="kpiLab3">Anomaly</div></div></div>
+<div class="stat-card"><div class="stat-icon hot"><span class="material-icons-outlined">whatshot</span></div><div class="stat-body"><div class="stat-value" id="kpiVal4">—</div><div class="stat-label" id="kpiLab4">Maximum</div></div></div>
 </div>
 
 
@@ -144,30 +144,30 @@ body.embed-charts #mapSection{display:none}
 <div class="chart-panel chart-wide map-panel" id="mapSection">
 <div class="chart-header">
   <div class="chart-title">
-    <span class="fig-num">Fig. 1</span> <span id="mapTitle">เธ เธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธก Anomaly เนเธเธ Interactive (Raster Map)</span>
+    <span class="fig-num">Fig. 1</span> <span id="mapTitle">ภาพดาวเทียม Anomaly แบบ Interactive (Raster Map)</span>
     <span class="map-param-badge" id="mapParamBadge">Chl-a Anomaly</span>
   </div>
-  <div class="chart-caption" id="mapCaption">เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒ Anomaly เธเธญเธเธเธธเธ”เธเธฑเนเธ ยท เธชเธตเธเนเธณเน€เธเธดเธ = เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด ยท เธชเธตเนเธ”เธ = เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด ยท เธเนเธญเธกเธนเธฅเธเธฒเธ VIIRS SNAP</div>
+  <div class="chart-caption" id="mapCaption">คลิกบนแผนที่เพื่อดูค่า Anomaly ของจุดนั้น · สีน้ำเงิน = ต่ำกว่าปกติ · สีแดง = สูงกว่าปกติ · ข้อมูลจาก VIIRS SNAP</div>
 </div>
 <div class="map-controls-bar">
   <div class="map-ctrl-group">
-    <label>เน€เธ”เธทเธญเธ:</label>
+    <label>เดือน:</label>
     <input type="range" id="mapMonthSlider" min="1" max="12" value="1" class="month-slider">
-    <span class="map-month-display" id="mapMonthDisplay">เธกเธเธฃเธฒเธเธก</span>
+    <span class="map-month-display" id="mapMonthDisplay">มกราคม</span>
   </div>
   <div class="map-nav-btns">
-    <button class="map-nav-btn" id="mapPrev" title="เน€เธ”เธทเธญเธเธเนเธญเธเธซเธเนเธฒ"><span class="material-icons-outlined">chevron_left</span></button>
-    <button class="map-nav-btn" id="mapNext" title="เน€เธ”เธทเธญเธเธ–เธฑเธ”เนเธ"><span class="material-icons-outlined">chevron_right</span></button>
+    <button class="map-nav-btn" id="mapPrev" title="เดือนก่อนหน้า"><span class="material-icons-outlined">chevron_left</span></button>
+    <button class="map-nav-btn" id="mapNext" title="เดือนถัดไป"><span class="material-icons-outlined">chevron_right</span></button>
   </div>
 </div>
 <div class="map-body">
   <div id="leafletMap"></div>
-  <div class="map-loading" id="mapLoading"><span>เธเธณเธฅเธฑเธเนเธซเธฅเธ” GeoTIFF...</span></div>
+  <div class="map-loading" id="mapLoading"><span>กำลังโหลด GeoTIFF...</span></div>
   <div class="click-info" id="clickInfo">
-    <div class="click-info-title">๐“ Pixel Info</div>
-    <div class="click-info-row"><span class="click-info-label">Lat:</span><span class="click-info-value" id="clickLat">โ€”</span></div>
-    <div class="click-info-row"><span class="click-info-label">Lon:</span><span class="click-info-value" id="clickLon">โ€”</span></div>
-    <div class="click-info-row"><span class="click-info-label">Value:</span><span class="click-info-value anomaly" id="clickValue">โ€”</span></div>
+    <div class="click-info-title">📍 Pixel Info</div>
+    <div class="click-info-row"><span class="click-info-label">Lat:</span><span class="click-info-value" id="clickLat">—</span></div>
+    <div class="click-info-row"><span class="click-info-label">Lon:</span><span class="click-info-value" id="clickLon">—</span></div>
+    <div class="click-info-row"><span class="click-info-label">Value:</span><span class="click-info-value anomaly" id="clickValue">—</span></div>
   </div>
   <div class="map-legend">
     <div class="legend-title" id="legendTitle">Chl-a Anomaly</div>
@@ -176,71 +176,71 @@ body.embed-charts #mapSection{display:none}
   </div>
 </div>
 <div class="chart-desc">
-  <strong>เธงเธดเธเธตเนเธเน:</strong> เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒ Anomaly เธเธญเธเธเธธเธ”เธเธฑเนเธ เน เธเธฃเนเธญเธกเธเธดเธเธฑเธ” Lat/Lon ยท
-  เนเธเน slider เธซเธฃเธทเธญเธเธธเนเธก โ—€ โ–ถ เน€เธเธทเนเธญเน€เธเธฅเธตเนเธขเธเน€เธ”เธทเธญเธ ยท เธเธตเนเธฅเธฐเธเธฒเธฃเธฒเธกเธดเน€เธ•เธญเธฃเนเธ•เธฒเธกเธ•เธฑเธงเธเธฃเธญเธเธ”เนเธฒเธเธเธ ยท
-  เธเนเธญเธกเธนเธฅ GeoTIFF เนเธซเธฅเธ”เธเธฒเธ GitHub เนเธ”เธขเธ•เธฃเธ (เนเธกเนเธ•เนเธญเธเธฃเธฑเธ local server)
+  <strong>วิธีใช้:</strong> คลิกบนแผนที่เพื่อดูค่า Anomaly ของจุดนั้น ๆ พร้อมพิกัด Lat/Lon ·
+  ใช้ slider หรือปุ่ม ◀ ▶ เพื่อเปลี่ยนเดือน · ปีและพารามิเตอร์ตามตัวกรองด้านบน ·
+  ข้อมูล GeoTIFF โหลดจาก GitHub โดยตรง (ไม่ต้องรัน local server)
 </div>
 </div>
 
 <!-- Fig 1: Main overlay -->
 <div class="chart-panel chart-full">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 2</span> เธเธฒเธฃเน€เธเธฅเธตเนเธขเธเนเธเธฅเธเธเนเธฒเน€เธเธฅเธตเนเธขเธฃเธฒเธขเน€เธ”เธทเธญเธ (Monthly Mean Time Series)</div>
-<div class="chart-caption">เน€เธชเนเธเธเธฃเธฐเธชเธตเน€เธเนเธก = เธเนเธฒ Climatology เน€เธเธฅเธตเนเธข 8 เธเธต | เน€เธชเนเธเธชเธตเน€เธเนเธกเน€เธ”เนเธเธเธฑเธ” = เธเธตเธ—เธตเนเน€เธฅเธทเธญเธ | เน€เธชเนเธเธเธฒเธ = เธเธตเธญเธทเนเธ เน เธชเธณเธซเธฃเธฑเธเน€เธเธฃเธตเธขเธเน€เธ—เธตเธขเธ</div></div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 2</span> การเปลี่ยนแปลงค่าเฉลี่ยรายเดือน (Monthly Mean Time Series)</div>
+<div class="chart-caption">เส้นประสีเข้ม = ค่า Climatology เฉลี่ย 8 ปี | เส้นสีเข้มเด่นชัด = ปีที่เลือก | เส้นจาง = ปีอื่น ๆ สำหรับเปรียบเทียบ</div></div>
 <div class="chart-body chart-body-lg"><canvas id="chartMain"></canvas></div>
-<div class="chart-desc"><strong>เธงเธดเธเธตเธญเนเธฒเธ:</strong> เนเธเธเธ•เธฑเนเธ (Y) = เธเนเธฒเธ—เธตเนเธงเธฑเธ”เนเธ”เน (เธซเธเนเธงเธขเธ•เธฒเธกเธเธฒเธฃเธฒเธกเธดเน€เธ•เธญเธฃเนเธ—เธตเนเน€เธฅเธทเธญเธ), เนเธเธเธเธญเธ (X) = เน€เธ”เธทเธญเธ เธก.เธ.โ€“เธ.เธ. เธซเธฒเธเน€เธชเนเธเธเธญเธเธเธตเนเธ”เธญเธขเธนเนเน€เธซเธเธทเธญเน€เธชเนเธ Climatology เธซเธกเธฒเธขเธ–เธถเธเธเนเธฒเธชเธนเธเธเธงเนเธฒเธเธเธ•เธดเนเธเน€เธ”เธทเธญเธเธเธฑเนเธ</div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ค่าที่วัดได้ (หน่วยตามพารามิเตอร์ที่เลือก), แกนนอน (X) = เดือน ม.ค.–ธ.ค. หากเส้นของปีใดอยู่เหนือเส้น Climatology หมายถึงค่าสูงกว่าปกติในเดือนนั้น</div>
 </div>
 
 <!-- Fig 2, 3 & 4 -->
 <div class="chart-grid" id="charts">
 <div class="chart-panel chart-wide" style="overflow:visible">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> เธเนเธฒเน€เธเธตเนเธขเธเน€เธเธเธฃเธฒเธขเน€เธ”เธทเธญเธ (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
-<div class="chart-caption">เนเธ—เนเธเธชเธตเนเธ”เธ = เธเนเธฒเธชเธนเธเธเธงเนเธฒเธเธเธ•เธด (positive) | เนเธ—เนเธเธชเธตเธเนเธฒ = เธเนเธฒเธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด (negative) | เน€เธชเนเธเธเธฃเธฐเธเธฅเธฒเธ = เธเนเธฒเน€เธเนเธเธจเธนเธเธขเน (เธเธเธ•เธด)</div></div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 3</span> ค่าเบี่ยงเบนรายเดือน (Monthly Anomaly) <span class="year-badge" id="anomBadge">2025</span></div>
+<div class="chart-caption">แท่งสีแดง = ค่าสูงกว่าปกติ (positive) | แท่งสีฟ้า = ค่าต่ำกว่าปกติ (negative) | เส้นประกลาง = ค่าเป็นศูนย์ (ปกติ)</div></div>
 <div id="anomalyBarChart" style="padding:4px 0 8px 0;"></div>
-<div class="chart-desc"><strong>เธงเธดเธเธตเธญเนเธฒเธ:</strong> เนเธเธเธ•เธฑเนเธ (Y) = เน€เธ”เธทเธญเธ เธก.เธ.โ€“เธ.เธ., เนเธเธเธเธญเธ (X) = เธเธเธฒเธ”เธเนเธฒเน€เธเธตเนเธขเธเน€เธเธ (Anomaly) เนเธ—เนเธเธขเธฒเธงเนเธเธ—เธฒเธเธเธงเธฒ = เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด เนเธ—เนเธเธขเธฒเธงเนเธเธ—เธฒเธเธเนเธฒเธข = เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด</div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = เดือน ม.ค.–ธ.ค., แกนนอน (X) = ขนาดค่าเบี่ยงเบน (Anomaly) แท่งยาวไปทางขวา = สูงกว่าปกติ แท่งยาวไปทางซ้าย = ต่ำกว่าปกติ</div>
 </div>
 
 <div class="chart-panel chart-wide">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> เนเธเธงเนเธเนเธกเธฃเธฒเธขเธเธต (Inter-annual Trend)</div>
-<div class="chart-caption">เธเธธเธ”เธชเธตเธเนเธณเน€เธเธดเธ = เธเนเธฒเน€เธเธฅเธตเนเธขเธฃเธฒเธขเธเธต | เน€เธชเนเธเธเธฃเธฐเธชเธตเนเธ”เธ = เน€เธชเนเธเนเธเธงเนเธเนเธกเน€เธเธดเธเน€เธชเนเธ (Linear Regression)</div></div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> แนวโน้มรายปี (Inter-annual Trend)</div>
+<div class="chart-caption">จุดสีน้ำเงิน = ค่าเฉลี่ยรายปี | เส้นประสีแดง = เส้นแนวโน้มเชิงเส้น (Linear Regression)</div></div>
 <div class="chart-body"><canvas id="chartTrend"></canvas></div>
-<div class="chart-desc"><strong>เธงเธดเธเธตเธญเนเธฒเธ:</strong> เนเธเธเธ•เธฑเนเธ (Y) = เธเนเธฒเน€เธเธฅเธตเนเธขเธ—เธฑเนเธเธเธต, เนเธเธเธเธญเธ (X) = เธเธต เธ.เธจ. (เธ.เธจ.) เธเนเธฒ slope เนเธ legend เธเธญเธเธญเธฑเธ•เธฃเธฒเน€เธเธฅเธตเนเธขเธเนเธเธฅเธเธ•เนเธญเธ—เธจเธงเธฃเธฃเธฉ (slope เธเธงเธ = เน€เธเธดเนเธกเธเธถเนเธ, slope เธฅเธ = เธฅเธ”เธฅเธ)</div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ค่าเฉลี่ยทั้งปี, แกนนอน (X) = ปี ค.ศ. (พ.ศ.) ค่า slope ใน legend บอกอัตราเปลี่ยนแปลงต่อทศวรรษ (slope บวก = เพิ่มขึ้น, slope ลบ = ลดลง)</div>
 </div>
 
 <div class="chart-panel chart-wide">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> เน€เธเธฃเธตเธขเธเน€เธ—เธตเธขเธ Anomaly: SST เธเธฑเธ Chl-a (Inverse Relationship)</div>
-<div class="chart-caption">เน€เธชเนเธเธเนเธณเน€เธเธดเธ = SST Anomaly (เนเธเธเธเนเธฒเธข) | เน€เธชเนเธเน€เธเธตเธขเธง = Chl-a Anomaly (เนเธเธเธเธงเธฒ, เธเธฅเธฑเธเธ”เนเธฒเธ) | เน€เธกเธทเนเธญเน€เธชเนเธเธ—เธฑเนเธเธชเธญเธเนเธเนเธเธ—เธดเธจเธ—เธฒเธเน€เธ”เธตเธขเธงเธเธฑเธ = เธชเธฑเธกเธเธฑเธเธเนเธฅเธ</div></div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
+<div class="chart-caption">เส้นน้ำเงิน = SST Anomaly (แกนซ้าย) | เส้นเขียว = Chl-a Anomaly (แกนขวา, กลับด้าน) | เมื่อเส้นทั้งสองไปในทิศทางเดียวกัน = สัมพันธ์ลบ</div></div>
 <div class="chart-body"><canvas id="chartDual"></canvas></div>
-<div class="chart-desc"><strong>Insight:</strong> เธเธฃเธฒเธเธเธตเนเนเธชเธ”เธ Anomaly (เธเนเธฒเน€เธเธตเนเธขเธเน€เธเธเธเธฒเธเธเธเธ•เธด) เธเธญเธ SST เนเธฅเธฐ Chl-a เธเนเธญเธเธเธฑเธ เนเธ”เธข <u>เนเธเธเธเธงเธฒ (Chl-a) เธ–เธนเธเธเธฅเธฑเธเธ”เนเธฒเธ</u> เธ”เธฑเธเธเธฑเนเธเธ–เนเธฒเน€เธชเนเธเธ—เธฑเนเธเธชเธญเธเน€เธเธฅเธทเนเธญเธเนเธซเธงเนเธเธ”เนเธงเธขเธเธฑเธ = เธขเธทเธเธขเธฑเธเธงเนเธฒเน€เธกเธทเนเธญ SST เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด Chl-a เธเธฐเธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด (inverse relationship) เธขเธดเนเธเน€เธชเนเธเธเนเธญเธเธ—เธฑเธเธเธฑเธเธกเธฒเธเธขเธดเนเธเธชเธฑเธกเธเธฑเธเธเนเนเธเนเธ</div>
+<div class="chart-desc"><strong>Insight:</strong> กราฟนี้แสดง Anomaly (ค่าเบี่ยงเบนจากปกติ) ของ SST และ Chl-a ซ้อนกัน โดย <u>แกนขวา (Chl-a) ถูกกลับด้าน</u> ดังนั้นถ้าเส้นทั้งสองเคลื่อนไหวไปด้วยกัน = ยืนยันว่าเมื่อ SST สูงกว่าปกติ Chl-a จะต่ำกว่าปกติ (inverse relationship) ยิ่งเส้นซ้อนทับกันมากยิ่งสัมพันธ์แน่น</div>
 </div>
 
 
 
 <!-- References + Dynamic Summary -->
 <section class="section" id="references" style="grid-column:1/-1">
-<h3 class="section-title"><span class="section-num">3</span> เนเธซเธฅเนเธเธเนเธญเธกเธนเธฅเนเธฅเธฐเธเนเธญเธเธณเธเธฑเธ”</h3>
+<h3 class="section-title"><span class="section-num">3</span> แหล่งข้อมูลและข้อจำกัด</h3>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch">
 
-<!-- เธ•เธฒเธฃเธฒเธเธเนเธฒเธข -->
+<!-- ตารางซ้าย -->
 <div class="ref-content" style="height:100%;box-sizing:border-box">
-<table class="ref-table"><thead><tr><th>เธฃเธฒเธขเธเธฒเธฃ</th><th>เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”</th></tr></thead><tbody>
+<table class="ref-table"><thead><tr><th>รายการ</th><th>รายละเอียด</th></tr></thead><tbody>
 <tr><td>Sensor</td><td>VIIRS (Visible Infrared Imaging Radiometer Suite)</td></tr>
 <tr><td>Platform</td><td>Suomi NPP / NOAA-20</td></tr>
 <tr><td>SST Product</td><td>Level-3 Monthly Composite</td></tr>
 <tr><td>Chl-a Product</td><td>Chlor_a VIIRS Monthly Composite</td></tr>
-<tr><td>Climatology</td><td>8-year mean (2018โ€“2025) per month</td></tr>
-<tr><td>Anomaly</td><td>Observed โ’ Climatology</td></tr>
+<tr><td>Climatology</td><td>8-year mean (2018–2025) per month</td></tr>
+<tr><td>Anomaly</td><td>Observed − Climatology</td></tr>
 <tr><td>Limitation</td><td>Cloud-masked pixels excluded; coastal land contamination possible</td></tr>
 </tbody></table>
 </div>
 
-<!-- Summary box เธเธงเธฒ -->
+<!-- Summary box ขวา -->
 <div id="dynamicSummary" style="background:var(--accent);border-radius:var(--r);padding:24px 28px;color:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px;">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
     <div>
-      <div style="font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:5px;">เธชเธฃเธธเธเธ เธฒเธเธฃเธงเธก</div>
-      <div id="summaryTitle" style="font-size:1.05rem;font-weight:700;color:#fff;line-height:1.45;">โ€”</div>
+      <div style="font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:5px;">สรุปภาพรวม</div>
+      <div id="summaryTitle" style="font-size:1.05rem;font-weight:700;color:#fff;line-height:1.45;">—</div>
     </div>
-    <div id="summaryBadge" style="flex-shrink:0;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.15);border-radius:5px;padding:5px 12px;white-space:nowrap;margin-top:2px;">โ€”</div>
+    <div id="summaryBadge" style="flex-shrink:0;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.15);border-radius:5px;padding:5px 12px;white-space:nowrap;margin-top:2px;">—</div>
   </div>
   <div id="summaryStats" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;"></div>
   <div id="summaryInsight" style="font-size:.78rem;line-height:1.75;color:rgba(255,255,255,.85);border-top:1px solid rgba(255,255,255,.15);padding-top:14px;"></div>
@@ -254,10 +254,10 @@ body.embed-charts #mapSection{display:none}
 <footer class="report-footer">
 <div class="footer-inner">
   <div class="footer-left">
-    <p class="footer-org">เธฃเธฐเธเธเธ•เธดเธ”เธ•เธฒเธกเธชเธดเนเธเนเธงเธ”เธฅเนเธญเธกเธ—เธฒเธเธ—เธฐเน€เธฅเธ”เนเธงเธขเน€เธ—เธเนเธเนเธฅเธขเธตเธ เธนเธกเธดเธชเธฒเธฃเธชเธเน€เธ—เธจ</p>
+    <p class="footer-org">ระบบติดตามสิ่งแวดล้อมทางทะเลด้วยเทคโนโลยีภูมิสารสนเทศ</p>
     <p class="footer-sub">Marine Environment Monitoring using Geoinformatics</p>
   </div>
-  <div class="footer-right"><p>VIIRS SNPP/NOAA-20 ยท Level-3 Monthly ยท v3.0</p></div>
+  <div class="footer-right"><p>VIIRS SNPP/NOAA-20 · Level-3 Monthly · v3.0</p></div>
 </div>
 </footer>
 
@@ -374,8 +374,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 </style>
 
 <script>
-const months=['เธก.เธ.','เธ.เธ.','เธกเธต.เธ.','เน€เธก.เธข.','เธ.เธ.','เธกเธด.เธข.','เธ.เธ.','เธช.เธ.','เธ.เธข.','เธ•.เธ.','เธ.เธข.','เธ.เธ.'];
-const monthsFull=['เธกเธเธฃเธฒเธเธก','เธเธธเธกเธ เธฒเธเธฑเธเธเน','เธกเธตเธเธฒเธเธก','เน€เธกเธฉเธฒเธขเธ','เธเธคเธฉเธ เธฒเธเธก','เธกเธดเธ–เธธเธเธฒเธขเธ','เธเธฃเธเธเธฒเธเธก','เธชเธดเธเธซเธฒเธเธก','เธเธฑเธเธขเธฒเธขเธ','เธ•เธธเธฅเธฒเธเธก','เธเธคเธจเธเธดเธเธฒเธขเธ','เธเธฑเธเธงเธฒเธเธก'];
+const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const monthsFull=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const years=[2018,2019,2020,2021,2022,2023,2024,2025,2026];
 
 const sstClimatology={min:[27.23,27.44,28.68,30.59,30.46,29.53,29.07,29.26,29.24,29.31,29.14,28.21],max:[30.2,30.82,32.44,33.79,34.18,34.55,33.77,33.62,32.93,31.65,31.01,30.47],mean:[28.61,29.11,30.05,31.26,31.6,30.83,30.49,30.31,30.35,30.21,29.85,29.27]};
@@ -397,8 +397,8 @@ let currentParam='sst', currentView='absolute';
 const yc={'2018':{l:'rgba(100,160,200,0.3)',f:'rgba(100,160,200,0.04)'},'2019':{l:'rgba(120,180,160,0.3)',f:'rgba(120,180,160,0.04)'},'2020':{l:'rgba(160,180,120,0.3)',f:'rgba(160,180,120,0.04)'},'2021':{l:'rgba(180,160,100,0.3)',f:'rgba(180,160,100,0.04)'},'2022':{l:'rgba(200,140,100,0.3)',f:'rgba(200,140,100,0.04)'},'2023':{l:'rgba(180,120,160,0.3)',f:'rgba(180,120,160,0.04)'},'2024':{l:'rgba(37,99,235,0.6)',f:'rgba(37,99,235,0.06)'},'2025':{l:'rgba(220,38,38,1)',f:'rgba(220,38,38,0.08)'},'2026':{l:'rgba(168,85,247,1)',f:'rgba(168,85,247,0.08)'}};
 let c1,c2,c3,c4;
 function D(){
-  if(currentParam==='sst')return{clim:sstClimatology,mo:sstMonthly,zone:sstZone,an:sstAnomaly,za:sstZoneAnom,u:'ยฐC',n:'SST',nTh:'เธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ'};
-  return{clim:chlClimatology,mo:chlMonthly,zone:chlZone,an:chlAnomaly,za:chlZoneAnom,u:'mg/m\u00B3',n:'Chl-a',nTh:'เธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ'};
+  if(currentParam==='sst')return{clim:sstClimatology,mo:sstMonthly,zone:sstZone,an:sstAnomaly,za:sstZoneAnom,u:'°C',n:'SST',nTh:'อุณหภูมิผิวน้ำทะเล'};
+  return{clim:chlClimatology,mo:chlMonthly,zone:chlZone,an:chlAnomaly,za:chlZoneAnom,u:'mg/m\u00B3',n:'Chl-a',nTh:'คลอโรฟิลล์-เอ'};
 }
 function gM(z,y,d){return z==='overall'?d.mo[y]:d.zone[z][y];}
 function gA(z,y,d){return z==='overall'?d.an[y]:d.za[z][y];}
@@ -410,11 +410,11 @@ function renderMain(zone,yr){
   if(currentView==='absolute'){
     years.forEach(y=>{const data=gM(zone,String(y),d),f=String(y)===yr;
       ds.push({label:String(y),data,borderColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):yc[y].l,backgroundColor:f?yc[y].f.replace(/[\d.]+\)$/,'0.12)'):yc[y].f,borderWidth:f?2.5:1,pointRadius:f?4:0,pointBackgroundColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):undefined,fill:f,tension:.4,order:f?0:1});});
-    ds.push({label:'Climatology (เน€เธเธฅเธตเนเธข 8 เธเธต)',data:d.clim.mean,borderColor:'#1e293b',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:.4,order:-1});
+    ds.push({label:'Climatology (เฉลี่ย 8 ปี)',data:d.clim.mean,borderColor:'#1e293b',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:.4,order:-1});
   } else {
     years.forEach(y=>{const data=gA(zone,String(y),d),f=String(y)===yr;
       ds.push({label:String(y),data,borderColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):yc[y].l,backgroundColor:f?yc[y].f.replace(/[\d.]+\)$/,'0.12)'):yc[y].f,borderWidth:f?2.5:1,pointRadius:f?4:0,fill:f,tension:.4,order:f?0:1});});
-    ds.push({label:'เน€เธชเนเธเธเธฒเธ (0)',data:Array(12).fill(0),borderColor:'#1e293b',borderWidth:1.5,borderDash:[4,2],pointRadius:0,fill:false,tension:0,order:-1});
+    ds.push({label:'เส้นฐาน (0)',data:Array(12).fill(0),borderColor:'#1e293b',borderWidth:1.5,borderDash:[4,2],pointRadius:0,fill:false,tension:0,order:-1});
   }
   const yLab=currentView==='absolute'?d.n+' ('+d.u+')':d.n+' Anomaly ('+d.u+')';
   c1=new Chart(ctx,{type:'line',data:{labels:months,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,padding:10,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y?.toFixed(currentParam==='chl'?3:2)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}}); 
@@ -469,7 +469,7 @@ function renderHeatmap(zone){
 
   let html='<thead><tr><th></th>';
   months.forEach(m=>{html+='<th>'+m+'</th>';});
-  html+='<th style="background:#e0f2fe">r (เธเธต)</th></tr></thead><tbody>';
+  html+='<th style="background:#e0f2fe">r (ปี)</th></tr></thead><tbody>';
   years.forEach((y,yi)=>{
     html+='<tr><td class="row-header">'+y+'</td>';
     for(let mi=0;mi<12;mi++){
@@ -479,15 +479,15 @@ function renderHeatmap(zone){
         const val=sv*cv; // simplified: positive=same direction, negative=opposite
         const norm=Math.max(Math.min(val/1.5,1),-1);
         html+='<td style="'+cellColor(norm)+'">'+val.toFixed(2)+'</td>';
-      } else {html+='<td style="background:#f8fafc;color:#cbd5e1">โ€”</td>';}
+      } else {html+='<td style="background:#f8fafc;color:#cbd5e1">—</td>';}
     }
-    html+='<td style="'+cellColor(rByYear[yi])+';font-weight:700">'+(rByYear[yi]!==null?rByYear[yi].toFixed(2):'โ€”')+'</td>';
+    html+='<td style="'+cellColor(rByYear[yi])+';font-weight:700">'+(rByYear[yi]!==null?rByYear[yi].toFixed(2):'—')+'</td>';
     html+='</tr>';
   });
   // Bottom row: monthly correlation
-  html+='<tr><td class="row-header" style="background:#e0f2fe">r (เน€เธ”เธทเธญเธ)</td>';
-  rByMonth.forEach(r=>{html+='<td style="'+cellColor(r)+';font-weight:700">'+(r!==null?r.toFixed(2):'โ€”')+'</td>';});
-  html+='<td style="background:#dbeafe;font-weight:700">โ€”</td></tr>';
+  html+='<tr><td class="row-header" style="background:#e0f2fe">r (เดือน)</td>';
+  rByMonth.forEach(r=>{html+='<td style="'+cellColor(r)+';font-weight:700">'+(r!==null?r.toFixed(2):'—')+'</td>';});
+  html+='<td style="background:#dbeafe;font-weight:700">—</td></tr>';
   html+='</tbody>';
   table.innerHTML=html;
 }
@@ -496,17 +496,17 @@ function renderBar(zone,yr){
   if(c3){c3.destroy();c3=null;}
   document.getElementById('anomBadge').textContent=yr;
   const d=D(),data=gA(zone,yr,d);
-  const monthLabels=['เธกเธเธฃเธฒเธเธก','เธเธธเธกเธ เธฒเธเธฑเธเธเน','เธกเธตเธเธฒเธเธก','เน€เธกเธฉเธฒเธขเธ','เธเธคเธฉเธ เธฒเธเธก','เธกเธดเธ–เธธเธเธฒเธขเธ','เธเธฃเธเธเธฒเธเธก','เธชเธดเธเธซเธฒเธเธก','เธเธฑเธเธขเธฒเธขเธ','เธ•เธธเธฅเธฒเธเธก','เธเธคเธจเธเธดเธเธฒเธขเธ','เธเธฑเธเธงเธฒเธเธก'];
+  const monthLabels=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
-  // เธซเธฒเธเนเธฒเธชเธนเธเธชเธธเธ”เธชเธณเธซเธฃเธฑเธ scale
+  // หาค่าสูงสุดสำหรับ scale
   const absMax = Math.max(...data.filter(v=>v!==null).map(v=>Math.abs(v)), 0.001);
-  const scale = absMax * 1.15; // เน€เธเธดเนเธก margin 15%
+  const scale = absMax * 1.15; // เพิ่ม margin 15%
 
-  // เธชเธฃเนเธฒเธ HTML bar chart เนเธ—เธ canvas
+  // สร้าง HTML bar chart แทน canvas
   const container = document.getElementById('anomalyBarChart');
   let html = `<div style="font-family:var(--font);padding:12px 16px;">`;
 
-  // header row เนเธชเธ”เธ scale
+  // header row แสดง scale
   const tickVals = [-scale, -scale*0.5, 0, scale*0.5, scale];
   html += `<div style="display:flex;margin-left:110px;margin-bottom:6px;position:relative;height:18px;">`;
   tickVals.forEach(v=>{
@@ -535,7 +535,7 @@ function renderBar(zone,yr){
         ${isNull ? '' : `<div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${monthLabels[i]}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>`}
       </div>
       <div style="width:64px;flex-shrink:0;text-align:right;font-size:11px;font-family:var(--mono);color:${isPos?'#dc2626':'#035a9d'};padding-left:8px;font-weight:600;">
-        ${isNull ? 'โ€”' : (v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
+        ${isNull ? '—' : (v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
       </div>
     </div>`;
   });
@@ -554,7 +554,7 @@ function renderTrend(zone){
   const slope=num/den,intercept=yM-slope*xM;
   const trend=means.map((v,i)=>+(intercept+slope*i).toFixed(4));
   const yLab=currentView==='absolute'?'Annual Mean '+d.n+' ('+d.u+')':'Annual Mean Anomaly ('+d.u+')';
-  c4=new Chart(ctx,{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets:[{label:'เธเนเธฒเน€เธเธฅเธตเนเธขเธฃเธฒเธขเธเธต (Annual Mean)',data:means.map(v=>v!==null?+v.toFixed(3):null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,fill:true,tension:.3},{label:'เน€เธชเนเธเนเธเธงเนเธเนเธก (slope: '+(slope*10).toFixed(4)+' '+d.u+'/decade)',data:trend,borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>' '+c.dataset.label.split(' (s')[0]+': '+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:9}},title:{display:true,text:'Year',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}});
+  c4=new Chart(ctx,{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets:[{label:'ค่าเฉลี่ยรายปี (Annual Mean)',data:means.map(v=>v!==null?+v.toFixed(3):null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,fill:true,tension:.3},{label:'เส้นแนวโน้ม (slope: '+(slope*10).toFixed(4)+' '+d.u+'/decade)',data:trend,borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>' '+c.dataset.label.split(' (s')[0]+': '+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:9}},title:{display:true,text:'Year',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}});
 }
 
 let c5;
@@ -564,9 +564,9 @@ function renderDual(zone,yr){
   const sstAn=zone==='overall'?sstAnomaly[yr]:sstZoneAnom[zone][yr];
   const chlAn=zone==='overall'?chlAnomaly[yr]:chlZoneAnom[zone][yr];
   c5=new Chart(ctx,{type:'line',data:{labels:months,datasets:[
-    {label:'SST Anomaly (ยฐC)',data:sstAn,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#2563eb',fill:true,tension:.4,yAxisID:'y'},
-    {label:'Chl-a Anomaly (mg/mยณ) [เธเธฅเธฑเธเธ”เนเธฒเธ]',data:chlAn,borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#059669',pointStyle:'rect',fill:true,tension:.4,yAxisID:'y1'}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,usePointStyle:true,padding:12}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:function(c){const v=c.parsed.y;return ' '+c.dataset.label.split(' [')[0]+': '+(v>0?'+':'')+v?.toFixed(3);}}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{type:'linear',position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#2563eb',font:{weight:'500'}},title:{display:true,text:'SST Anomaly (ยฐC)',color:'#2563eb',font:{size:11,weight:'600'}}},y1:{type:'linear',position:'right',reverse:true,grid:{drawOnChartArea:false},ticks:{color:'#059669',font:{weight:'500'}},title:{display:true,text:'Chl-a Anomaly (เธเธฅเธฑเธเธ”เนเธฒเธ)',color:'#059669',font:{size:11,weight:'600'}}}}}});
+    {label:'SST Anomaly (°C)',data:sstAn,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#2563eb',fill:true,tension:.4,yAxisID:'y'},
+    {label:'Chl-a Anomaly (mg/m³) [กลับด้าน]',data:chlAn,borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#059669',pointStyle:'rect',fill:true,tension:.4,yAxisID:'y1'}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,usePointStyle:true,padding:12}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:function(c){const v=c.parsed.y;return ' '+c.dataset.label.split(' [')[0]+': '+(v>0?'+':'')+v?.toFixed(3);}}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{type:'linear',position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#2563eb',font:{weight:'500'}},title:{display:true,text:'SST Anomaly (°C)',color:'#2563eb',font:{size:11,weight:'600'}}},y1:{type:'linear',position:'right',reverse:true,grid:{drawOnChartArea:false},ticks:{color:'#059669',font:{weight:'500'}},title:{display:true,text:'Chl-a Anomaly (กลับด้าน)',color:'#059669',font:{size:11,weight:'600'}}}}}});
   // Generate insights
   generateInsights(zone,yr);
 }
@@ -583,17 +583,17 @@ function updateSummary(zone,yr){
   const meanVal=avg(validMo), meanAnom=avg(validAn);
   const maxVal=Math.max(...validMo), minVal=Math.min(...validMo);
   const maxAnom=Math.max(...validAn), minAnom=Math.min(...validAn);
-  const monthLabels=['เธก.เธ.','เธ.เธ.','เธกเธต.เธ.','เน€เธก.เธข.','เธ.เธ.','เธกเธด.เธข.','เธ.เธ.','เธช.เธ.','เธ.เธข.','เธ•.เธ.','เธ.เธข.','เธ.เธ.'];
-  // เนเธเน findIndex เนเธ—เธ indexOf เน€เธเธทเนเธญเธซเธฅเธตเธเน€เธฅเธตเนเธขเธ floating point mismatch
+  const monthLabels=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  // ใช้ findIndex แทน indexOf เพื่อหลีกเลี่ยง floating point mismatch
   const maxMonthIdx=mo.findIndex(v=>v===maxVal);
   const minMonthIdx=mo.findIndex(v=>v===minVal);
-  const maxMonth=maxMonthIdx>=0?monthLabels[maxMonthIdx]:'โ€”';
-  const minMonth=minMonthIdx>=0?monthLabels[minMonthIdx]:'โ€”';
-  // เน€เธ”เธทเธญเธเธ—เธตเน anomaly เธกเธฒเธเธ—เธตเนเธชเธธเธ” (absolute)
+  const maxMonth=maxMonthIdx>=0?monthLabels[maxMonthIdx]:'—';
+  const minMonth=minMonthIdx>=0?monthLabels[minMonthIdx]:'—';
+  // เดือนที่ anomaly มากที่สุด (absolute)
   const peakAnomIdx=an.reduce((bi,v,i)=>v!==null&&Math.abs(v)>Math.abs(an[bi]??0)?i:bi, 0);
   const peakAnomMonth=monthLabels[peakAnomIdx];
 
-  const zoneNames={overall:'เธ เธฒเธเธฃเธงเธก',upper_gulf:'เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธ',rayong:'เธญเนเธฒเธงเธฃเธฐเธขเธญเธ',trat:'เธญเนเธฒเธงเธ•เธฃเธฒเธ”',central_gulf:'เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธเธฅเธฒเธ',lower_gulf:'เธญเนเธฒเธงเนเธ—เธขเธ•เธญเธเธฅเนเธฒเธ',andaman:'เธ—เธฐเน€เธฅเธญเธฑเธเธ”เธฒเธกเธฑเธ'};
+  const zoneNames={overall:'ภาพรวม',upper_gulf:'อ่าวไทยตอนบน',rayong:'อ่าวระยอง',trat:'อ่าวตราด',central_gulf:'อ่าวไทยตอนกลาง',lower_gulf:'อ่าวไทยตอนล่าง',andaman:'ทะเลอันดามัน'};
   const zoneName=zoneNames[zone]||zone;
   const isSST=currentParam==='sst';
   const isAbs=currentView==='absolute';
@@ -601,11 +601,11 @@ function updateSummary(zone,yr){
 
   // Title
   document.getElementById('summaryTitle').textContent=
-    (isSST?'เธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ (SST)':'เธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ (Chl-a)')+' ยท '+zoneName+' ยท เธเธต '+(parseInt(yr)+543);
+    (isSST?'อุณหภูมิผิวน้ำทะเล (SST)':'คลอโรฟิลล์-เอ (Chl-a)')+' · '+zoneName+' · ปี '+(parseInt(yr)+543);
 
   // Badge
-  const anomSign=meanAnom>=0?'โ–ฒ เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด':'โ–ผ เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด';
-  document.getElementById('summaryBadge').textContent=isAbs?'Absolute':'Anomaly ยท '+anomSign;
+  const anomSign=meanAnom>=0?'▲ สูงกว่าปกติ':'▼ ต่ำกว่าปกติ';
+  document.getElementById('summaryBadge').textContent=isAbs?'Absolute':'Anomaly · '+anomSign;
 
   // Stats grid
   const statCard=(label,val,unit,color='rgba(255,255,255,.12)')=>`
@@ -616,17 +616,17 @@ function updateSummary(zone,yr){
 
   let statsHtml='';
   if(isAbs){
-    statsHtml+=statCard('เธเนเธฒเน€เธเธฅเธตเนเธขเธ—เธฑเนเธเธเธต',meanVal.toFixed(p),d.u);
-    statsHtml+=statCard('Anomaly เน€เธเธฅเธตเนเธข',(meanAnom>=0?'+':'')+meanAnom.toFixed(p),d.u,
+    statsHtml+=statCard('ค่าเฉลี่ยทั้งปี',meanVal.toFixed(p),d.u);
+    statsHtml+=statCard('Anomaly เฉลี่ย',(meanAnom>=0?'+':'')+meanAnom.toFixed(p),d.u,
       meanAnom>0?'rgba(220,38,38,.25)':'rgba(3,105,161,.25)');
-    statsHtml+=statCard('เธชเธนเธเธชเธธเธ”: '+maxMonth,maxVal.toFixed(p),d.u,'rgba(220,38,38,.18)');
-    statsHtml+=statCard('เธ•เนเธณเธชเธธเธ”: '+minMonth,minVal.toFixed(p),d.u,'rgba(3,105,161,.18)');
+    statsHtml+=statCard('สูงสุด: '+maxMonth,maxVal.toFixed(p),d.u,'rgba(220,38,38,.18)');
+    statsHtml+=statCard('ต่ำสุด: '+minMonth,minVal.toFixed(p),d.u,'rgba(3,105,161,.18)');
   } else {
     statsHtml+=statCard('Mean Anomaly',(meanAnom>=0?'+':'')+meanAnom.toFixed(p),d.u,
       meanAnom>0?'rgba(220,38,38,.25)':'rgba(3,105,161,.25)');
     statsHtml+=statCard('Max Anomaly',(maxAnom>=0?'+':'')+maxAnom.toFixed(p),d.u,'rgba(220,38,38,.18)');
     statsHtml+=statCard('Min Anomaly',(minAnom>=0?'+':'')+minAnom.toFixed(p),d.u,'rgba(3,105,161,.18)');
-    statsHtml+=statCard('เน€เธ”เธทเธญเธเธเธดเธ”เธเธเธ•เธดเธกเธฒเธเธชเธธเธ”',peakAnomMonth,'');
+    statsHtml+=statCard('เดือนผิดปกติมากสุด',peakAnomMonth,'');
   }
   document.getElementById('summaryStats').innerHTML=statsHtml;
 
@@ -634,18 +634,18 @@ function updateSummary(zone,yr){
   let insight='';
   if(isAbs){
     if(isSST){
-      if(meanAnom>0.5) insight=`โ  SST เธเธต ${parseInt(yr)+543} <strong>เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด</strong> เน€เธเธฅเธตเนเธข ${meanAnom>0?'+':''}${meanAnom.toFixed(2)} ยฐC เธญเธฒเธเธเนเธเธเธตเนเธชเธ เธฒเธงเธฐ El Niรฑo เธซเธฃเธทเธญ Marine Heatwave`;
-      else if(meanAnom<-0.5) insight=`๐ SST เธเธต ${parseInt(yr)+543} <strong>เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด</strong> เน€เธเธฅเธตเนเธข ${meanAnom.toFixed(2)} ยฐC เธญเธฒเธเธเนเธเธเธตเนเธชเธ เธฒเธงเธฐ La Niรฑa เธซเธฃเธทเธญ Upwelling เน€เธเธดเนเธกเธเธถเนเธ`;
-      else insight=`SST เธเธต ${parseInt(yr)+543} เนเธเธฅเนเน€เธเธตเธขเธเธเนเธฒเน€เธเธฅเธตเนเธขเธเธเธ•เธด ยท เธเนเธงเธเนเธเธงเนเธ ${minVal.toFixed(1)}โ€“${maxVal.toFixed(1)} ยฐC`;
+      if(meanAnom>0.5) insight=`⚠ SST ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> เฉลี่ย ${meanAnom>0?'+':''}${meanAnom.toFixed(2)} °C อาจบ่งชี้สภาวะ El Niño หรือ Marine Heatwave`;
+      else if(meanAnom<-0.5) insight=`🌊 SST ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> เฉลี่ย ${meanAnom.toFixed(2)} °C อาจบ่งชี้สภาวะ La Niña หรือ Upwelling เพิ่มขึ้น`;
+      else insight=`SST ปี ${parseInt(yr)+543} ใกล้เคียงค่าเฉลี่ยปกติ · ช่วงแกว่ง ${minVal.toFixed(1)}–${maxVal.toFixed(1)} °C`;
     } else {
-      if(meanAnom>0.05) insight=`๐ฟ Chl-a เธเธต ${parseInt(yr)+543} <strong>เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด</strong> (+${meanAnom.toFixed(3)} mg/mยณ) โ’ เธเธฅเธเธฅเธดเธ•เธเธฑเนเธเธเธเธกเธ เธนเธกเธดเน€เธเธดเนเธกเธเธถเนเธ เธญเธฒเธเน€เธเธดเธ”เธเธฒเธ nutrient enrichment เธซเธฃเธทเธญ upwelling`;
-      else if(meanAnom<-0.05) insight=`Chl-a เธเธต ${parseInt(yr)+543} <strong>เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด</strong> (${meanAnom.toFixed(3)} mg/mยณ) โ’ เธเธฅเธเธฅเธดเธ•เธเธฑเนเธเธเธเธกเธ เธนเธกเธดเธฅเธ”เธฅเธ เธญเธฒเธเน€เธเธตเนเธขเธงเธเนเธญเธเธเธฑเธ stratification เธ—เธตเนเน€เธเธดเนเธกเธเธถเนเธ`;
-      else insight=`Chl-a เธเธต ${parseInt(yr)+543} เนเธเธฅเนเน€เธเธตเธขเธเธเนเธฒเธเธเธ•เธด ยท เธเนเธงเธ ${minVal.toFixed(3)}โ€“${maxVal.toFixed(3)} mg/mยณ`;
+      if(meanAnom>0.05) insight=`🌿 Chl-a ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> (+${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิเพิ่มขึ้น อาจเกิดจาก nutrient enrichment หรือ upwelling`;
+      else if(meanAnom<-0.05) insight=`Chl-a ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> (${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิลดลง อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น`;
+      else insight=`Chl-a ปี ${parseInt(yr)+543} ใกล้เคียงค่าปกติ · ช่วง ${minVal.toFixed(3)}–${maxVal.toFixed(3)} mg/m³`;
     }
   } else {
     const posCount=validAn.filter(v=>v>0).length, negCount=validAn.filter(v=>v<0).length;
-    insight=`${posCount} เน€เธ”เธทเธญเธเธกเธตเธเนเธฒ<strong>เธชเธนเธเธเธงเนเธฒเธเธเธ•เธด</strong> ยท ${negCount} เน€เธ”เธทเธญเธเธกเธตเธเนเธฒ<strong>เธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด</strong>`;
-    if(Math.abs(meanAnom)>0.3) insight+=` ยท Anomaly เน€เธเธฅเธตเนเธข<strong>${meanAnom>=0?' เน€เธเนเธเธเธงเธ':' เน€เธเนเธเธฅเธ'}</strong>เธ•เธฅเธญเธ”เธเธต`;
+    insight=`${posCount} เดือนมีค่า<strong>สูงกว่าปกติ</strong> · ${negCount} เดือนมีค่า<strong>ต่ำกว่าปกติ</strong>`;
+    if(Math.abs(meanAnom)>0.3) insight+=` · Anomaly เฉลี่ย<strong>${meanAnom>=0?' เป็นบวก':' เป็นลบ'}</strong>ตลอดปี`;
   }
   document.getElementById('summaryInsight').innerHTML=insight;
 }
@@ -655,20 +655,20 @@ function updateKPI(zone,yr){
   let last=11;for(let i=11;i>=0;i--){if(mo[i]!==null){last=i;break;}}
   const p=currentParam==='chl'?3:2;
   if(currentView==='absolute'){
-    document.getElementById('kpiVal1').textContent=mo[last]?mo[last].toFixed(p):'โ€”';
+    document.getElementById('kpiVal1').textContent=mo[last]?mo[last].toFixed(p):'—';
     document.getElementById('kpiVal2').textContent=avg(d.clim.mean).toFixed(p);
-    document.getElementById('kpiVal3').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'โ€”';
+    document.getElementById('kpiVal3').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'—';
     document.getElementById('kpiVal4').textContent=Math.max(...mo.filter(v=>v!==null)).toFixed(p);
-    document.getElementById('kpiLab1').textContent='เธเนเธฒเน€เธเธฅเธตเนเธขเน€เธ”เธทเธญเธเธฅเนเธฒเธชเธธเธ” ('+d.u+')';
-    document.getElementById('kpiLab3').textContent='Anomaly เน€เธ”เธทเธญเธเธฅเนเธฒเธชเธธเธ”';
-    document.getElementById('kpiLab4').textContent='เธเนเธฒเธชเธนเธเธชเธธเธ”เนเธเธเธต ('+d.u+')';
+    document.getElementById('kpiLab1').textContent='ค่าเฉลี่ยเดือนล่าสุด ('+d.u+')';
+    document.getElementById('kpiLab3').textContent='Anomaly เดือนล่าสุด';
+    document.getElementById('kpiLab4').textContent='ค่าสูงสุดในปี ('+d.u+')';
   } else {
-    document.getElementById('kpiVal1').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'โ€”';
-    document.getElementById('kpiVal2').textContent=avg(an)!==null?avg(an).toFixed(p):'โ€”';
+    document.getElementById('kpiVal1').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'—';
+    document.getElementById('kpiVal2').textContent=avg(an)!==null?avg(an).toFixed(p):'—';
     const mx=Math.max(...an.filter(v=>v!==null)),mn=Math.min(...an.filter(v=>v!==null));
     document.getElementById('kpiVal3').textContent=mn.toFixed(p);
     document.getElementById('kpiVal4').textContent=(mx>0?'+':'')+mx.toFixed(p);
-    document.getElementById('kpiLab1').textContent='Anomaly เน€เธ”เธทเธญเธเธฅเนเธฒเธชเธธเธ” ('+d.u+')';
+    document.getElementById('kpiLab1').textContent='Anomaly เดือนล่าสุด ('+d.u+')';
     document.getElementById('kpiLab3').textContent='Min Anomaly';
     document.getElementById('kpiLab4').textContent='Max Anomaly ('+d.u+')';
   }
@@ -721,7 +721,7 @@ function getTifUrl(view, param, year, month) {
 const PALETTES = {
   chl_absolute: {
     label: 'Chlorophyll-a',
-    unit: 'mg/mยณ',
+    unit: 'mg/m³',
     min: 0.0,
     max: 20.0,
     stops: [
@@ -735,7 +735,7 @@ const PALETTES = {
   },
   sst_absolute: {
     label: 'SST',
-    unit: 'ยฐC',
+    unit: '°C',
     min: 0.0,
     max: 45.0,
     stops: [
@@ -748,7 +748,7 @@ const PALETTES = {
   },
   chl_anomaly: {
     label: 'Chl-a Anomaly',
-    unit: 'mg/mยณ',
+    unit: 'mg/m³',
     min: -20.0,
     max: 20.0,
     stops: [
@@ -761,7 +761,7 @@ const PALETTES = {
   },
   sst_anomaly: {
     label: 'SST Anomaly',
-    unit: 'ยฐC',
+    unit: '°C',
     min: -5.0,
     max: 5.0,
     stops: [
@@ -805,9 +805,9 @@ function initLeafletMap() {
     maxZoom: 10,
   });
 
-  // OSM Humanitarian โ€” เธชเธงเนเธฒเธ เธชเธฐเธญเธฒเธ” เธเธฃเธต เนเธกเนเธ•เนเธญเธ API key
+  // OSM Humanitarian — สว่าง สะอาด ฟรี ไม่ต้อง API key
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'ยฉ <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
     opacity: 1.0
   }).addTo(leafletMap);
@@ -871,7 +871,7 @@ async function loadMapGeoTIFF() {
       const g = values[1];
       const b = values[2];
 
-      // Black pixels (0,0,0) = nodata/land โ’ transparent
+      // Black pixels (0,0,0) = nodata/land → transparent
       if (r === 0 && g === 0 && b === 0) return null;
 
       return `rgb(${r},${g},${b})`;
@@ -898,7 +898,7 @@ async function loadMapGeoTIFF() {
     console.error('Error loading GeoTIFF:', error);
     document.getElementById('mapLoading').classList.remove('show');
     if (!error.message.includes('404')) {
-      alert(`เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ” GeoTIFF เนเธ”เน: ${error.message}`);
+      alert(`ไม่สามารถโหลด GeoTIFF ได้: ${error.message}`);
     }
   }
 }
@@ -916,8 +916,8 @@ function onMapClick(e) {
       const val = values[0];
       const pal = getCurrentPalette();
 
-      document.getElementById('clickLat').textContent = lat.toFixed(4) + 'ยฐ';
-      document.getElementById('clickLon').textContent = lon.toFixed(4) + 'ยฐ';
+      document.getElementById('clickLat').textContent = lat.toFixed(4) + '°';
+      document.getElementById('clickLon').textContent = lon.toFixed(4) + '°';
       
       const valueEl = document.getElementById('clickValue');
       const isAnomaly = currentView === 'anomaly';
@@ -934,7 +934,7 @@ function onMapClick(e) {
 
 function updateMapUI() {
   const param = currentParam === 'sst' ? 'sst' : 'chl';
-  const pal = getCurrentPalette();  // โ เนเธเน palette เธ•เธฒเธก param + view
+  const pal = getCurrentPalette();  // ← ใช้ palette ตาม param + view
   
   // Update parameter badge
   document.getElementById('mapParamBadge').textContent = pal.label;
@@ -948,19 +948,19 @@ function updateMapUI() {
   
   if (currentView === 'absolute') {
     if (param === 'sst') {
-      title = 'เธ เธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธกเธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ (SST) เนเธเธ Interactive';
-      caption = 'เนเธชเธ”เธเธเนเธฒเธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅเน€เธเธฅเธตเนเธขเธฃเธฒเธขเน€เธ”เธทเธญเธ (ยฐC) เธเธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธก VIIRS เนเธ”เธขเธชเธตเนเธ”เธ-เธชเนเธกเนเธชเธ”เธเธญเธธเธ“เธซเธ เธนเธกเธดเธชเธนเธ (28-35ยฐC) เนเธฅเธฐเธชเธตเธเนเธณเน€เธเธดเธเนเธชเธ”เธเธญเธธเธ“เธซเธ เธนเธกเธดเธ•เนเธณ (20-25ยฐC) เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒเธ—เธตเนเธ•เธณเนเธซเธเนเธเธเธฑเนเธ เน';
+      title = 'ภาพดาวเทียมอุณหภูมิผิวน้ำทะเล (SST) แบบ Interactive';
+      caption = 'แสดงค่าอุณหภูมิผิวน้ำทะเลเฉลี่ยรายเดือน (°C) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงอุณหภูมิสูง (28-35°C) และสีน้ำเงินแสดงอุณหภูมิต่ำ (20-25°C) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     } else {
-      title = 'เธ เธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธกเธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ เนเธเธ Interactive';
-      caption = 'เนเธชเธ”เธเธเธงเธฒเธกเน€เธเนเธกเธเนเธเธเธญเธเธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญเน€เธเธฅเธตเนเธขเธฃเธฒเธขเน€เธ”เธทเธญเธ (mg/mยณ) เธเธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธก VIIRS เนเธ”เธขเธชเธตเนเธ”เธ-เธชเนเธกเนเธชเธ”เธเธเธงเธฒเธกเน€เธเนเธกเธเนเธเธชเธนเธ (>5 mg/mยณ) เนเธฅเธฐเธชเธตเธเนเธณเน€เธเธดเธเน€เธเนเธกเนเธชเธ”เธเธเธงเธฒเธกเน€เธเนเธกเธเนเธเธ•เนเธณ (<0.5 mg/mยณ) เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒเธ—เธตเนเธ•เธณเนเธซเธเนเธเธเธฑเนเธ เน';
+      title = 'ภาพดาวเทียมคลอโรฟิลล์-เอ แบบ Interactive';
+      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (mg/m³) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงความเข้มข้นสูง (>5 mg/m³) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ (<0.5 mg/m³) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     }
   } else { // anomaly
     if (param === 'sst') {
-      title = 'เธ เธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธก SST Anomaly เนเธเธ Interactive';
-      caption = 'เนเธชเธ”เธเธเธงเธฒเธกเธเธดเธ”เธเธเธ•เธดเธเธญเธเธญเธธเธ“เธซเธ เธนเธกเธดเธเธดเธงเธเนเธณเธ—เธฐเน€เธฅ (ยฐC) เน€เธ—เธตเธขเธเธเธฑเธเธเนเธฒเน€เธเธฅเธตเนเธขเธฃเธฐเธขเธฐเธขเธฒเธง เนเธ”เธขเธชเธตเนเธ”เธเนเธชเธ”เธเธญเธธเธ“เธซเธ เธนเธกเธดเธชเธนเธเธเธงเนเธฒเธเธเธ•เธด เธชเธตเธเนเธณเน€เธเธดเธเนเธชเธ”เธเธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด เนเธฅเธฐเธชเธตเธเธฒเธงเนเธชเธ”เธเนเธเธฅเนเน€เธเธตเธขเธเธเนเธฒเน€เธเธฅเธตเนเธข เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒ Anomaly เธ—เธตเนเธ•เธณเนเธซเธเนเธเธเธฑเนเธ เน';
+      title = 'ภาพดาวเทียม SST Anomaly แบบ Interactive';
+      caption = 'แสดงความผิดปกติของอุณหภูมิผิวน้ำทะเล (°C) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดงแสดงอุณหภูมิสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     } else {
-      title = 'เธ เธฒเธเธ”เธฒเธงเน€เธ—เธตเธขเธก Chlorophyll-a Anomaly เนเธเธ Interactive';
-      caption = 'เนเธชเธ”เธเธเธงเธฒเธกเธเธดเธ”เธเธเธ•เธดเธเธญเธเธเธฅเธญเนเธฃเธเธดเธฅเธฅเน-เน€เธญ (mg/mยณ) เน€เธ—เธตเธขเธเธเธฑเธเธเนเธฒเน€เธเธฅเธตเนเธขเธฃเธฐเธขเธฐเธขเธฒเธง เนเธ”เธขเธชเธตเนเธ”เธ-เธชเนเธกเนเธชเธ”เธเธเธงเธฒเธกเน€เธเนเธกเธเนเธเธชเธนเธเธเธงเนเธฒเธเธเธ•เธด เธชเธตเธเนเธณเน€เธเธดเธเนเธชเธ”เธเธ•เนเธณเธเธงเนเธฒเธเธเธ•เธด เนเธฅเธฐเธชเธตเธเธฒเธงเนเธชเธ”เธเนเธเธฅเนเน€เธเธตเธขเธเธเนเธฒเน€เธเธฅเธตเนเธข เธเธฅเธดเธเธเธเนเธเธเธ—เธตเนเน€เธเธทเนเธญเธ”เธนเธเนเธฒ Anomaly เธ—เธตเนเธ•เธณเนเธซเธเนเธเธเธฑเนเธ เน';
+      title = 'ภาพดาวเทียม Chlorophyll-a Anomaly แบบ Interactive';
+      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (mg/m³) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดง-ส้มแสดงความเข้มข้นสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     }
   }
   
@@ -1012,7 +1012,7 @@ document.getElementById('mapMonthSlider').addEventListener('input', function() {
 document.getElementById('mapPrev').addEventListener('click', () => changeMapMonth(-1));
 document.getElementById('mapNext').addEventListener('click', () => changeMapMonth(1));
 
-// เน€เธเธดเนเธก map update เน€เธกเธทเนเธญเน€เธเธฅเธตเนเธขเธ param/year
+// เพิ่ม map update เมื่อเปลี่ยน param/year
 const origRenderAll = renderAll;
 renderAll = function() {
   origRenderAll();
@@ -1023,7 +1023,7 @@ renderAll = function() {
   }
 };
 
-// Init map เธซเธฅเธฑเธ DOM ready
+// Init map หลัง DOM ready
 setTimeout(() => {
   initLeafletMap();
   syncMapMonthRange();
@@ -1083,4 +1083,3 @@ setTimeout(() => loadMarineZones(), 1000);
 </script>
 </body>
 </html>
-

@@ -123,7 +123,7 @@ viirs-marine-dashboard/
 - **Processing**: SNAP ESA Toolbox
 - **Parameters**:
   - Sea Surface Temperature (SST) - degrees Celsius
-  - Chlorophyll-a concentration - mg/m³
+  - Chlorophyll-a concentration - µg/L
 
 ### Marine Zones
 - Gulf of Thailand Upper (อ่าวไทยตอนบน)

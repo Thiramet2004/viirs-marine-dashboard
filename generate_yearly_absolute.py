@@ -13,6 +13,7 @@ from rasterio.mask import mask
 
 PROJECT_DIR = Path(__file__).resolve().parent
 MONTHLY_DIR = Path(os.environ.get("VIIRS_MONTHLY_SOURCE_DIR", r"E:\SST_Chlor\Monthly"))
+PREPARED_SST_DIR = os.environ.get("VIIRS_PREPARED_SST_DIR")
 CLIMATOLOGY_DIR = Path(os.environ.get("VIIRS_CLIMATOLOGY_DIR", r"E:\Monthly Climatology"))
 ZONE_DIR = Path(os.environ.get("VIIRS_MARINE_ZONES_DIR", r"E:\SST_Chlor\EEZ_MarineZone"))
 OUTPUT_DIR = Path(os.environ.get("VIIRS_YEARLY_DIR", PROJECT_DIR / "data" / "Yearly_RGB"))
@@ -30,6 +31,12 @@ ZONE_FILES = {
 
 
 def source_files(param, year):
+    if param == "sst" and PREPARED_SST_DIR:
+        return sorted(
+            (Path(PREPARED_SST_DIR) / str(year)).glob(
+                f"SST_VIIRS_*_{year}_4km.data/sst_mean.img"
+            )
+        )
     folder = "SST_4km" if param == "sst" else "Chlor_a_4km"
     name = "sst_mean.img" if param == "sst" else "chlor_a_mean.img"
     return sorted((MONTHLY_DIR / folder / str(year)).glob(f"*/{name}"))
@@ -112,9 +119,14 @@ def main():
     stats_path = OUTPUT_DIR / "stats.json"
     stats = json.loads(stats_path.read_text(encoding="utf-8")) if stats_path.exists() else {"years": list(YEARS)}
     stats["years"] = list(YEARS)
-    stats["absolute"] = {"sst": {}, "chl": {}}
-    stats["trend"] = {"absolute": {}, "anomaly": {}}
-    stats["baseline"] = {}
+    stats.setdefault("absolute", {"sst": {}, "chl": {}})
+    stats.setdefault("monthly", {})
+    stats.setdefault("trend", {"absolute": {}, "anomaly": {}})
+    stats["trend"].setdefault("absolute", {})
+    stats["trend"].setdefault("anomaly", {})
+    stats["trend"].setdefault("monthly_absolute", {})
+    stats.setdefault("baseline", {})
+    parameters = ("sst",) if PREPARED_SST_DIR else ("sst", "chl")
     monthly_records = {"sst": {}, "chl": {}}
     monthly_arrays = {"sst": {}, "chl": {}}
     annual_arrays = {"sst": {}, "chl": {}}
@@ -129,7 +141,7 @@ def main():
             zones.append((zone_id, gpd.read_file(path).geometry.iloc[0]))
 
     ranges = {"sst": (0, 40), "chl": (0, 20)}
-    for param in ("sst", "chl"):
+    for param in parameters:
         for year in YEARS:
             paths = source_files(param, year)
             if not paths:
@@ -144,6 +156,7 @@ def main():
                 eez_mask = mask(template, [overall_geometry], crop=False, filled=False)[0].mask
                 arrays = []
                 for path in paths:
+                    month = int(path.parent.name.split("_")[2])
                     with rasterio.open(path) as dataset:
                         monthly_values = np.ma.masked_invalid(dataset.read(1, masked=True))
                         arrays.append(monthly_values)
@@ -152,7 +165,7 @@ def main():
                             mask=np.ma.getmaskarray(monthly_values) | eez_mask,
                         ).compressed()
                         if monthly_valid.size:
-                            monthly_record = {"mean": float(monthly_valid.mean()), "zones": {}}
+                            monthly_record = {"month": month, "mean": float(monthly_valid.mean()), "zones": {}}
                             for zone_id, zone_mask in zone_masks.items():
                                 zone_valid = np.ma.array(monthly_values, mask=np.ma.getmaskarray(monthly_values) | zone_mask).compressed()
                                 if zone_valid.size:
@@ -162,10 +175,12 @@ def main():
                 values = np.ma.masked_invalid(values)
                 monthly_arrays[param][year] = arrays
                 annual_arrays[param][year] = values
-    for param in ("sst", "chl"):
+    for param in parameters:
         available = monthly_records[param]
-        stats["trend"]["absolute"][param] = {}
-        stats["trend"]["anomaly"][param] = {}
+        stats["monthly"].setdefault(param, {})
+        stats["trend"]["absolute"].setdefault(param, {})
+        stats["trend"]["anomaly"].setdefault(param, {})
+        stats["trend"]["monthly_absolute"].setdefault(param, {})
         climatology_paths = climatology_files(param)
         if len(climatology_paths) != 12:
             raise RuntimeError(
@@ -194,21 +209,49 @@ def main():
                     )
         valid_climatology = [value for value in climatology if value is not None]
         stats["baseline"][param] = float(np.mean(valid_climatology)) if valid_climatology else None
-        stats[param] = {}
+        stats.setdefault(param, {})
         for year, records in available.items():
+            records_by_month = {record["month"]: record for record in records}
+            monthly_absolute_zones = {
+                zone_id: [records_by_month.get(month, {}).get("zones", {}).get(zone_id) for month in range(1, 13)]
+                for zone_id in ZONE_FILES
+            }
+            monthly_anomaly_zones = {
+                zone_id: [
+                    records_by_month[month]["zones"][zone_id] - zone_climatology[zone_id][month - 1]
+                    if month in records_by_month
+                    and zone_id in records_by_month[month]["zones"]
+                    and zone_climatology[zone_id][month - 1] is not None
+                    else None
+                    for month in range(1, 13)
+                ]
+                for zone_id in ZONE_FILES
+            }
+            stats["monthly"][param][str(year)] = {
+                "absolute": {"zones": monthly_absolute_zones},
+                "anomaly": {"zones": monthly_anomaly_zones},
+                "available_months": sorted(records_by_month),
+            }
             absolute_months = [item["mean"] for item in records if np.isfinite(item["mean"])]
             absolute_zone_values = {
                 zone_id: [item["zones"][zone_id] for item in records if zone_id in item["zones"]]
                 for zone_id in ZONE_FILES
             }
-            stats["trend"]["absolute"][param][str(year)] = {
+            absolute_record = {
                 "mean": float(np.mean(absolute_months)) if absolute_months else None,
                 "zones": {
                     zone_id: float(np.mean(values))
                     for zone_id, values in absolute_zone_values.items()
                     if values
                 },
+                "months": len(absolute_months),
+                "zone_months": {
+                    zone_id: len(values)
+                    for zone_id, values in absolute_zone_values.items()
+                },
             }
+            stats["trend"]["monthly_absolute"][param][str(year)] = absolute_record
+            stats["trend"]["absolute"][param][str(year)] = absolute_record
             if year in annual_arrays[param]:
                 anomaly_array = np.ma.masked_invalid(
                     np.ma.mean(
@@ -221,17 +264,16 @@ def main():
                     )
                 )
                 anomaly_values = np.array([
-                    records_item["mean"] - climatology[index]
-                    for index, records_item in enumerate(records)
-                    if climatology[index] is not None
+                    records_item["mean"] - climatology[records_item["month"] - 1]
+                    for records_item in records
+                    if climatology[records_item["month"] - 1] is not None
                 ])
                 anomaly_zone_values = {
                     zone_id: [
-                        records_item["zones"][zone_id] - zone_climatology[zone_id][index]
-                        for index, records_item in enumerate(records)
-                        if index < len(zone_climatology.get(zone_id, []))
-                        and zone_id in records_item["zones"]
-                        and zone_climatology[zone_id][index] is not None
+                        records_item["zones"][zone_id] - zone_climatology[zone_id][records_item["month"] - 1]
+                        for records_item in records
+                        if zone_id in records_item["zones"]
+                        if zone_climatology[zone_id][records_item["month"] - 1] is not None
                     ]
                     for zone_id in ZONE_FILES
                 }
@@ -264,6 +306,11 @@ def main():
                         zone_id: float(np.mean(values))
                         for zone_id, values in anomaly_zone_values.items()
                         if values
+                    },
+                    "months": len(anomaly_values),
+                    "zone_months": {
+                        zone_id: len(values)
+                        for zone_id, values in anomaly_zone_values.items()
                     },
                 }
             else:

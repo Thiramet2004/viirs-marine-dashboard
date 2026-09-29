@@ -198,30 +198,38 @@ def convert_monthly_to_rgb(param, year, month):
         month: month as int (1-12)
     """
     
-    # Map month to folder name
-    month_names = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ]
-    month_name = month_names[int(month) - 1]
     month_str = f"{int(month):02d}"
     
-    # Input paths
     if param == 'Chlor_a':
-        base_dir = os.path.join(SOURCE_MONTHLY_DIR, "Chlor_a_4km", str(year))
-        data_folder = f"Chlor_a_VIIRS_{month_str}_{month_name}_{year}_4km.data"
+        product = "Chlor_a"
         img_file = "chlor_a_mean.img"
         hdr_file = "chlor_a_mean.hdr"
         palette = CHLOR_A_PALETTE
-    else:  # SST
-        base_dir = os.path.join(SOURCE_MONTHLY_DIR, "SST_4km", str(year))
-        data_folder = f"SST_VIIRS_{month_str}_{month_name}_{year}_4km.data"
+    elif param == 'SST':
+        product = "SST"
         img_file = "sst_mean.img"
         hdr_file = "sst_mean.hdr"
         palette = SST_PALETTE
+    else:
+        raise ValueError("param must be 'Chlor_a' or 'SST'")
     
-    img_path = os.path.join(base_dir, data_folder, img_file)
-    hdr_path = os.path.join(base_dir, data_folder, hdr_file)
+    source_root = Path(SOURCE_MONTHLY_DIR)
+    source_dirs = [
+        source_root / f"{product}_4km" / str(year),
+        source_root / str(year),
+    ]
+    data_folders = [
+        folder
+        for source_dir in source_dirs
+        if source_dir.is_dir()
+        for folder in source_dir.glob(f"{product}_VIIRS_{month_str}_*_{year}_4km.data")
+    ]
+    if len(data_folders) != 1:
+        print(f"ERROR: Expected one source folder for {param} {year}-{month_str}, found {len(data_folders)}")
+        return None
+
+    img_path = data_folders[0] / img_file
+    hdr_path = data_folders[0] / hdr_file
     
     # Check if input exists
     if not os.path.exists(img_path) or not os.path.exists(hdr_path):

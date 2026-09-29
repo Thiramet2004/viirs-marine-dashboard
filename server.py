@@ -258,11 +258,11 @@ def get_metadata(view, param, year, month):
     if param == "chl":
         if view == "anomaly":
             filename = f"Chlor_a_Anomaly_RGB_{mm}_{year}.tif"
-            unit = "mg/m³"
+            unit = "µg/L"
             label = "Chlorophyll-a Anomaly"
         else:
             filename = f"Chlor_a_Monthly_RGB_{mm}_{year}.tif"
-            unit = "mg/m³"
+            unit = "µg/L"
             label = "Chlorophyll-a (Absolute)"
     else:
         if view == "anomaly":

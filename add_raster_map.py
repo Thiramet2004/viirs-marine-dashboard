@@ -121,7 +121,7 @@ const API_BASE = 'http://localhost:5001/api';
 const PALETTES = {
   chl: {
     label: 'Chl-a Anomaly',
-    unit: 'mg/m³',
+    unit: 'µg/L',
     min: -20.0,
     max: 20.0,
     stops: [

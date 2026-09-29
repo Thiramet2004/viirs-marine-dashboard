@@ -94,7 +94,7 @@ body.embed-charts #mapSection{display:none}
 <h3 class="section-title"><span class="section-num">1</span> ระเบียบวิธี (Methodology)</h3>
 <div class="method-grid">
 <div class="method-card"><div class="method-icon"><span class="material-icons-outlined">satellite</span></div><h4>Data Acquisition</h4><p>VIIRS sensor บน Suomi NPP ความละเอียด 750 m ประมวลผลเป็น Monthly Composite (Level-3)</p></div>
-<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">analytics</span></div><h4>Parameters</h4><p><strong>SST</strong> (°C): อุณหภูมิผิวน้ำทะเล | <strong>Chl-a</strong> (mg/m³): ความเข้มข้นคลอโรฟิลล์-เอ</p></div>
+<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">analytics</span></div><h4>Parameters</h4><p><strong>SST</strong> (°C): อุณหภูมิผิวน้ำทะเล | <strong>Chl-a</strong> (µg/L): ความเข้มข้นคลอโรฟิลล์-เอ</p></div>
 <div class="method-card"><div class="method-icon"><span class="material-icons-outlined">map</span></div><h4>Zonal Statistics</h4><p>6 โซนทะเล: อ่าวไทยตอนบน, อ่าวระยอง, อ่าวตราด, อ่าวไทยตอนกลาง, อ่าวไทยตอนล่าง, ทะเลอันดามัน</p></div>
 </div>
 </section>
@@ -120,13 +120,7 @@ body.embed-charts #mapSection{display:none}
 <option value="lower_gulf">อ่าวไทยตอนล่าง</option>
 <option value="andaman">ทะเลอันดามัน</option>
 </select></div>
-<div class="control-item"><label for="yearSelect">ปี:</label>
-<select id="yearSelect">
-<option value="2026">2569 (2026)</option><option value="2025">2568 (2025)</option><option value="2024">2567 (2024)</option>
-<option value="2023">2566 (2023)</option><option value="2022">2565 (2022)</option>
-<option value="2021">2564 (2021)</option><option value="2020">2563 (2020)</option>
-<option value="2019">2562 (2019)</option><option value="2018">2561 (2018)</option>
-</select></div>
+<input type="hidden" id="yearSelect" value="2018">
 <div class="param-indicator" id="paramIndicator">SST | Absolute</div>
 </div>
 </section>
@@ -134,7 +128,7 @@ body.embed-charts #mapSection{display:none}
 <!-- Stats -->
 <div class="stats-row">
 <div class="stat-card"><div class="stat-icon"><span class="material-icons-outlined">thermostat</span></div><div class="stat-body"><div class="stat-value" id="kpiVal1">—</div><div class="stat-label" id="kpiLab1">Mean (Latest Month)</div></div></div>
-<div class="stat-card"><div class="stat-icon clim"><span class="material-icons-outlined">equalizer</span></div><div class="stat-body"><div class="stat-value" id="kpiVal2">—</div><div class="stat-label">Climatology Mean</div></div></div>
+<div class="stat-card"><div class="stat-icon clim"><span class="material-icons-outlined">equalizer</span></div><div class="stat-body"><div class="stat-value" id="kpiVal2">—</div><div class="stat-label" id="kpiLab2">Climatology Mean</div></div></div>
 <div class="stat-card"><div class="stat-icon anom"><span class="material-icons-outlined">swap_vert</span></div><div class="stat-body"><div class="stat-value" id="kpiVal3">—</div><div class="stat-label" id="kpiLab3">Anomaly</div></div></div>
 <div class="stat-card"><div class="stat-icon hot"><span class="material-icons-outlined">whatshot</span></div><div class="stat-body"><div class="stat-value" id="kpiVal4">—</div><div class="stat-label" id="kpiLab4">Maximum</div></div></div>
 </div>
@@ -151,9 +145,9 @@ body.embed-charts #mapSection{display:none}
 </div>
 <div class="map-controls-bar">
   <div class="map-ctrl-group">
-    <label>เดือน:</label>
-    <input type="range" id="mapMonthSlider" min="1" max="12" value="1" class="month-slider">
-    <span class="map-month-display" id="mapMonthDisplay">มกราคม</span>
+    <label for="mapMonthSlider">ช่วงเวลา:</label>
+    <input type="range" id="mapMonthSlider" min="0" max="0" value="0" class="month-slider">
+    <span class="map-month-display" id="mapMonthDisplay">มกราคม 2026</span>
   </div>
   <div class="map-nav-btns">
     <button class="map-nav-btn" id="mapPrev" title="เดือนก่อนหน้า"><span class="material-icons-outlined">chevron_left</span></button>
@@ -201,9 +195,9 @@ body.embed-charts #mapSection{display:none}
 
 <div class="chart-panel chart-wide">
 <div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> แนวโน้มรายปี (Inter-annual Trend)</div>
-<div class="chart-caption">จุดสีน้ำเงิน = ค่าเฉลี่ยรายปี | เส้นประสีแดง = เส้นแนวโน้มเชิงเส้น (Linear Regression)</div></div>
+<div class="chart-caption">ภาพรวม = เฉลี่ย 6 Marine zones เท่า ๆ กัน; จุดสามเหลี่ยม = ปีล่าสุดเฉลี่ยจากเดือนที่มีข้อมูล | เส้นแดง fit ปีเต็มและต่อค่าคาดการณ์ถึงปีล่าสุด</div></div>
 <div class="chart-body"><canvas id="chartTrend"></canvas></div>
-<div class="chart-desc"><strong>วิธีอ่าน:</strong> แกนตั้ง (Y) = ค่าเฉลี่ยทั้งปี, แกนนอน (X) = ปี ค.ศ. (พ.ศ.) ค่า slope ใน legend บอกอัตราเปลี่ยนแปลงต่อทศวรรษ (slope บวก = เพิ่มขึ้น, slope ลบ = ลดลง)</div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> เฉลี่ยรายเดือนในแต่ละ Marine zone ก่อน แล้วเฉลี่ย 6 โซนแบบน้ำหนักเท่ากัน; จุดปีล่าสุดใช้เฉพาะเดือนที่มีข้อมูล ส่วนเส้น regression fit จากปีที่ครบ 12 เดือนและ extrapolate ถึงปีล่าสุด</div>
 </div>
 
 <div class="chart-panel chart-wide">
@@ -395,14 +389,33 @@ Chart.defaults.font.family="'IBM Plex Sans Thai',sans-serif";
 Chart.defaults.font.size=11;
 let currentParam='sst', currentView='absolute';
 const yc={'2018':{l:'rgba(100,160,200,0.3)',f:'rgba(100,160,200,0.04)'},'2019':{l:'rgba(120,180,160,0.3)',f:'rgba(120,180,160,0.04)'},'2020':{l:'rgba(160,180,120,0.3)',f:'rgba(160,180,120,0.04)'},'2021':{l:'rgba(180,160,100,0.3)',f:'rgba(180,160,100,0.04)'},'2022':{l:'rgba(200,140,100,0.3)',f:'rgba(200,140,100,0.04)'},'2023':{l:'rgba(180,120,160,0.3)',f:'rgba(180,120,160,0.04)'},'2024':{l:'rgba(37,99,235,0.6)',f:'rgba(37,99,235,0.06)'},'2025':{l:'rgba(220,38,38,1)',f:'rgba(220,38,38,0.08)'},'2026':{l:'rgba(168,85,247,1)',f:'rgba(168,85,247,0.08)'}};
-let c1,c2,c3,c4;
+let c1,c2,c3,c4,yearlyTrendStats=null;
+let currentMapMonth=1,timelineDates=[],currentTimelineIndex=0;
 function D(){
   if(currentParam==='sst')return{clim:sstClimatology,mo:sstMonthly,zone:sstZone,an:sstAnomaly,za:sstZoneAnom,u:'°C',n:'SST',nTh:'อุณหภูมิผิวน้ำทะเล'};
-  return{clim:chlClimatology,mo:chlMonthly,zone:chlZone,an:chlAnomaly,za:chlZoneAnom,u:'mg/m\u00B3',n:'Chl-a',nTh:'คลอโรฟิลล์-เอ'};
+  return{clim:chlClimatology,mo:chlMonthly,zone:chlZone,an:chlAnomaly,za:chlZoneAnom,u:'µg/L',n:'Chl-a',nTh:'คลอโรฟิลล์-เอ'};
 }
-function gM(z,y,d){return z==='overall'?d.mo[y]:d.zone[z][y];}
-function gA(z,y,d){return z==='overall'?d.an[y]:d.za[z][y];}
 function avg(a){const v=a.filter(x=>x!==null);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}
+function zonalMeanSeries(zones,year){return months.map((_,index)=>avg(Object.values(zones).map(series=>series[year]?.[index]).filter(Number.isFinite)));}
+function gM(z,y,d){return z==='overall'?zonalMeanSeries(d.zone,y):d.zone[z][y];}
+function gA(z,y,d){return z==='overall'?zonalMeanSeries(d.za,y):d.za[z][y];}
+function applyMonthlyZonalStats(stats){
+  const monthlyStats=stats.monthly?.sst||{};
+  for(const [year,record] of Object.entries(monthlyStats)){
+    for(const zone of Object.keys(sstZone)){
+      const absolute=record.absolute?.zones?.[zone];
+      const anomaly=record.anomaly?.zones?.[zone];
+      if(absolute)sstZone[zone][year]=absolute;
+      if(anomaly)sstZoneAnom[zone][year]=anomaly;
+    }
+  }
+  for(const year of years){
+    sstMonthly[year]=zonalMeanSeries(sstZone,String(year));
+    sstAnomaly[year]=zonalMeanSeries(sstZoneAnom,String(year));
+    chlMonthly[year]=zonalMeanSeries(chlZone,String(year));
+    chlAnomaly[year]=zonalMeanSeries(chlZoneAnom,String(year));
+  }
+}
 
 function renderMain(zone,yr){
   const ctx=document.getElementById('chartMain').getContext('2d');if(c1)c1.destroy();
@@ -494,7 +507,7 @@ function renderHeatmap(zone){
 
 function renderBar(zone,yr){
   if(c3){c3.destroy();c3=null;}
-  document.getElementById('anomBadge').textContent=yr;
+  document.getElementById('anomBadge').textContent=yr+' · '+monthsFull[currentMapMonth-1];
   const d=D(),data=gA(zone,yr,d);
   const monthLabels=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
@@ -527,7 +540,7 @@ function renderBar(zone,yr){
     const leftPct = isPos ? zeroPct : (parseFloat(zeroPct) - pct).toFixed(2);
 
     html += `
-    <div style="display:flex;align-items:center;margin-bottom:5px;">
+    <div style="display:flex;align-items:center;margin-bottom:5px;${i===currentMapMonth-1?'background:#eff6ff;outline:1px solid #2563eb;':''}">
       <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${monthLabels[i]}</div>
       <div style="flex:1;position:relative;height:22px;background:#f8fafc;border-radius:3px;overflow:hidden;">
         <!-- grid lines -->
@@ -548,13 +561,51 @@ function renderBar(zone,yr){
 function renderTrend(zone){
   const ctx=document.getElementById('chartTrend').getContext('2d');if(c4)c4.destroy();
   const d=D();
-  let means=currentView==='absolute'?years.map(y=>avg(gM(zone,String(y),d))):years.map(y=>avg(gA(zone,String(y),d)));
-  const n=means.length,xM=(n-1)/2,yM=means.reduce((a,b)=>a+(b||0),0)/n;
-  let num=0,den=0;means.forEach((y,i)=>{if(y!==null){num+=(i-xM)*(y-yM);den+=(i-xM)*(i-xM);}});
-  const slope=num/den,intercept=yM-slope*xM;
-  const trend=means.map((v,i)=>+(intercept+slope*i).toFixed(4));
+  const marineZones=Object.keys(d.zone);
+  const zoneSeries=marineZones.map(zoneId=>years.map(year=>currentView==='absolute'?gM(zoneId,String(year),d):gA(zoneId,String(year),d)));
+  const monthlySeries=years.map(year=>currentView==='absolute'?gM(zone,String(year),d):gA(zone,String(year),d));
+  const trendKey=currentView==='absolute'?'monthly_absolute':'anomaly';
+  const trendSource=yearlyTrendStats?.trend?.[trendKey]?.[currentParam]||{};
+  const monthCounts=years.map((year,index)=>{
+    const record=currentParam==='sst'&&year>=2024?trendSource[String(year)]:null;
+    if(zone==='overall'){
+      if(record){
+        const counts=marineZones.map(zoneId=>record.zone_months?.[zoneId]).filter(Number.isFinite);
+        return counts.length?Math.min(...counts):0;
+      }
+      return Math.min(...zoneSeries.map(series=>series[index].filter(Number.isFinite).length));
+    }
+    const count=record?.zone_months?.[zone];
+    return Number.isFinite(count)?count:monthlySeries[index].filter(Number.isFinite).length;
+  });
+  const means=years.map((year,index)=>{
+    const record=currentParam==='sst'&&year>=2024?trendSource[String(year)]:null;
+    if(zone==='overall'){
+      const zoneMeans=record
+        ?marineZones.map(zoneId=>record.zones?.[zoneId]).filter(Number.isFinite)
+        :zoneSeries.map(series=>avg(series[index])).filter(Number.isFinite);
+      return avg(zoneMeans);
+    }
+    if(!record)return avg(monthlySeries[index]);
+    const value=record.zones?.[zone];
+    return Number.isFinite(value)?value:null;
+  });
+  const completeYearPoints=means.flatMap((value,index)=>monthCounts[index]===12&&Number.isFinite(value)?[{year:years[index],value}]:[]);
+  const meanYear=completeYearPoints.length?completeYearPoints.reduce((sum,point)=>sum+point.year,0)/completeYearPoints.length:0;
+  const meanValue=completeYearPoints.length?completeYearPoints.reduce((sum,point)=>sum+point.value,0)/completeYearPoints.length:0;
+  const denominator=completeYearPoints.reduce((sum,point)=>sum+(point.year-meanYear)**2,0);
+  const slope=denominator?completeYearPoints.reduce((sum,point)=>sum+(point.year-meanYear)*(point.value-meanValue),0)/denominator:null;
+  const intercept=slope===null?null:meanValue-slope*meanYear;
+  const trend=years.map(year=>slope===null?null:+(intercept+slope*year).toFixed(4));
+  const slopeLabel=slope===null?'n/a':(slope*10).toFixed(4);
   const yLab=currentView==='absolute'?'Annual Mean '+d.n+' ('+d.u+')':'Annual Mean Anomaly ('+d.u+')';
-  c4=new Chart(ctx,{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets:[{label:'ค่าเฉลี่ยรายปี (Annual Mean)',data:means.map(v=>v!==null?+v.toFixed(3):null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,fill:true,tension:.3},{label:'เส้นแนวโน้ม (slope: '+(slope*10).toFixed(4)+' '+d.u+'/decade)',data:trend,borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>' '+c.dataset.label.split(' (s')[0]+': '+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:9}},title:{display:true,text:'Year',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}});
+  c4=new Chart(ctx,{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets:[{label:'ค่าเฉลี่ยรายปี (Annual Mean)',data:means.map(v=>v!==null?+v.toFixed(3):null),borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',borderWidth:2,pointRadius:5,pointStyle:monthCounts.map(count=>count===12?'circle':'triangle'),pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,fill:true,tension:.3},{label:'เส้นแนวโน้ม (slope: '+(slope*10).toFixed(4)+' '+d.u+'/decade)',data:trend,borderColor:'rgba(220,38,38,0.7)',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:10},boxWidth:12,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,callbacks:{label:c=>' '+c.dataset.label.split(' (s')[0]+': '+c.parsed.y?.toFixed(3)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:9}},title:{display:true,text:'Year',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}});
+  c4.data.datasets[0].label='ค่าเฉลี่ยรายปี (สามเหลี่ยม = ปีข้อมูลบางส่วน)';
+  c4.data.datasets[0].data=means.map(value=>value===null?null:+value.toFixed(3));
+  c4.data.datasets[0].pointStyle=monthCounts.map(count=>count===12?'circle':'triangle');
+  c4.data.datasets[1].label='เส้นแนวโน้ม (fit ปีเต็ม, slope: '+slopeLabel+' '+d.u+'/decade)';
+  c4.data.datasets[1].data=trend;
+  c4.update('none');
 }
 
 let c5;
@@ -565,8 +616,10 @@ function renderDual(zone,yr){
   const chlAn=zone==='overall'?chlAnomaly[yr]:chlZoneAnom[zone][yr];
   c5=new Chart(ctx,{type:'line',data:{labels:months,datasets:[
     {label:'SST Anomaly (°C)',data:sstAn,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#2563eb',fill:true,tension:.4,yAxisID:'y'},
-    {label:'Chl-a Anomaly (mg/m³) [กลับด้าน]',data:chlAn,borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#059669',pointStyle:'rect',fill:true,tension:.4,yAxisID:'y1'}
+    {label:'Chl-a Anomaly (µg/L) [กลับด้าน]',data:chlAn,borderColor:'#059669',backgroundColor:'rgba(5,150,105,0.1)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#059669',pointStyle:'rect',fill:true,tension:.4,yAxisID:'y1'}
   ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,usePointStyle:true,padding:12}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:function(c){const v=c.parsed.y;return ' '+c.dataset.label.split(' [')[0]+': '+(v>0?'+':'')+v?.toFixed(3);}}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{type:'linear',position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#2563eb',font:{weight:'500'}},title:{display:true,text:'SST Anomaly (°C)',color:'#2563eb',font:{size:11,weight:'600'}}},y1:{type:'linear',position:'right',reverse:true,grid:{drawOnChartArea:false},ticks:{color:'#059669',font:{weight:'500'}},title:{display:true,text:'Chl-a Anomaly (กลับด้าน)',color:'#059669',font:{size:11,weight:'600'}}}}}});
+  c5.data.datasets.forEach(dataset=>{dataset.pointRadius=months.map((_,index)=>index===currentMapMonth-1?7:4);});
+  c5.update('none');
   // Generate insights
   generateInsights(zone,yr);
 }
@@ -601,7 +654,7 @@ function updateSummary(zone,yr){
 
   // Title
   document.getElementById('summaryTitle').textContent=
-    (isSST?'อุณหภูมิผิวน้ำทะเล (SST)':'คลอโรฟิลล์-เอ (Chl-a)')+' · '+zoneName+' · ปี '+(parseInt(yr)+543);
+    'สรุปรายปี '+(isSST?'อุณหภูมิผิวน้ำทะเล (SST)':'คลอโรฟิลล์-เอ (Chl-a)')+' · '+zoneName+' · '+(parseInt(yr)+543)+' · เดือนที่เลือก '+monthsFull[currentMapMonth-1];
 
   // Badge
   const anomSign=meanAnom>=0?'▲ สูงกว่าปกติ':'▼ ต่ำกว่าปกติ';
@@ -638,9 +691,9 @@ function updateSummary(zone,yr){
       else if(meanAnom<-0.5) insight=`🌊 SST ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> เฉลี่ย ${meanAnom.toFixed(2)} °C อาจบ่งชี้สภาวะ La Niña หรือ Upwelling เพิ่มขึ้น`;
       else insight=`SST ปี ${parseInt(yr)+543} ใกล้เคียงค่าเฉลี่ยปกติ · ช่วงแกว่ง ${minVal.toFixed(1)}–${maxVal.toFixed(1)} °C`;
     } else {
-      if(meanAnom>0.05) insight=`🌿 Chl-a ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> (+${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิเพิ่มขึ้น อาจเกิดจาก nutrient enrichment หรือ upwelling`;
-      else if(meanAnom<-0.05) insight=`Chl-a ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> (${meanAnom.toFixed(3)} mg/m³) → ผลผลิตขั้นปฐมภูมิลดลง อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น`;
-      else insight=`Chl-a ปี ${parseInt(yr)+543} ใกล้เคียงค่าปกติ · ช่วง ${minVal.toFixed(3)}–${maxVal.toFixed(3)} mg/m³`;
+      if(meanAnom>0.05) insight=`🌿 Chl-a ปี ${parseInt(yr)+543} <strong>สูงกว่าปกติ</strong> (+${meanAnom.toFixed(3)} µg/L) → ผลผลิตขั้นปฐมภูมิเพิ่มขึ้น อาจเกิดจาก nutrient enrichment หรือ upwelling`;
+      else if(meanAnom<-0.05) insight=`Chl-a ปี ${parseInt(yr)+543} <strong>ต่ำกว่าปกติ</strong> (${meanAnom.toFixed(3)} µg/L) → ผลผลิตขั้นปฐมภูมิลดลง อาจเกี่ยวข้องกับ stratification ที่เพิ่มขึ้น`;
+      else insight=`Chl-a ปี ${parseInt(yr)+543} ใกล้เคียงค่าปกติ · ช่วง ${minVal.toFixed(3)}–${maxVal.toFixed(3)} µg/L`;
     }
   } else {
     const posCount=validAn.filter(v=>v>0).length, negCount=validAn.filter(v=>v<0).length;
@@ -652,23 +705,25 @@ function updateSummary(zone,yr){
 
 function updateKPI(zone,yr){
   const d=D(),mo=gM(zone,yr,d),an=gA(zone,yr,d);
-  let last=11;for(let i=11;i>=0;i--){if(mo[i]!==null){last=i;break;}}
+  const selectedMonth=currentMapMonth-1;
   const p=currentParam==='chl'?3:2;
   if(currentView==='absolute'){
-    document.getElementById('kpiVal1').textContent=mo[last]?mo[last].toFixed(p):'—';
-    document.getElementById('kpiVal2').textContent=avg(d.clim.mean).toFixed(p);
-    document.getElementById('kpiVal3').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'—';
+    document.getElementById('kpiVal1').textContent=mo[selectedMonth]!==null?mo[selectedMonth].toFixed(p):'—';
+    document.getElementById('kpiVal2').textContent=d.clim.mean[selectedMonth].toFixed(p);
+    document.getElementById('kpiVal3').textContent=an[selectedMonth]!==null?(an[selectedMonth]>0?'+':'')+an[selectedMonth].toFixed(p):'—';
     document.getElementById('kpiVal4').textContent=Math.max(...mo.filter(v=>v!==null)).toFixed(p);
-    document.getElementById('kpiLab1').textContent='ค่าเฉลี่ยเดือนล่าสุด ('+d.u+')';
-    document.getElementById('kpiLab3').textContent='Anomaly เดือนล่าสุด';
+    document.getElementById('kpiLab1').textContent='ค่าเฉลี่ย '+monthsFull[selectedMonth]+' ('+d.u+')';
+    document.getElementById('kpiLab2').textContent='Climatology '+monthsFull[selectedMonth];
+    document.getElementById('kpiLab3').textContent='Anomaly '+monthsFull[selectedMonth];
     document.getElementById('kpiLab4').textContent='ค่าสูงสุดในปี ('+d.u+')';
   } else {
-    document.getElementById('kpiVal1').textContent=an[last]!==null?(an[last]>0?'+':'')+an[last].toFixed(p):'—';
+    document.getElementById('kpiVal1').textContent=an[selectedMonth]!==null?(an[selectedMonth]>0?'+':'')+an[selectedMonth].toFixed(p):'—';
     document.getElementById('kpiVal2').textContent=avg(an)!==null?avg(an).toFixed(p):'—';
     const mx=Math.max(...an.filter(v=>v!==null)),mn=Math.min(...an.filter(v=>v!==null));
     document.getElementById('kpiVal3').textContent=mn.toFixed(p);
     document.getElementById('kpiVal4').textContent=(mx>0?'+':'')+mx.toFixed(p);
-    document.getElementById('kpiLab1').textContent='Anomaly เดือนล่าสุด ('+d.u+')';
+    document.getElementById('kpiLab1').textContent='Anomaly '+monthsFull[selectedMonth]+' ('+d.u+')';
+    document.getElementById('kpiLab2').textContent='Anomaly เฉลี่ยทั้งปี';
     document.getElementById('kpiLab3').textContent='Min Anomaly';
     document.getElementById('kpiLab4').textContent='Max Anomaly ('+d.u+')';
   }
@@ -677,14 +732,23 @@ function updateKPI(zone,yr){
 
 function renderAll(){
   const z=document.getElementById('zoneSelect').value,y=document.getElementById('yearSelect').value;
-  renderMain(z,y);renderBar(z,y);renderTrend(z);renderDual(z,y);updateKPI(z,y);updateSummary(z,y);
+  renderMain(z,y);
+  const selectedMainDataset=c1.data.datasets.find(dataset=>dataset.label===String(y));
+  if(selectedMainDataset)selectedMainDataset.pointRadius=months.map((_,index)=>index===currentMapMonth-1?7:2);
+  c1.update('none');
+  renderBar(z,y);
+  renderTrend(z);
+  c4.data.datasets[0].pointRadius=years.map(year=>String(year)===String(y)?8:5);
+  c4.update('none');
+  renderDual(z,y);updateKPI(z,y);updateSummary(z,y);
 }
 
 document.querySelectorAll('.param-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.param-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentParam=b.dataset.param;renderAll();});});
 document.querySelectorAll('.view-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentView=b.dataset.view;renderAll();});});
 document.getElementById('zoneSelect').addEventListener('change',renderAll);
-document.getElementById('yearSelect').addEventListener('change',renderAll);
 renderAll();
+const trendStatsUrl=['localhost','127.0.0.1'].includes(location.hostname)?'/api/yearly/stats':'https://raw.githubusercontent.com/Thiramet2004/viirs-marine-dashboard/main/data/Yearly_RGB/stats.json';
+fetch(trendStatsUrl).then(response=>response.ok?response.json():null).then(data=>{if(!data)return;yearlyTrendStats=data;applyMonthlyZonalStats(data);syncMapMonthRange();renderAll();}).catch(()=>{});
 
 function setEmbedMode(mode) {
   document.body.classList.toggle('embed-map', mode === 'map');
@@ -721,7 +785,7 @@ function getTifUrl(view, param, year, month) {
 const PALETTES = {
   chl_absolute: {
     label: 'Chlorophyll-a',
-    unit: 'mg/m³',
+    unit: 'µg/L',
     min: 0.0,
     max: 20.0,
     stops: [
@@ -748,7 +812,7 @@ const PALETTES = {
   },
   chl_anomaly: {
     label: 'Chl-a Anomaly',
-    unit: 'mg/m³',
+    unit: 'µg/L',
     min: -20.0,
     max: 20.0,
     stops: [
@@ -782,19 +846,27 @@ function getCurrentPalette() {
 
 let leafletMap = null;
 let currentMapLayer = null;
-let currentMapMonth = 1;
-
 function syncMapMonthRange() {
-  const zone = document.getElementById('zoneSelect').value;
-  const year = document.getElementById('yearSelect').value;
-  const data = currentView === 'absolute' ? D().mo : D().an;
-  const values = zone === 'overall' ? data[year] : (currentView === 'absolute' ? D().zone[zone][year] : D().za[zone][year]);
-  const availableMonths = values.reduce((last, value, index) => value !== null ? index + 1 : last, 0);
-  const maxMonth = Math.max(1, availableMonths);
+  const selectedYear = Number(document.getElementById('yearSelect').value) || years[years.length - 1];
+  const selectedMonth = currentMapMonth;
+  timelineDates = years.flatMap(year => {
+    const monthCount = year < 2026 ? 12 : currentView === 'anomaly' ? 0 : currentParam === 'sst' ? 8 : 7;
+    return Array.from({length: monthCount}, (_, index) => ({year, month: index + 1}));
+  });
+  if (!timelineDates.length) return;
+  let index = timelineDates.findIndex(date => date.year === selectedYear && date.month === selectedMonth);
+  if (index < 0) {
+    const nextDate = timelineDates.findIndex(date => date.year > selectedYear || (date.year === selectedYear && date.month > selectedMonth));
+    index = nextDate < 0 ? timelineDates.length - 1 : Math.max(0, nextDate - 1);
+  }
+  currentTimelineIndex = index;
+  const selectedDate = timelineDates[index];
+  document.getElementById('yearSelect').value = selectedDate.year;
+  currentMapMonth = selectedDate.month;
   const slider = document.getElementById('mapMonthSlider');
-  slider.max = maxMonth;
-  if (currentMapMonth > maxMonth) currentMapMonth = maxMonth;
-  slider.value = currentMapMonth;
+  slider.min = 0;
+  slider.max = timelineDates.length - 1;
+  slider.value = currentTimelineIndex;
 }
 
 function initLeafletMap() {
@@ -940,7 +1012,7 @@ function updateMapUI() {
   document.getElementById('mapParamBadge').textContent = pal.label;
   document.getElementById('mapParamBadge').className = 'map-param-badge' + (param === 'sst' ? ' sst' : '');
   
-  document.getElementById('mapMonthDisplay').textContent = monthsFull[currentMapMonth - 1];
+  document.getElementById('mapMonthDisplay').textContent = monthsFull[currentMapMonth - 1] + ' ' + document.getElementById('yearSelect').value;
   
   // Update map title and caption dynamically
   let title = '';
@@ -952,7 +1024,7 @@ function updateMapUI() {
       caption = 'แสดงค่าอุณหภูมิผิวน้ำทะเลเฉลี่ยรายเดือน (°C) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงอุณหภูมิสูง (28-35°C) และสีน้ำเงินแสดงอุณหภูมิต่ำ (20-25°C) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     } else {
       title = 'ภาพดาวเทียมคลอโรฟิลล์-เอ แบบ Interactive';
-      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (mg/m³) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงความเข้มข้นสูง (>5 mg/m³) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ (<0.5 mg/m³) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
+      caption = 'แสดงความเข้มข้นของคลอโรฟิลล์-เอเฉลี่ยรายเดือน (µg/L) จากดาวเทียม VIIRS โดยสีแดง-ส้มแสดงความเข้มข้นสูง (>5 µg/L) และสีน้ำเงินเข้มแสดงความเข้มข้นต่ำ (<0.5 µg/L) คลิกบนแผนที่เพื่อดูค่าที่ตำแหน่งนั้น ๆ';
     }
   } else { // anomaly
     if (param === 'sst') {
@@ -960,7 +1032,7 @@ function updateMapUI() {
       caption = 'แสดงความผิดปกติของอุณหภูมิผิวน้ำทะเล (°C) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดงแสดงอุณหภูมิสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     } else {
       title = 'ภาพดาวเทียม Chlorophyll-a Anomaly แบบ Interactive';
-      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (mg/m³) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดง-ส้มแสดงความเข้มข้นสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
+      caption = 'แสดงความผิดปกติของคลอโรฟิลล์-เอ (µg/L) เทียบกับค่าเฉลี่ยระยะยาว โดยสีแดง-ส้มแสดงความเข้มข้นสูงกว่าปกติ สีน้ำเงินแสดงต่ำกว่าปกติ และสีขาวแสดงใกล้เคียงค่าเฉลี่ย คลิกบนแผนที่เพื่อดูค่า Anomaly ที่ตำแหน่งนั้น ๆ';
     }
   }
   
@@ -994,19 +1066,23 @@ function updateMapUI() {
 }
 
 function changeMapMonth(delta) {
-  const maxMonth = parseInt(document.getElementById('mapMonthSlider').max, 10) || 12;
-  currentMapMonth += delta;
-  if (currentMapMonth < 1) currentMapMonth = maxMonth;
-  if (currentMapMonth > maxMonth) currentMapMonth = 1;
-  document.getElementById('mapMonthSlider').value = currentMapMonth;
-  updateMapUI();
-  loadMapGeoTIFF();
+  const index = Math.max(0, Math.min(timelineDates.length - 1, currentTimelineIndex + delta));
+  const date = timelineDates[index];
+  if (!date) return;
+  currentTimelineIndex = index;
+  document.getElementById('yearSelect').value = date.year;
+  currentMapMonth = date.month;
+  renderAll();
 }
 
 document.getElementById('mapMonthSlider').addEventListener('input', function() {
-  currentMapMonth = parseInt(this.value);
-  updateMapUI();
-  loadMapGeoTIFF();
+  const index = Number(this.value);
+  const date = timelineDates[index];
+  if (!date) return;
+  currentTimelineIndex = index;
+  document.getElementById('yearSelect').value = date.year;
+  currentMapMonth = date.month;
+  renderAll();
 });
 
 document.getElementById('mapPrev').addEventListener('click', () => changeMapMonth(-1));
@@ -1015,9 +1091,9 @@ document.getElementById('mapNext').addEventListener('click', () => changeMapMont
 // เพิ่ม map update เมื่อเปลี่ยน param/year
 const origRenderAll = renderAll;
 renderAll = function() {
+  syncMapMonthRange();
   origRenderAll();
   if (leafletMap) {
-    syncMapMonthRange();
     updateMapUI();
     loadMapGeoTIFF();
   }

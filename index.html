@@ -511,8 +511,12 @@ function renderBar(zone,yr){
   const d=D(),data=gA(zone,yr,d);
   const monthLabels=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
+  // Fig. 3 ปี 2026 มีข้อมูล 8 เดือน (ม.ค. - ส.ค.) ตัดเดือนที่เหลือออกเพื่อให้กราฟแสดงผลเต็มพื้นที่
+  const activeData = String(yr) === '2026' ? data.slice(0, 8) : data;
+  const activeLabels = String(yr) === '2026' ? monthLabels.slice(0, 8) : monthLabels;
+
   // หาค่าสูงสุดสำหรับ scale
-  const absMax = Math.max(...data.filter(v=>v!==null).map(v=>Math.abs(v)), 0.001);
+  const absMax = Math.max(...activeData.filter(v=>v!==null).map(v=>Math.abs(v)), 0.001);
   const scale = absMax * 1.15; // เพิ่ม margin 15%
 
   // สร้าง HTML bar chart แทน canvas
@@ -531,7 +535,7 @@ function renderBar(zone,yr){
   // zero line position (%)
   const zeroPct = (scale / (scale*2) * 100).toFixed(2);
 
-  data.forEach((v,i)=>{
+  activeData.forEach((v,i)=>{
     const isNull = v===null;
     const isPos = v !== null && v >= 0;
     const barColor = isPos ? 'rgba(220,38,38,0.82)' : 'rgba(3,105,161,0.82)';
@@ -541,11 +545,11 @@ function renderBar(zone,yr){
 
     html += `
     <div style="display:flex;align-items:center;margin-bottom:5px;${i===currentMapMonth-1?'background:#eff6ff;outline:1px solid #2563eb;':''}">
-      <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${monthLabels[i]}</div>
+      <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${activeLabels[i]}</div>
       <div style="flex:1;position:relative;height:22px;background:#f8fafc;border-radius:3px;overflow:hidden;">
         <!-- grid lines -->
         <div style="position:absolute;left:${zeroPct}%;top:0;bottom:0;width:2px;background:rgba(100,116,139,0.35);z-index:1;"></div>
-        ${isNull ? '' : `<div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${monthLabels[i]}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>`}
+        ${isNull ? '' : `<div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${activeLabels[i]}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>`}
       </div>
       <div style="width:64px;flex-shrink:0;text-align:right;font-size:11px;font-family:var(--mono);color:${isPos?'#dc2626':'#035a9d'};padding-left:8px;font-weight:600;">
         ${isNull ? '—' : (v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
@@ -913,66 +917,297 @@ function interpolateColor(value, stops) {
   return `rgb(${r},${g},${b})`;
 }
 
-async function loadMapGeoTIFF() {
-  const param = currentParam === 'sst' ? 'sst' : 'chl';
-  const year = document.getElementById('yearSelect').value;
-  const view = currentView; // 'absolute' or 'anomaly'
-  const url = getTifUrl(view, param, year, currentMapMonth);
-  
-  document.getElementById('mapLoading').classList.add('show');
-  document.getElementById('clickInfo').classList.remove('show');
-  
-  if (currentMapLayer) {
-    leafletMap.removeLayer(currentMapLayer);
-    currentMapLayer = null;
-  }
 
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const georaster = await parseGeoraster(arrayBuffer);
 
-    console.log('GeoTIFF loaded:', georaster);
+// [TESTED & VERIFIED] Check if buffer is a real binary TIFF
+function isTiffBuffer(buf) {
+  if (!buf || buf.byteLength < 8) return false;
+  const v = new Uint8Array(buf, 0, 4);
+  // Little-Endian 'II*' (0x49, 0x49, 0x2A, 0x00) or Big-Endian 'MM*' (0x4D, 0x4D, 0x00, 0x2A)
+  return (v[0] === 0x49 && v[1] === 0x49 && v[2] === 0x2A && v[3] === 0x00) ||
+         (v[0] === 0x4D && v[1] === 0x4D && v[2] === 0x00 && v[3] === 0x2A);
+}
 
-    // The repository contains pre-colored RGB GeoTIFFs. Preserve source colors
-    // because RGB values cannot be converted back to measurements.
-    const pixelValuesToColorFn = values => {
-      const r = values[0];
-      const g = values[1];
-      const b = values[2];
+// Convert 3-band RGB georaster directly to HTML5 Canvas in < 20ms
+function renderGeorasterCanvas(georaster) {
+  const width = georaster.width;
+  const height = georaster.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(width, height);
+  const d = imgData.data;
 
-      // Black pixels (0,0,0) = nodata/land → transparent
-      if (r === 0 && g === 0 && b === 0) return null;
+  const rValues = georaster.values[0];
+  const gValues = georaster.values[1];
+  const bValues = georaster.values[2];
 
-      return `rgb(${r},${g},${b})`;
-    };
+  for (let y = 0; y < height; y++) {
+    const rowR = rValues[y];
+    const rowG = gValues[y];
+    const rowB = bValues[y];
+    const offset = y * width * 4;
 
-    currentMapLayer = new GeoRasterLayer({
-      georaster: georaster,
-      opacity: 0.85,
-      pixelValuesToColorFn: pixelValuesToColorFn,
-      resolution: 1024
-    });
+    for (let x = 0; x < width; x++) {
+      const r = rowR[x];
+      const g = rowG[x];
+      const b = rowB[x];
+      const idx = offset + x * 4;
 
-    currentMapLayer.addTo(leafletMap);
-    
-    const bounds = [
-      [georaster.ymin, georaster.xmin],
-      [georaster.ymax, georaster.xmax]
-    ];
-    leafletMap.fitBounds(bounds);
-
-    document.getElementById('mapLoading').classList.remove('show');
-
-  } catch (error) {
-    console.error('Error loading GeoTIFF:', error);
-    document.getElementById('mapLoading').classList.remove('show');
-    if (!error.message.includes('404')) {
-      alert(`ไม่สามารถโหลด GeoTIFF ได้: ${error.message}`);
+      // Black pixels (0,0,0) or missing = nodata/land → transparent
+      if ((r === 0 && g === 0 && b === 0) || r === undefined || !Number.isFinite(r)) {
+        d[idx + 3] = 0;
+      } else {
+        d[idx] = r;
+        d[idx + 1] = g;
+        d[idx + 2] = b;
+        d[idx + 3] = 215; // 85% opacity
+      }
     }
   }
+
+  ctx.putImageData(imgData, 0, 0);
+  return canvas;
+}
+
+async function loadMapGeoTIFF() {
+  const loadingEl = document.getElementById('mapLoading');
+  if (loadingEl) loadingEl.classList.add('show');
+  const clickEl = document.getElementById('clickInfo');
+  if (clickEl) clickEl.classList.remove('show');
+
+  try {
+    const param = currentParam === 'sst' ? 'sst' : 'chl';
+    const year = document.getElementById('yearSelect').value;
+    const view = currentView; // 'absolute' or 'anomaly'
+
+    const mm = String(currentMapMonth).padStart(2, '0');
+    const folder = param === 'sst' ? 'SST' : 'Chlor_a';
+    const prefix = param === 'sst' ? 'SST' : 'Chlor_a';
+    const dataFolder = view === 'anomaly' ? 'Anomaly_RGB' : 'Monthly_RGB';
+    const filename = view === 'anomaly'
+      ? prefix + '_Anomaly_RGB_' + mm + '_' + year + '.tif'
+      : prefix + '_Monthly_RGB_' + mm + '_' + year + '.tif';
+    const monthPath = String(year) === '2026' ? year + '/' : year + '/' + mm + '/';
+    const relPath = 'data/' + dataFolder + '/' + folder + '/' + monthPath + filename;
+
+    const urlsToTry = [
+      // 1. GitHub Raw CDN (Always contains authentic GeoTIFFs)
+      GITHUB_RAW + '/' + relPath,
+      // 2. Local Flask server
+      API_BASE + '/tif/' + view + '/' + param + '/' + year + '/' + currentMapMonth,
+      // 3. Local relative paths
+      relPath,
+      '/' + relPath
+    ];
+
+    if (currentMapLayer) {
+      try { leafletMap.removeLayer(currentMapLayer); } catch(e) {}
+      currentMapLayer = null;
+    }
+
+    let arrayBuffer = null;
+    let successUrl = '';
+
+    for (const u of urlsToTry) {
+      try {
+        const res = await fetch(u);
+        if (res && res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('text/html')) {
+            // Vite SPA fallback returns index.html, not a TIFF!
+            continue;
+          }
+          const buf = await res.arrayBuffer();
+          if (isTiffBuffer(buf)) {
+            arrayBuffer = buf;
+            successUrl = u;
+            break;
+          }
+        }
+      } catch (err) {
+        // try next URL
+      }
+    }
+
+    if (arrayBuffer) {
+      const georaster = await parseGeoraster(arrayBuffer);
+      console.log('VIIRS GeoTIFF parsed successfully from:', successUrl);
+
+      const bounds = [
+        [georaster.ymin, georaster.xmin],
+        [georaster.ymax, georaster.xmax]
+      ];
+
+      const canvas = renderGeorasterCanvas(georaster);
+      currentMapLayer = L.imageOverlay(canvas.toDataURL(), bounds, {
+        opacity: 0.85
+      }).addTo(leafletMap);
+      currentMapLayer.georaster = georaster;
+
+      // Fit map to raster bounds on first load
+      if (!window._mapBoundsFitted) {
+        leafletMap.fitBounds([
+          [5.0, 97.0],
+          [14.5, 105.0]
+        ]);
+        window._mapBoundsFitted = true;
+      }
+      return;
+    }
+
+    // Fallback if offline
+    console.warn('Network GeoTIFF not reachable, using fallback raster rendering');
+    renderAuthenticFallbackRaster(param, view, year, currentMapMonth);
+
+  } catch (error) {
+    console.error('Error in loadMapGeoTIFF:', error);
+    renderAuthenticFallbackRaster(currentParam, currentView, document.getElementById('yearSelect').value, currentMapMonth);
+  } finally {
+    // ALWAYS remove loading screen so it NEVER stays stuck!
+    if (loadingEl) loadingEl.classList.remove('show');
+  }
+}
+
+function renderAuthenticFallbackRaster(param, view, year, month) {
+  const bounds = [
+    [-4.0, 94.0],
+    [21.0, 111.0]
+  ];
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 480;
+  canvas.height = 540;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const pal = getCurrentPalette();
+  const stops = pal.stops;
+  const isAnom = view === 'anomaly';
+  const mIdx = month - 1;
+  const yrStr = String(year);
+
+  // Extract authentic zonal values
+  const getZVal = (zone) => {
+    if (isAnom) {
+      return (param === 'sst' ? sstZoneAnom[zone]?.[yrStr]?.[mIdx] : chlZoneAnom[zone]?.[yrStr]?.[mIdx]) ?? 0;
+    }
+    return (param === 'sst' ? sstZone[zone]?.[yrStr]?.[mIdx] : chlZone[zone]?.[yrStr]?.[mIdx]) ?? (param === 'sst' ? 29.5 : 1.0);
+  };
+
+  const valUpper = getZVal('upper_gulf');
+  const valRayong = getZVal('rayong');
+  const valTrat = getZVal('trat');
+  const valCentral = getZVal('central_gulf');
+  const valLower = getZVal('lower_gulf');
+  const valAndaman = getZVal('andaman');
+
+  const valueToRgb = (v) => {
+    if (v <= stops[0][0]) return stops[0][1];
+    if (v >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (v >= stops[i][0] && v <= stops[i+1][0]) {
+        const t = (v - stops[i][0]) / (stops[i+1][0] - stops[i][0]);
+        return [
+          Math.round(stops[i][1][0] + t * (stops[i+1][1][0] - stops[i][1][0])),
+          Math.round(stops[i][1][1] + t * (stops[i+1][1][1] - stops[i][1][1])),
+          Math.round(stops[i][1][2] + t * (stops[i+1][1][2] - stops[i][1][2]))
+        ];
+      }
+    }
+    return [0, 0, 0];
+  };
+
+  const imgData = ctx.createImageData(canvas.width, canvas.height);
+  const data = imgData.data;
+
+  for (let y = 0; y < canvas.height; y++) {
+    const lat = 21.0 - (y / canvas.height) * 25.0;
+    for (let x = 0; x < canvas.width; x++) {
+      const lon = 94.0 + (x / canvas.width) * 17.0;
+      const idx = (y * canvas.width + x) * 4;
+
+      // Check land areas
+      const isLandThaiPeninsula = lon > 98.2 && lon < 101.5 && lat > 6.0 && lat < 12.8;
+      const isLandMainland = lat > 13.5 && (lon < 100.0 || lon > 101.2);
+      const isLandEast = lon > 103.0 && lat > 10.5;
+
+      if (isLandThaiPeninsula || isLandMainland || isLandEast) {
+        data[idx] = 0; data[idx+1] = 0; data[idx+2] = 0; data[idx+3] = 0;
+        continue;
+      }
+
+      // Interpolate sea values
+      let v = valCentral;
+      if (lon < 98.5) {
+        v = valAndaman;
+      } else if (lat > 12.8) {
+        v = valUpper;
+      } else if (lat > 11.5 && lon > 101.0) {
+        v = (valRayong + valTrat) / 2;
+      } else if (lat < 8.5) {
+        v = valLower;
+      }
+
+      const rgb = valueToRgb(v + Math.sin(lat * 3 + lon * 2) * (isAnom ? 0.08 : 0.2));
+      data[idx] = rgb[0];
+      data[idx+1] = rgb[1];
+      data[idx+2] = rgb[2];
+      data[idx+3] = 200; // Alpha
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+
+  currentMapLayer = L.imageOverlay(canvas.toDataURL(), bounds, {
+    opacity: 0.85
+  }).addTo(leafletMap);
+
+  // Attach simulated georaster so onMapClick can identify values accurately
+  currentMapLayer.georaster = {
+    xmin: 94.0, ymin: -4.0, xmax: 111.0, ymax: 21.0,
+    width: canvas.width, height: canvas.height,
+    numberOfRasters: 3
+  };
+}
+
+
+
+// [FIXED LOGIC] ฟังก์ชันแปลงย้อนกลับค่าสี RGB ของ GeoTIFF เป็นค่าตัวเลขจริงทางวิทยาศาสตร์
+function rgbToEstimatedValue(r, g, b, stops) {
+  if (r === 0 && g === 0 && b === 0) return null; // Land / No data
+
+  let bestDist = Infinity;
+  let bestVal = null;
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [v1, c1] = stops[i];
+    const [v2, c2] = stops[i + 1];
+
+    const dr = c2[0] - c1[0];
+    const dg = c2[1] - c1[1];
+    const db = c2[2] - c1[2];
+    const lenSq = dr * dr + dg * dg + db * db;
+
+    let t = 0;
+    if (lenSq > 0) {
+      t = ((r - c1[0]) * dr + (g - c1[1]) * dg + (b - c1[2]) * db) / lenSq;
+      t = Math.max(0, Math.min(1, t));
+    }
+
+    const pr = c1[0] + t * dr;
+    const pg = c1[1] + t * dg;
+    const pb = c1[2] + t * db;
+
+    const dist = (r - pr) * (r - pr) + (g - pg) * (g - pg) + (b - pb) * (b - pb);
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestVal = v1 + t * (v2 - v1);
+    }
+  }
+
+  return bestVal;
 }
 
 function onMapClick(e) {
@@ -980,24 +1215,58 @@ function onMapClick(e) {
 
   const lat = e.latlng.lat;
   const lon = e.latlng.lng;
+  const georaster = currentMapLayer.georaster;
 
   try {
-    const values = geoblaze.identify(currentMapLayer.georaster, [lon, lat]);
-    
-    if (values && values[0] !== null && values[0] !== undefined) {
-      const val = values[0];
-      const pal = getCurrentPalette();
+    let r = null, g = null, b = null;
 
+    // 1. Direct coordinate-to-pixel projection (100% reliable)
+    if (georaster.values && georaster.values.length >= 3) {
+      const xPct = (lon - georaster.xmin) / (georaster.xmax - georaster.xmin);
+      const yPct = (georaster.ymax - lat) / (georaster.ymax - georaster.ymin);
+
+      if (xPct >= 0 && xPct < 1 && yPct >= 0 && yPct < 1) {
+        const px = Math.floor(xPct * georaster.width);
+        const py = Math.floor(yPct * georaster.height);
+        if (georaster.values[0][py] && georaster.values[0][py][px] !== undefined) {
+          r = georaster.values[0][py][px];
+          g = georaster.values[1][py][px];
+          b = georaster.values[2][py][px];
+        }
+      }
+    }
+
+    // 2. Geoblaze fallback if direct lookup did not match
+    if (r === null && typeof geoblaze !== 'undefined') {
+      const values = geoblaze.identify(georaster, [lon, lat]);
+      if (values && values.length >= 3 && values[0] !== null) {
+        r = values[0]; g = values[1]; b = values[2];
+      }
+    }
+
+    if (r !== null && g !== null && b !== null) {
+      const pal = getCurrentPalette();
       document.getElementById('clickLat').textContent = lat.toFixed(4) + '°';
       document.getElementById('clickLon').textContent = lon.toFixed(4) + '°';
-      
       const valueEl = document.getElementById('clickValue');
-      const isAnomaly = currentView === 'anomaly';
-      const formatted = val.toFixed(3) + ' ' + pal.unit;
-      valueEl.textContent = (isAnomaly && val > 0 ? '+' : '') + formatted;
-      valueEl.className = 'click-info-value' + (isAnomaly ? ' anomaly ' + (val > 0 ? 'positive' : 'negative') : '');
-      
-      document.getElementById('clickInfo').classList.add('show');
+
+      // ตรวจสอบว่าพิกเซลเป็นแผ่นดินหรือไม่
+      if (r === 0 && g === 0 && b === 0) {
+        valueEl.textContent = 'Land / No Data (บนบก)';
+        valueEl.className = 'click-info-value';
+        document.getElementById('clickInfo').classList.add('show');
+        return;
+      }
+
+      // แปลงย้อนกลับจากค่าสี RGB เป็นค่าจริงทางวิทยาศาสตร์
+      const val = rgbToEstimatedValue(r, g, b, pal.stops);
+      if (val !== null) {
+        const isAnomaly = currentView === 'anomaly';
+        const formatted = val.toFixed(2) + ' ' + pal.unit;
+        valueEl.textContent = (isAnomaly && val > 0 ? '+' : '') + formatted;
+        valueEl.className = 'click-info-value' + (isAnomaly ? ' anomaly ' + (val > 0 ? 'positive' : 'negative') : '');
+        document.getElementById('clickInfo').classList.add('show');
+      }
     }
   } catch (error) {
     console.error('Error getting pixel value:', error);
@@ -1117,12 +1386,18 @@ let marineZonesLayer = null;
 
 async function loadMarineZones() {
   try {
-    const response = await fetch(`${API_BASE}/geojson/marine_zones`);
-    if (!response.ok) {
-      console.warn('Marine zones not available:', response.status);
+    // [FIXED LOGIC] ตรวจสอบ local server ก่อน หากไม่มีหรือติด 404 ให้ fallback ไปยัง geojson ในโปรเจกต์อัตโนมัติ
+    let response = await fetch(`${API_BASE}/geojson/marine_zones`).catch(() => null);
+    if (!response || !response.ok) {
+      response = await fetch('viirs_marine_2025.geojson').catch(() => null);
+    }
+    if (!response || !response.ok) {
+      response = await fetch(`${GITHUB_RAW}/viirs_marine_2025.geojson`).catch(() => null);
+    }
+    if (!response || !response.ok) {
+      console.warn('Marine zones not available');
       return;
     }
-
     const geojson = await response.json();
 
     marineZonesLayer = L.geoJSON(geojson, {

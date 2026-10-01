@@ -63,7 +63,7 @@ body.embed-charts #mapSection{display:none}
 <div class="nav-brand">
 <div class="agency-logos"><img src="assets/mhesi-logo.png" alt="กระทรวงการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม (อว.)" title="กระทรวงการอุดมศึกษา วิทยาศาสตร์ วิจัยและนวัตกรรม"><span class="sep"></span><img src="assets/gistda-logo.png" alt="GISTDA สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (องค์การมหาชน)" title="GISTDA"></div>
 <div class="agency-text">
-<span class="agency-name">ระบบติดตามสิ่งแวดล้อมทางทะเล</span>
+<span class="agency-name">ระบบติดตามสิ่งแวดล้อม<span class="nowrap">ทางทะเล</span></span>
 <span class="agency-sub">Marine Environment Monitoring System</span>
 </div>
 </div>
@@ -375,6 +375,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 @media (max-width:520px){.nav-inner{padding:8px 12px}.nav-brand{gap:8px;min-width:0}.agency-text{min-width:0}.agency-name{font-size:.78rem;line-height:1.25;white-space:normal}.agency-sub{display:none}}
 .chart-grid>*,.chart-panel{min-width:0}.chart-panel table{display:block;overflow-x:auto;max-width:100%}
 .ref-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}.summary-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}@media (max-width:900px){.ref-grid{grid-template-columns:minmax(0,1fr)}}@media (max-width:520px){.summary-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* header type scaled to the 60 px logo block */.nav-brand{gap:16px}.agency-text{gap:3px}.agency-name{font-size:1.2rem;font-weight:700;line-height:1.25;letter-spacing:.1px}.agency-sub{font-size:.82rem;color:rgba(255,255,255,.65)}.nav-link{font-size:.9rem;padding:8px 14px}@media (max-width:900px){.agency-name{font-size:1.02rem}.agency-sub{font-size:.74rem}}@media (max-width:520px){.nav-brand{gap:10px}.agency-name{font-size:.86rem}.agency-sub{display:none}}
+.nowrap{white-space:nowrap}
 </style>
 
 <script>

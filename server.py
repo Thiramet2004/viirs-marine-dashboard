@@ -22,7 +22,8 @@ from PIL import Image
 from flask import Flask, send_file, abort, send_from_directory, jsonify
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder='.')
+# Static files are served by static_files() below from an allowlist, not from the whole folder.
+app = Flask(__name__, static_folder=None)
 CORS(app)
 
 # Path config. Defaults are portable and can be overridden in deployment.
@@ -66,10 +67,25 @@ def yearly():
     """Serve the annual anomaly dashboard."""
     return send_file('index_yearly.html')
 
+# Only these file types are public; source code, .git and other dot-folders are never served.
+STATIC_EXTENSIONS = {'.html', '.css', '.js', '.json', '.geojson', '.tif', '.png', '.jpg', '.svg', '.ico'}
+
 @app.route('/<path:path>')
 def static_files(path):
-    """Serve static files (CSS, JS, etc)"""
-    return send_from_directory('.', path)
+    """Serve dashboard pages and data files (HTML, GeoJSON, GeoTIFF, ...)"""
+    if path.endswith('/'):
+        path += 'index.html'
+    parts = path.replace('\\', '/').split('/')
+    if any(part.startswith('.') for part in parts) or os.path.splitext(path)[1].lower() not in STATIC_EXTENSIONS:
+        abort(404)
+    return send_from_directory(PROJECT_DIR, path)
+
+def send_repo_marine_zones():
+    """Marine zones bundled with the repository (used when the source shapefiles are unavailable)."""
+    path = os.path.join(PROJECT_DIR, "data", "marine_zones.geojson")
+    if not os.path.exists(path):
+        return jsonify({"error": "No EEZ polygon shapefiles found"}), 404
+    return send_file(path, mimetype='application/json')
 
 @app.route('/api/geojson/marine_zones')
 def get_marine_zones():
@@ -114,10 +130,10 @@ def get_marine_zones():
             geojson = combined.to_json()
             return geojson, 200, {'Content-Type': 'application/json'}
 
-        return jsonify({"error": "No EEZ polygon shapefiles found"}), 404
-            
+        return send_repo_marine_zones()
+
     except ImportError:
-        return jsonify({"error": "geopandas not installed"}), 500
+        return send_repo_marine_zones()
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -345,6 +361,9 @@ def get_available_dates(view, param):
     })
 
 if __name__ == '__main__':
+    import sys
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(errors='replace')
     print("=" * 60)
     print("🚀 VIIRS Marine Dashboard Server")
     print("=" * 60)
@@ -360,4 +379,11 @@ if __name__ == '__main__':
     print("=" * 60)
     print("Press Ctrl+C to stop\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Debug mode (with its interactive debugger) and LAN access are opt-in:
+    #   VIIRS_DEBUG=1  enables Flask debug mode
+    #   VIIRS_HOST=0.0.0.0  makes the server reachable from other machines
+    app.run(
+        debug=os.environ.get("VIIRS_DEBUG") == "1",
+        host=os.environ.get("VIIRS_HOST", "127.0.0.1"),
+        port=int(os.environ.get("VIIRS_PORT", "5001")),
+    )

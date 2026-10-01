@@ -264,11 +264,15 @@ The converter:
 
 ## 📝 Configuration
 
-### Server Port
-Edit `server.py`:
-```python
-app.run(debug=True, host='0.0.0.0', port=5001)
+### Server Port, Host and Debug Mode
+Set environment variables (defaults shown):
+```bash
+VIIRS_PORT=5001        # port
+VIIRS_HOST=127.0.0.1   # use 0.0.0.0 to allow other machines on the network
+VIIRS_DEBUG=0          # 1 enables Flask debug mode; never enable it on a shared network
 ```
+The server only serves dashboard pages and data files (HTML, JSON/GeoJSON, GeoTIFF, images);
+source code and dot-folders such as `.git` are never served.
 
 ### Data Paths
 Edit `server.py`:
@@ -299,7 +303,7 @@ lsof -i :5001
 kill -9 <PID>
 
 # Try different port
-python3 server.py --port 5002
+VIIRS_PORT=5002 python3 server.py
 ```
 
 ### GeoTIFF not loading

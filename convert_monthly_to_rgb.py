@@ -6,6 +6,7 @@ Reads chlor_a_mean.img and sst_mean.img, applies color palettes, exports RGB Geo
 
 import numpy as np
 import rasterio
+import rasterio.errors
 from rasterio.transform import Affine
 from rasterio.crs import CRS
 import os
@@ -183,7 +184,8 @@ def get_land_mask_from_anomaly(param, year, month):
                 land_mask = (rgb[0] == 0) & (rgb[1] == 0) & (rgb[2] == 0)
                 ocean_mask = ~land_mask  # True = ocean, False = land
             return ocean_mask
-    except:
+    except (rasterio.errors.RasterioError, OSError) as error:
+        print(f"  Warning: could not read land mask {anomaly_path}: {error}")
         return None
 
 

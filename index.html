@@ -787,7 +787,8 @@ window.addEventListener('message', event => {
 // LEAFLET MAP (Fig. 1)
 // =============================================
 
-const API_BASE = 'http://localhost:5001/api';
+// Same-origin API: works on localhost, over the LAN and behind a proxy; on GitHub Pages it 404s quickly and the GitHub copies are used.
+const API_BASE = '/api';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/Thiramet2004/viirs-marine-dashboard/main';
 const USE_LOCAL_RASTERS = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 

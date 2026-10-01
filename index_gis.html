@@ -205,7 +205,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 // CONFIG
 // =============================================
 
-const API_BASE = 'http://localhost:5001/api';
+// Same-origin API: works on localhost, over the LAN and behind a proxy; on GitHub Pages it 404s quickly and the GitHub copies are used.
+const API_BASE = '/api';
 
 const monthsTH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                   'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];

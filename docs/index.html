@@ -80,8 +80,8 @@ body.embed-charts #mapSection{display:none}
 <h2>อุณหภูมิผิวน้ำทะเล (SST) และ คลอโรฟิลล์-เอ (Chlorophyll-a)</h2>
 <p class="report-meta">
 <span><span class="material-icons-outlined">satellite_alt</span> Suomi NPP / NOAA-20 VIIRS</span>
-<span><span class="material-icons-outlined">date_range</span> มกราคม 2561 – กรกฎาคม 2569</span>
-<span><span class="material-icons-outlined">layers</span> Level-3 Monthly Composite, 750 m</span>
+<span><span class="material-icons-outlined">date_range</span> <span id="dataRange">มกราคม 2561 – สิงหาคม 2569</span></span>
+<span><span class="material-icons-outlined">layers</span> Level-3 Monthly Composite, 4 km</span>
 </p>
 </div>
 <div class="report-info-card">
@@ -94,7 +94,7 @@ body.embed-charts #mapSection{display:none}
 <section class="section" id="methodology">
 <h3 class="section-title"><span class="section-num">1</span> ระเบียบวิธี (Methodology)</h3>
 <div class="method-grid">
-<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">satellite</span></div><h4>Data Acquisition</h4><p>VIIRS sensor บน Suomi NPP ความละเอียด 750 m ประมวลผลเป็น Monthly Composite (Level-3)</p></div>
+<div class="method-card"><div class="method-icon"><span class="material-icons-outlined">satellite</span></div><h4>Data Acquisition</h4><p>VIIRS บน Suomi NPP และ NOAA-20 (เซนเซอร์ 750 m) ข้อมูลที่ใช้เป็น NASA Level-3 Monthly Composite ความละเอียด 4 km (1/24°)</p></div>
 <div class="method-card"><div class="method-icon"><span class="material-icons-outlined">analytics</span></div><h4>Parameters</h4><p><strong>SST</strong> (°C): อุณหภูมิผิวน้ำทะเล | <strong>Chl-a</strong> (µg/L): ความเข้มข้นคลอโรฟิลล์-เอ</p></div>
 <div class="method-card"><div class="method-icon"><span class="material-icons-outlined">map</span></div><h4>Zonal Statistics</h4><p>6 โซนทะเล: อ่าวไทยตอนบน, อ่าวระยอง, อ่าวตราด, อ่าวไทยตอนกลาง, อ่าวไทยตอนล่าง, ทะเลอันดามัน</p></div>
 </div>
@@ -425,6 +425,10 @@ function applyMonthlyZonalStats(stats){
     estimatedMonths[param]=stats.estimated_months?.[param]||{};
     const climatology=stats.climatology?.[param];
     if(climatology){const target=param==='sst'?sstClimatology:chlClimatology;target.mean=climatology.eez;target.zones=climatology.zones;}
+  }
+  {
+    const latest=Math.max(...['sst','chl'].flatMap(param=>Object.entries(availableMonths[param]).flatMap(([year,list])=>list.map(month=>Number(year)*12+month-1))));
+    if(Number.isFinite(latest))document.getElementById('dataRange').textContent='มกราคม '+(years[0]+543)+' – '+monthsFull[latest%12]+' '+(Math.floor(latest/12)+543);
   }
   for(const year of years){
     sstMonthly[year]=zonalMeanSeries(sstZone,String(year));
@@ -987,52 +991,73 @@ function isTiffBuffer(buf) {
 
 // Convert 3-band RGB georaster directly to HTML5 Canvas in < 20ms
 function renderGeorasterCanvas(georaster) {
-  const width = georaster.width;
-  const height = georaster.height;
+  // Display only: the data stay 4 km (1/24 degree). The image is drawn at DISPLAY_SCALE times the raster size,
+  // with colours blended bilinearly between neighbouring ocean pixels, so it looks smooth when zoomed in.
+  // A display pixel is transparent when its nearest data pixel is land / no data, so the coastline and
+  // the land mask stay exactly as in the data; land pixels are never blended into the sea.
+  const DISPLAY_SCALE = 3;
+  const width = georaster.width, height = georaster.height;
+  const outWidth = width * DISPLAY_SCALE, outHeight = height * DISPLAY_SCALE;
   // The GeoTIFF rows are evenly spaced in latitude (EPSG:4326), but L.imageOverlay stretches the image
-  // evenly in Web Mercator. Output row y is therefore taken from the source row at that row's Mercator latitude.
+  // evenly in Web Mercator, so each output row is sampled at its Mercator latitude.
   const mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
   const fromMercY = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180 / Math.PI;
   const topY = mercY(georaster.ymax), bottomY = mercY(georaster.ymin);
-  const sourceRow = Array.from({length: height}, (_, y) => {
-    const lat = fromMercY(topY - (y + 0.5) / height * (topY - bottomY));
-    return Math.min(height - 1, Math.max(0, Math.floor((georaster.ymax - lat) / georaster.pixelHeight)));
-  });
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const imgData = ctx.createImageData(width, height);
-  const d = imgData.data;
 
-  const rValues = georaster.values[0];
-  const gValues = georaster.values[1];
-  const bValues = georaster.values[2];
-
-  for (let y = 0; y < height; y++) {
-    const rowR = rValues[sourceRow[y]];
-    const rowG = gValues[sourceRow[y]];
-    const rowB = bValues[sourceRow[y]];
-    const offset = y * width * 4;
-
-    for (let x = 0; x < width; x++) {
-      const r = rowR[x];
-      const g = rowG[x];
-      const b = rowB[x];
-      const idx = offset + x * 4;
-
-      // Black pixels (0,0,0) or missing = nodata/land → transparent
-      if ((r === 0 && g === 0 && b === 0) || r === undefined || !Number.isFinite(r)) {
-        d[idx + 3] = 0;
-      } else {
-        d[idx] = r;
-        d[idx + 1] = g;
-        d[idx + 2] = b;
-        d[idx + 3] = 215; // 85% opacity
-      }
+  const [rValues, gValues, bValues] = georaster.values;
+  const valid = new Uint8Array(width * height);
+  for (let row = 0; row < height; row++) {
+    const r = rValues[row], g = gValues[row], b = bValues[row];
+    for (let col = 0; col < width; col++) {
+      valid[row * width + col] = Number.isFinite(r[col]) && !(r[col] === 0 && g[col] === 0 && b[col] === 0) ? 1 : 0;
     }
   }
 
+  const canvas = document.createElement('canvas');
+  canvas.width = outWidth;
+  canvas.height = outHeight;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(outWidth, outHeight);
+  const d = imgData.data;
+
+  // horizontal sample positions are the same for every row
+  const col0 = new Int32Array(outWidth), colFrac = new Float32Array(outWidth), colNear = new Int32Array(outWidth);
+  for (let x = 0; x < outWidth; x++) {
+    const fc = (x + 0.5) / DISPLAY_SCALE - 0.5;
+    col0[x] = Math.floor(fc);
+    colFrac[x] = fc - col0[x];
+    colNear[x] = Math.min(width - 1, Math.max(0, Math.round(fc)));
+  }
+
+  for (let y = 0; y < outHeight; y++) {
+    const lat = fromMercY(topY - (y + 0.5) / outHeight * (topY - bottomY));
+    const fr = (georaster.ymax - lat) / georaster.pixelHeight - 0.5;
+    const row0 = Math.floor(fr), rowFrac = fr - row0;
+    const rowNear = Math.min(height - 1, Math.max(0, Math.round(fr)));
+    const rows = [Math.min(height - 1, Math.max(0, row0)), Math.min(height - 1, Math.max(0, row0 + 1))];
+    const offset = y * outWidth * 4;
+    for (let x = 0; x < outWidth; x++) {
+      const idx = offset + x * 4;
+      if (!valid[rowNear * width + colNear[x]]) { d[idx + 3] = 0; continue; }
+      const cols = [Math.min(width - 1, Math.max(0, col0[x])), Math.min(width - 1, Math.max(0, col0[x] + 1))];
+      let sumR = 0, sumG = 0, sumB = 0, sumW = 0;
+      for (let i = 0; i < 2; i++) {
+        const wy = i ? rowFrac : 1 - rowFrac;
+        for (let j = 0; j < 2; j++) {
+          const w = wy * (j ? colFrac[x] : 1 - colFrac[x]);
+          if (w <= 0 || !valid[rows[i] * width + cols[j]]) continue;
+          sumR += w * rValues[rows[i]][cols[j]];
+          sumG += w * gValues[rows[i]][cols[j]];
+          sumB += w * bValues[rows[i]][cols[j]];
+          sumW += w;
+        }
+      }
+      d[idx] = sumR / sumW;
+      d[idx + 1] = sumG / sumW;
+      d[idx + 2] = sumB / sumW;
+      d[idx + 3] = 215; // 85% opacity
+    }
+  }
   ctx.putImageData(imgData, 0, 0);
   return canvas;
 }
@@ -1098,7 +1123,10 @@ async function loadMapGeoTIFF() {
         [georaster.ymax, georaster.xmax]
       ];
       const canvas = renderGeorasterCanvas(georaster);
-      currentMapLayer = L.imageOverlay(canvas.toDataURL(), bounds, {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (window._rasterObjectUrl) URL.revokeObjectURL(window._rasterObjectUrl);
+      window._rasterObjectUrl = URL.createObjectURL(blob);
+      currentMapLayer = L.imageOverlay(window._rasterObjectUrl, bounds, {
         opacity: 0.85,
         pane: 'rasterPane'
       }).addTo(leafletMap);

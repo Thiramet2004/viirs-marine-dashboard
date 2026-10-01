@@ -511,15 +511,27 @@ function renderBar(zone,yr){
   const d=D(),data=gA(zone,yr,d);
   const monthLabels=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
-  // Fig. 3 ปี 2026 มีข้อมูล 8 เดือน (ม.ค. - ส.ค.) ตัดเดือนที่เหลือออกเพื่อให้กราฟแสดงผลเต็มพื้นที่
-  const activeData = String(yr) === '2026' ? data.slice(0, 8) : data;
-  const activeLabels = String(yr) === '2026' ? monthLabels.slice(0, 8) : monthLabels;
+  // กรองเฉพาะเดือนที่มีข้อมูลจริงเท่านั้น (เดือนที่ไม่มีข้อมูล/null ให้ตัดทิ้ง ไม่ต้องใส่แถวกราฟลงไป เพื่อให้กราฟเต็มพื้นที่)
+  const activeItems = [];
+  data.forEach((v, i) => {
+    if (v !== null && v !== undefined) {
+      activeItems.push({
+        val: v,
+        label: monthLabels[i],
+        origIdx: i
+      });
+    }
+  });
 
-  // หาค่าสูงสุดสำหรับ scale
-  const absMax = Math.max(...activeData.filter(v=>v!==null).map(v=>Math.abs(v)), 0.001);
+  if (activeItems.length === 0) {
+    document.getElementById('anomalyBarChart').innerHTML = '<div style="text-align:center;padding:24px;color:#64748b;">ไม่มีข้อมูล Anomaly สำหรับปีนี้</div>';
+    return;
+  }
+
+  // หาค่าสูงสุดสำหรับ scale จากเฉพาะเดือนที่มีข้อมูล
+  const absMax = Math.max(...activeItems.map(item => Math.abs(item.val)), 0.001);
   const scale = absMax * 1.15; // เพิ่ม margin 15%
 
-  // สร้าง HTML bar chart แทน canvas
   const container = document.getElementById('anomalyBarChart');
   let html = `<div style="font-family:var(--font);padding:12px 16px;">`;
 
@@ -535,29 +547,30 @@ function renderBar(zone,yr){
   // zero line position (%)
   const zeroPct = (scale / (scale*2) * 100).toFixed(2);
 
-  activeData.forEach((v,i)=>{
-    const isNull = v===null;
-    const isPos = v !== null && v >= 0;
+  activeItems.forEach(item => {
+    const v = item.val;
+    const isPos = v >= 0;
     const barColor = isPos ? 'rgba(220,38,38,0.82)' : 'rgba(3,105,161,0.82)';
     const barBorder = isPos ? '#dc2626' : '#035a9d';
-    const pct = isNull ? 0 : (Math.abs(v)/scale*50);
+    const pct = (Math.abs(v) / scale * 50);
     const leftPct = isPos ? zeroPct : (parseFloat(zeroPct) - pct).toFixed(2);
+    const isCurrent = item.origIdx === currentMapMonth - 1;
 
     html += `
-    <div style="display:flex;align-items:center;margin-bottom:5px;${i===currentMapMonth-1?'background:#eff6ff;outline:1px solid #2563eb;':''}">
-      <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${activeLabels[i]}</div>
-      <div style="flex:1;position:relative;height:22px;background:#f8fafc;border-radius:3px;overflow:hidden;">
+    <div style="display:flex;align-items:center;margin-bottom:6px;${isCurrent ? 'background:#eff6ff;outline:1px solid #2563eb;' : ''}">
+      <div style="width:110px;flex-shrink:0;text-align:right;padding-right:10px;font-size:12px;font-weight:600;color:#1e293b;">${item.label}</div>
+      <div style="flex:1;position:relative;height:24px;background:#f8fafc;border-radius:3px;overflow:hidden;">
         <!-- grid lines -->
         <div style="position:absolute;left:${zeroPct}%;top:0;bottom:0;width:2px;background:rgba(100,116,139,0.35);z-index:1;"></div>
-        ${isNull ? '' : `<div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${activeLabels[i]}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>`}
+        <div style="position:absolute;left:${leftPct}%;width:${pct}%;height:100%;background:${barColor};border:1px solid ${barBorder};border-radius:3px;z-index:2;" title="${item.label}: ${(v>0?'+':'')+v.toFixed(3)} ${d.u}"></div>
       </div>
-      <div style="width:64px;flex-shrink:0;text-align:right;font-size:11px;font-family:var(--mono);color:${isPos?'#dc2626':'#035a9d'};padding-left:8px;font-weight:600;">
-        ${isNull ? '—' : (v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
+      <div style="width:64px;flex-shrink:0;text-align:right;font-size:11px;font-family:var(--mono);color:${isPos ? '#dc2626' : '#035a9d'};padding-left:8px;font-weight:600;">
+        ${(v>0?'+':'')+v.toFixed(currentParam==='chl'?3:2)}
       </div>
     </div>`;
   });
 
-  html += `<div style="margin-left:110px;font-size:11px;color:#64748b;margin-top:4px;font-weight:600;text-align:center;">Anomaly (${d.u})</div>`;
+  html += `<div style="margin-left:110px;font-size:11px;color:#64748b;margin-top:6px;font-weight:600;text-align:center;">Anomaly (${d.u})</div>`;
   html += `</div>`;
   container.innerHTML = html;
 }

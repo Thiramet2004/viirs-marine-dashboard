@@ -1075,7 +1075,27 @@ function renderGeorasterCanvas(georaster) {
   return canvas;
 }
 
+// Only the newest request may draw: every call takes a number, and a call that is no longer the newest
+// stops after each await. Rendered months are kept (up to RASTER_CACHE_SIZE) so moving back is instant.
+let mapLoadSeq = 0, mapLoadTimer = null;
+const rasterCache = new Map(), RASTER_CACHE_SIZE = 12;
+function scheduleMapLoad(delay = 150) {
+  clearTimeout(mapLoadTimer);
+  mapLoadTimer = setTimeout(loadMapGeoTIFF, delay);
+}
+function showRaster(entry) {
+  // remove every raster overlay (not only the last one) so exactly one image is on the map
+  leafletMap.eachLayer(layer => { if (layer instanceof L.ImageOverlay && layer.options.pane === 'rasterPane') leafletMap.removeLayer(layer); });
+  currentMapLayer = L.imageOverlay(entry.url, entry.bounds, {opacity: 0.85, pane: 'rasterPane'}).addTo(leafletMap);
+  currentMapLayer.georaster = entry.georaster;
+}
+function clearRaster() {
+  leafletMap.eachLayer(layer => { if (layer instanceof L.ImageOverlay && layer.options.pane === 'rasterPane') leafletMap.removeLayer(layer); });
+  currentMapLayer = null;
+}
+
 async function loadMapGeoTIFF() {
+  const seq = ++mapLoadSeq;
   const loadingEl = document.getElementById('mapLoading');
   if (loadingEl) loadingEl.classList.add('show');
   const clickEl = document.getElementById('clickInfo');
@@ -1106,9 +1126,12 @@ async function loadMapGeoTIFF() {
       API_BASE + '/tif/' + view + '/' + param + '/' + year + '/' + currentMapMonth
     ];
 
-    if (currentMapLayer) {
-      try { leafletMap.removeLayer(currentMapLayer); } catch(e) {}
-      currentMapLayer = null;
+    const cacheKey = view + '/' + param + '/' + year + '/' + mm;
+    if (rasterCache.has(cacheKey)) {
+      const entry = rasterCache.get(cacheKey);
+      rasterCache.delete(cacheKey); rasterCache.set(cacheKey, entry);   // most recently used last
+      showRaster(entry);
+      return;
     }
 
     let arrayBuffer = null;
@@ -1116,6 +1139,7 @@ async function loadMapGeoTIFF() {
     for (const u of urlsToTry) {
       try {
         const res = await fetch(u);
+        if (seq !== mapLoadSeq) return;
         if (res && res.ok) {
           const contentType = res.headers.get('content-type') || '';
           if (contentType.includes('text/html')) continue;
@@ -1129,21 +1153,25 @@ async function loadMapGeoTIFF() {
       } catch (err) {}
     }
 
+    if (seq !== mapLoadSeq) return;
     if (arrayBuffer) {
       const georaster = await parseGeoraster(arrayBuffer);
+      if (seq !== mapLoadSeq) return;
       const bounds = [
         [georaster.ymin, georaster.xmin],
         [georaster.ymax, georaster.xmax]
       ];
       const canvas = renderGeorasterCanvas(georaster);
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      if (window._rasterObjectUrl) URL.revokeObjectURL(window._rasterObjectUrl);
-      window._rasterObjectUrl = URL.createObjectURL(blob);
-      currentMapLayer = L.imageOverlay(window._rasterObjectUrl, bounds, {
-        opacity: 0.85,
-        pane: 'rasterPane'
-      }).addTo(leafletMap);
-      currentMapLayer.georaster = georaster;
+      const entry = {url: URL.createObjectURL(blob), bounds, georaster};
+      rasterCache.set(cacheKey, entry);
+      while (rasterCache.size > RASTER_CACHE_SIZE) {
+        const [oldKey, oldEntry] = rasterCache.entries().next().value;
+        rasterCache.delete(oldKey);
+        URL.revokeObjectURL(oldEntry.url);
+      }
+      if (seq !== mapLoadSeq) return;   // a newer month was requested while this one was drawn
+      showRaster(entry);
 
       if (!window._mapBoundsFitted) {
         leafletMap.fitBounds([
@@ -1153,12 +1181,13 @@ async function loadMapGeoTIFF() {
         window._mapBoundsFitted = true;
       }
     } else {
+      clearRaster();   // no data for this month: do not leave the previous month on screen
       console.warn('GeoTIFF raster not available for selected date');
     }
   } catch (error) {
     console.error('Error in loadMapGeoTIFF:', error);
   } finally {
-    if (loadingEl) loadingEl.classList.remove('show');
+    if (loadingEl && seq === mapLoadSeq) loadingEl.classList.remove('show');
   }
 }
 
@@ -1356,7 +1385,7 @@ renderAll = function() {
   origRenderAll();
   if (leafletMap) {
     updateMapUI();
-    loadMapGeoTIFF();
+    scheduleMapLoad();
   }
 };
 
@@ -1365,7 +1394,7 @@ setTimeout(() => {
   initLeafletMap();
   syncMapMonthRange();
   updateMapUI();
-  loadMapGeoTIFF();
+  scheduleMapLoad(0);
   setTimeout(() => leafletMap.invalidateSize(), 200);
 }, 500);
 

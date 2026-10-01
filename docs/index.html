@@ -213,7 +213,14 @@ body.embed-charts #mapSection{display:none}
 </div>
 
 <div class="chart-panel chart-wide">
-<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 5</span> แนวโน้มรายปี: อ่าวไทย เทียบกับ ทะเลอันดามัน</div>
+<div class="chart-caption">ทั้งทะเลในเขต EEZ ไทย (ฝั่งอ่าวไทยและฝั่งอันดามันของ polygon EEZ) · เส้นทึบ = ค่ารายปี · เส้นประ = แนวโน้มจากปีที่ครบ 12 เดือน · จุดสามเหลี่ยม = ปีที่ข้อมูลไม่ครบ (ปรับฤดูกาลแล้ว)</div></div>
+<div class="chart-body"><canvas id="chartRegionTrend"></canvas></div>
+<div class="chart-desc" id="regionTrendSummary"></div>
+</div>
+
+<div class="chart-panel chart-wide">
+<div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 6</span> เปรียบเทียบ Anomaly: SST กับ Chl-a (Inverse Relationship)</div>
 <div class="chart-caption">เส้นน้ำเงิน = SST Anomaly (แกนซ้าย) | เส้นเขียว = Chl-a Anomaly (แกนขวา, กลับด้าน) | เมื่อเส้นทั้งสองไปในทิศทางเดียวกัน = สัมพันธ์ลบ</div></div>
 <div class="chart-body"><canvas id="chartDual"></canvas></div>
 <div class="chart-desc"><strong>Insight:</strong> กราฟนี้แสดง Anomaly (ค่าเบี่ยงเบนจากปกติ) ของ SST และ Chl-a ซ้อนกัน โดย <u>แกนขวา (Chl-a) ถูกกลับด้าน</u> ดังนั้นถ้าเส้นทั้งสองเคลื่อนไหวไปด้วยกัน = ยืนยันว่าเมื่อ SST สูงกว่าปกติ Chl-a จะต่ำกว่าปกติ (inverse relationship) ยิ่งเส้นซ้อนทับกันมากยิ่งสัมพันธ์แน่น</div>
@@ -698,6 +705,71 @@ function renderTrendContext(points,slope,intercept,d){
   el.hidden=false;
 }
 
+// Fig. 5: whole Gulf of Thailand vs whole Andaman Sea, one value per year and a trend line for each.
+// A year with fewer than 12 months is seasonally adjusted (annual climatology + mean anomaly of its months),
+// drawn as a triangle and left out of the fit, as in Fig. 4.
+let c4b=null;
+function annualValues(zoneId,d){
+  return years.map(year=>{
+    const series=currentView==='absolute'?gM(zoneId,String(year),d):gA(zoneId,String(year),d);
+    const present=series.map((value,month)=>Number.isFinite(value)?month:-1).filter(month=>month>=0);
+    if(!present.length)return {value:null,months:0};
+    if(present.length===12||currentView!=='absolute')return {value:avg(present.map(month=>series[month])),months:present.length};
+    const climatology=climFor(zoneId,d);
+    const anomalies=present.map(month=>series[month]-climatology[month]).filter(Number.isFinite);
+    const annual=avg(climatology.filter(Number.isFinite));
+    return {value:anomalies.length&&annual!==null?annual+avg(anomalies):null,months:present.length};
+  });
+}
+function linearFit(points){
+  const n=points.length;if(n<3)return null;
+  const mx=points.reduce((s,p)=>s+p.x,0)/n,my=points.reduce((s,p)=>s+p.y,0)/n;
+  const sxx=points.reduce((s,p)=>s+(p.x-mx)**2,0);if(!sxx)return null;
+  const slope=points.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0)/sxx,intercept=my-slope*mx;
+  const ssr=points.reduce((s,p)=>s+(p.y-(intercept+slope*p.x))**2,0);
+  const tTable=[0,12.706,4.303,3.182,2.776,2.571,2.447,2.365,2.306,2.262,2.228,2.201,2.179,2.160,2.145,2.131];
+  const ci=(tTable[n-2]||2.0)*Math.sqrt(ssr/(n-2)/sxx);
+  return {slope,intercept,ci,n,significant:Math.abs(slope)>ci};
+}
+function renderRegionTrend(){
+  const canvas=document.getElementById('chartRegionTrend');if(!canvas)return;
+  if(c4b)c4b.destroy();
+  const d=D(),p=currentParam==='sst'?2:3;
+  const regions=[
+    {id:'gulf_of_thailand',name:'อ่าวไทย (ทั้งหมด)',color:'#2563eb'},
+    {id:'andaman_sea',name:'ทะเลอันดามัน (ทั้งหมด)',color:'#d97706'}];
+  const datasets=[],fits={};
+  for(const region of regions){
+    const values=annualValues(region.id,d);
+    const fit=linearFit(values.flatMap((v,i)=>v.months===12&&Number.isFinite(v.value)?[{x:years[i],y:v.value}]:[]));
+    fits[region.id]={fit,values};
+    const slopeText=fit?` · แนวโน้ม ${(fit.slope*10>=0?'+':'')+(fit.slope*10).toFixed(p)} ± ${(fit.ci*10).toFixed(p)} ${d.u}/ทศวรรษ`:'';
+    datasets.push({label:region.name+slopeText,data:values.map(v=>v.value===null?null:+v.value.toFixed(3)),borderColor:region.color,backgroundColor:region.color,
+      borderWidth:2.5,pointRadius:values.map(v=>v.months===12?4:6),pointStyle:values.map(v=>v.months===12?'circle':'triangle'),tension:.3,fill:false,order:0});
+    datasets.push({label:region.name+' (เส้นแนวโน้ม)',data:years.map(year=>fit?+(fit.intercept+fit.slope*year).toFixed(4):null),borderColor:region.color,
+      borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,order:1});
+  }
+  const yLab=currentView==='absolute'?'Annual Mean '+d.n+' ('+d.u+')':'Annual Mean Anomaly ('+d.u+')';
+  c4b=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:years.map(y=>y+' ('+(y+543)+')'),datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},usePointStyle:true,padding:12,filter:item=>!item.text.endsWith('(เส้นแนวโน้ม)')}},
+        tooltip:{filter:item=>!item.dataset.label.endsWith('(เส้นแนวโน้ม)'),callbacks:{label:ctx=>` ${ctx.dataset.label.split(' · ')[0]}: ${ctx.parsed.y?.toFixed(p)} ${d.u}`}}},
+      scales:{x:{title:{display:true,text:'Year',color:'#475569'},grid:{color:'rgba(148,163,184,.15)'}},
+        y:{title:{display:true,text:yLab,color:'#475569'},grid:{color:'rgba(148,163,184,.15)'}}}}});
+  // summary under the chart
+  const describe=(name,fit)=>{
+    if(!fit)return `${name}: ข้อมูลไม่พอคำนวณแนวโน้ม`;
+    const s=fit.slope*10;
+    return `${name}: <strong>${(s>=0?'+':'')+s.toFixed(p)} ± ${(fit.ci*10).toFixed(p)} ${d.u}/ทศวรรษ</strong> (${fit.n} ปีเต็ม) → `
+      +(fit.significant?(s>0?'เพิ่มขึ้น':'ลดลง')+'อย่างมีนัยสำคัญทางสถิติ':'ไม่มีนัยสำคัญทางสถิติ');
+  };
+  const g=fits.gulf_of_thailand,a=fits.andaman_sea;
+  const diffs=years.map((year,i)=>Number.isFinite(g.values[i].value)&&Number.isFinite(a.values[i].value)?`${year}: ${(g.values[i].value-a.values[i].value>=0?'+':'')+(g.values[i].value-a.values[i].value).toFixed(p)}`:null).filter(Boolean);
+  document.getElementById('regionTrendSummary').innerHTML='<strong>แนวโน้ม (ช่วงเชื่อมั่น 95%):</strong> '+describe('อ่าวไทย',g.fit)+' · '+describe('ทะเลอันดามัน',a.fit)
+    +'<br><strong>ส่วนต่าง อ่าวไทย − อันดามัน รายปี ('+d.u+'):</strong> '+diffs.join(' · ')
+    +'<br><span style="color:#64748b">ข้อมูล '+years[0]+'–'+years[years.length-1]+' ยังสั้น แนวโน้มที่ไม่มีนัยสำคัญจึงยังสรุปทิศทางระยะยาวไม่ได้'+(currentParam==='sst'?' (ดูค่าอ้างอิงระยะยาวใต้ Fig. 4)':'')+'</span>';
+}
+
 let c5;
 function renderDual(zone,yr){
   const ctx=document.getElementById('chartDual').getContext('2d');if(c5)c5.destroy();
@@ -833,6 +905,7 @@ function renderAll(){
   c1.update('none');
   renderBar(z,y);
   renderTrend(z);
+  renderRegionTrend();
   c4.data.datasets[0].pointRadius=years.map(year=>String(year)===String(y)?8:5);
   c4.update('none');
   renderDual(z,y);updateKPI(z,y);updateSummary(z,y);

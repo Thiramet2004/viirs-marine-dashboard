@@ -41,7 +41,8 @@ Python 3.9+ is needed; rebuilding the data also needs the source products on `E:
 | Fig. 2 Monthly time series | All years overlaid with the selected zone's climatology (VIIRS 2018–2025) |
 | Fig. 3 Monthly anomaly | Anomaly of each month of the selected year (red above normal, blue below) |
 | Fig. 4 Inter-annual trend | Annual means, linear trend from complete years with its 95 % interval, and the NOAA OISST long-term trend for SST. Years with fewer than 12 months are seasonally adjusted (zone climatology + mean anomaly of the available months), drawn as triangles and kept out of the fit |
-| Fig. 5 SST vs Chl-a | SST and Chl-a anomalies of the selected year on two axes |
+| Fig. 5 Gulf vs Andaman | Annual values of the whole Gulf of Thailand and the whole Andaman Sea (the two parts of the Thai EEZ), each with its own trend line, 95 % interval and significance, and the Gulf − Andaman difference per year; same partial-year rule as Fig. 4 |
+| Fig. 6 SST vs Chl-a | SST and Chl-a anomalies of the selected year on two axes |
 
 "Overall" is the equal-weight mean of the six marine zones. Besides the zones, the area selector has two
 whole-sea areas, **อ่าวไทย (ทั้งหมด)** and **ทะเลอันดามัน (ทั้งหมด)**: the Gulf of Thailand and Andaman parts of the

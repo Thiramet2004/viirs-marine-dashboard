@@ -13,6 +13,7 @@ Sources (override with environment variables):
                                                           the SST anomaly products were computed from it)
   VIIRS_CLIMATOLOGY_DIR      E:\\Monthly Climatology      <P>_4km/*_VIIRS_<MM>_*.data/<var>_mean.img
   VIIRS_MARINE_ZONES_DIR     E:\\SST_Chlor\\EEZ_MarineZone
+  VIIRS_SOURCE_YEARLY_DIR    E:\\SST_Chlor                 <P>_Yearly_Anomaly/<YYYY>/<P>_Yearly_Anomaly_<YYYY>_msk.tif
 
 Outputs:
   data/Anomaly_RGB/<P>/<YYYY>/<MM>/<P>_Anomaly_RGB_<MM>_<YYYY>.tif
@@ -20,6 +21,9 @@ Outputs:
   data/Yearly_RGB/{sst,chl}/<p>_Yearly_Anomaly_RGB_<YYYY>.tif
   data/Yearly_RGB/absolute/{sst,chl}/<p>_Yearly_Absolute_RGB_<YYYY>.tif   (annual mean of SST - climatology)
   data/Yearly_RGB/stats.json
+  data/zonal_stats/<p>_monthly_zonal.csv       year, month, zone, absolute, climatology, anomaly, pixels
+  data/zonal_stats/<p>_climatology_zonal.csv   month, zone, climatology, pixels, source
+  data/zonal_stats/<p>_yearly_zonal.csv        year, zone, mean of monthly anomalies, yearly anomaly product
 
 Usage:
   python build_dashboard_data.py            # rebuild everything
@@ -27,9 +31,11 @@ Usage:
 """
 
 import argparse
+import csv
 import glob
 import json
 import os
+import re
 from pathlib import Path
 
 import geopandas as gpd
@@ -48,6 +54,7 @@ ANOMALY_SRC = Path(os.environ.get("VIIRS_SOURCE_ANOMALY_DIR", r"E:\SST_Chlor\Ano
 MONTHLY_SRC = Path(os.environ.get("VIIRS_SOURCE_MONTHLY_DIR", r"E:\SST_Chlor\Monthly"))
 PREPARED_SST_ROOT = Path(os.environ.get("VIIRS_PREPARED_SST_ROOT", "E:\\"))
 CLIMATOLOGY_DIR = Path(os.environ.get("VIIRS_CLIMATOLOGY_DIR", r"E:\Monthly Climatology"))
+YEARLY_SRC = Path(os.environ.get("VIIRS_SOURCE_YEARLY_DIR", r"E:\SST_Chlor"))
 ZONE_DIR = Path(os.environ.get("VIIRS_MARINE_ZONES_DIR", r"E:\SST_Chlor\EEZ_MarineZone"))
 YEARS = range(2018, 2027)
 
@@ -106,6 +113,11 @@ def climatology_source(param, month):
     return first(CLIMATOLOGY_DIR / f"{folder}_4km" / f"{folder}_VIIRS_{month:02d}_*.data" / f"{var}.img")
 
 
+def yearly_product_source(param, year):
+    folder = PARAMS[param]["folder"]
+    return first(YEARLY_SRC / f"{folder}_Yearly_Anomaly" / str(year) / f"{folder}_Yearly_Anomaly_{year}_msk.tif")
+
+
 def write_rgb(path, rgb, transform, crs):
     path.parent.mkdir(parents=True, exist_ok=True)
     with rasterio.open(
@@ -126,6 +138,20 @@ def zone_masks(shape, transform):
 def zone_mean(values, inside):
     selected = values[inside]
     return float(selected.mean()) if selected.count() else None
+
+
+def zone_count(values, inside):
+    return int(values[inside].count())
+
+
+def write_csv(path, header, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(header)
+        for row in rows:
+            writer.writerow(["" if value is None else round(value, 6) if isinstance(value, float) else value
+                             for value in row])
 
 
 def mean_or_none(values):
@@ -156,7 +182,7 @@ def check_sources():
 def build():
     stats = {"years": list(YEARS), "sst": {}, "chl": {}, "absolute": {"sst": {}, "chl": {}},
              "baseline": {}, "trend": {"absolute": {}, "anomaly": {}, "monthly_absolute": {}}, "monthly": {},
-             "sources": {}}
+             "climatology": {}, "yearly_product": {}, "sources": {}}
     for param, config in PARAMS.items():
         folder = config["folder"]
         climatology = {}
@@ -170,6 +196,9 @@ def build():
         for key in ("absolute", "anomaly", "monthly_absolute"):
             stats["trend"][key][param] = {}
         stats["monthly"][param] = {}
+        all_zones = [("overall", overall_mask), *masks.items()]
+        monthly_rows, yearly_rows = [], []
+        ever_valid = np.zeros(template[0].shape, dtype=bool)
 
         for year in YEARS:
             monthly_anomalies, records = [], {}
@@ -189,12 +218,18 @@ def build():
                 write_rgb(DATA_DIR / "Monthly_RGB" / folder / str(year) / mm / f"{folder}_Monthly_RGB_{mm}_{year}.tif",
                           apply_color_palette(monthly, config["palette"]), transform, crs)
                 monthly_anomalies.append(anomaly)
+                ever_valid |= ~np.ma.getmaskarray(anomaly)
                 records[month] = {
                     "absolute_mean": zone_mean(monthly, overall_mask),
                     "anomaly_mean": zone_mean(anomaly, overall_mask),
                     "absolute_zones": {zone_id: zone_mean(monthly, mask) for zone_id, mask in masks.items()},
                     "anomaly_zones": {zone_id: zone_mean(anomaly, mask) for zone_id, mask in masks.items()},
                 }
+                for zone_id, mask in all_zones:
+                    absolute_value, anomaly_value = zone_mean(monthly, mask), zone_mean(anomaly, mask)
+                    monthly_rows.append([year, month, zone_id, absolute_value,
+                                         None if absolute_value is None else absolute_value - anomaly_value,
+                                         anomaly_value, zone_count(anomaly, mask)])
                 stats["sources"][param].setdefault("monthly", {})[f"{year}-{mm}"] = str(monthly_path.parent.parent)
                 print(f"{param} {year}-{mm}: EEZ mean {records[month]['absolute_mean']:.3f}, "
                       f"anomaly {records[month]['anomaly_mean']:+.3f}", flush=True)
@@ -239,6 +274,44 @@ def build():
             rgb = colorize_anomaly(annual, config["anomaly_palette"])
             write_rgb(DATA_DIR / "Yearly_RGB" / param / f"{param}_Yearly_Anomaly_RGB_{year}.tif", rgb, transform, crs)
             write_rgb(DATA_DIR / "Yearly_RGB" / "absolute" / param / f"{param}_Yearly_Absolute_RGB_{year}.tif", rgb, transform, crs)
+
+            # Zonal means of the yearly anomaly product, kept next to the monthly-derived values for comparison.
+            product_path = yearly_product_source(param, year)
+            product = read(product_path)[0] if product_path else None
+            if product is not None:
+                stats["yearly_product"].setdefault(param, {})[str(year)] = {
+                    "mean": zone_mean(product, overall_mask),
+                    "zones": {zone_id: zone_mean(product, mask) for zone_id, mask in masks.items()},
+                    "source": product_path.name,
+                }
+            for zone_id, mask in all_zones:
+                derived = record["mean"] if zone_id == "overall" else record["zones"].get(zone_id)
+                yearly_rows.append([year, zone_id, derived, len(months),
+                                    None if product is None else zone_mean(product, mask)])
+
+        # Climatology per zone, on ocean pixels valid in at least one anomaly product (the same land mask).
+        climatology_rows, eez_climatology = [], []
+        zones_climatology = {zone_id: [] for zone_id in ZONE_FILES}
+        for month in range(1, 13):
+            values = np.ma.array(climatology[month], mask=np.ma.getmaskarray(climatology[month]) | ~ever_valid)
+            for zone_id, mask in all_zones:
+                value = zone_mean(values, mask)
+                climatology_rows.append([month, zone_id, value, zone_count(values, mask),
+                                         stats["sources"][param]["climatology"][month]])
+                (eez_climatology if zone_id == "overall" else zones_climatology[zone_id]).append(value)
+        stats["climatology"][param] = {
+            "eez": eez_climatology,
+            "zones": zones_climatology,
+            "periods": {month: re.search(r"(\d{4}_\d{4})", name).group(1).replace("_", "-")
+                        for month, name in stats["sources"][param]["climatology"].items()},
+        }
+        output = DATA_DIR / "zonal_stats"
+        write_csv(output / f"{param}_monthly_zonal.csv",
+                  ["year", "month", "zone", "absolute", "climatology", "anomaly", "pixels"], monthly_rows)
+        write_csv(output / f"{param}_climatology_zonal.csv",
+                  ["month", "zone", "climatology", "pixels", "source"], climatology_rows)
+        write_csv(output / f"{param}_yearly_zonal.csv",
+                  ["year", "zone", "anomaly_mean_of_months", "months", "yearly_anomaly_product"], yearly_rows)
 
     stats_path = DATA_DIR / "Yearly_RGB" / "stats.json"
     stats_path.write_text(json.dumps(stats, ensure_ascii=False, indent=2), encoding="utf-8")

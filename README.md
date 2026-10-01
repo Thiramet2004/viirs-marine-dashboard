@@ -221,6 +221,17 @@ Default sources are `E:\SST_Chlor\Anomaly`, `E:\SST_Chlor\Monthly`, `E:\Monthly 
 anomaly products for 2024 onward were computed from it). Override them with the environment variables listed
 at the top of the script. All outputs are stored as `<YYYY>/<MM>/` folders.
 
+Values extracted per EEZ marine zone (`E:\SST_Chlor\EEZ_MarineZone`, pixel centres inside each polygon) are
+also written as CSV in `data/zonal_stats/`:
+
+| File | Contents |
+|------|----------|
+| `<p>_monthly_zonal.csv` | year, month, zone, absolute mean, climatology, anomaly, valid pixels |
+| `<p>_climatology_zonal.csv` | month, zone, long-term climatology, pixels, source climatology product |
+| `<p>_yearly_zonal.csv` | year, zone, mean of monthly anomalies, months used, yearly anomaly product (`E:\SST_Chlor\*_Yearly_Anomaly`) |
+
+`<p>` is `sst` or `chl`; zone `overall` is the whole EEZ (`1_Marine_Zone_Andaman_GoT.shp`).
+
 
 ### Convert New Monthly Data
 

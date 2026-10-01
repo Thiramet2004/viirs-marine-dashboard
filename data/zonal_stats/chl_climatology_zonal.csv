@@ -1,85 +1,85 @@
-month,zone,climatology,pixels,source
-1,overall,0.74051,15095,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,upper_gulf,2.484409,610,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,rayong,0.617814,439,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,trat,0.938369,369,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,central_gulf,2.028263,935,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,lower_gulf,1.096096,968,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-1,andaman,0.923407,1962,Chlor_a_VIIRS_01_January_2012_2026_4km.data
-2,overall,0.637895,15095,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,upper_gulf,2.270423,610,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,rayong,0.610526,439,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,trat,0.909078,369,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,central_gulf,1.506095,935,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,lower_gulf,0.825341,968,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-2,andaman,0.906707,1962,Chlor_a_VIIRS_02_February_2012_2025_4km.data
-3,overall,0.556783,15095,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,upper_gulf,2.663956,610,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,rayong,0.57085,439,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,trat,0.875654,369,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,central_gulf,1.199275,935,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,lower_gulf,0.608081,968,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-3,andaman,0.79339,1962,Chlor_a_VIIRS_03_March_2012_2025_4km.data
-4,overall,0.531062,15093,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,upper_gulf,2.906974,610,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,rayong,0.579464,439,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,trat,0.910135,369,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,central_gulf,1.156561,933,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,lower_gulf,0.482801,968,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-4,andaman,0.84143,1962,Chlor_a_VIIRS_04_April_2012_2025_4km.data
-5,overall,0.54881,15094,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,upper_gulf,3.671705,610,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,rayong,0.634052,439,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,trat,1.027005,369,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,central_gulf,1.288001,935,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,lower_gulf,0.501028,968,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-5,andaman,0.738528,1962,Chlor_a_VIIRS_05_May_2012_2025_4km.data
-6,overall,0.635514,15091,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,upper_gulf,4.657592,610,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,rayong,0.820741,439,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,trat,1.48597,368,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,central_gulf,1.291006,933,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,lower_gulf,0.497001,968,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-6,andaman,0.768216,1962,Chlor_a_VIIRS_06_June_2012_2025_4km.data
-7,overall,0.629212,15091,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,upper_gulf,4.753481,610,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,rayong,0.887688,439,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,trat,1.521933,369,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,central_gulf,1.250473,932,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,lower_gulf,0.507499,968,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-7,andaman,0.690766,1961,Chlor_a_VIIRS_07_July_2012_2025_4km.data
-8,overall,0.67117,15094,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,upper_gulf,6.020117,610,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,rayong,0.89899,439,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,trat,1.524946,369,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,central_gulf,1.233216,934,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,lower_gulf,0.499945,968,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-8,andaman,0.649056,1962,Chlor_a_VIIRS_08_August_2012_2025_4km.data
-9,overall,0.650603,15093,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,upper_gulf,5.875011,610,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,rayong,0.865357,439,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,trat,1.47743,369,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,central_gulf,1.129731,935,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,lower_gulf,0.496153,968,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-9,andaman,0.664804,1962,Chlor_a_VIIRS_09_September_2012_2025_4km.data
-10,overall,0.621695,15095,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,upper_gulf,5.087093,610,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,rayong,0.76934,439,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,trat,1.127222,369,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,central_gulf,1.230723,935,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,lower_gulf,0.53966,968,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-10,andaman,0.657036,1962,Chlor_a_VIIRS_10_October_2012_2025_4km.data
-11,overall,0.660874,15095,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,upper_gulf,3.851201,610,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,rayong,0.641974,439,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,trat,0.932849,369,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,central_gulf,1.904198,935,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,lower_gulf,0.858883,968,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-11,andaman,0.708624,1962,Chlor_a_VIIRS_11_November_2012_2025_4km.data
-12,overall,0.802003,15095,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,upper_gulf,2.694348,610,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,rayong,0.647142,439,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,trat,0.964626,369,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,central_gulf,2.578186,935,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,lower_gulf,1.579909,968,Chlor_a_VIIRS_12_December_2012_2025_4km.data
-12,andaman,0.828876,1962,Chlor_a_VIIRS_12_December_2012_2025_4km.data
+month,zone,climatology,pixels,years
+1,overall,0.726081,15092,2018-2025 (8 yr)
+1,upper_gulf,2.388228,610,2018-2025 (8 yr)
+1,rayong,0.615037,439,2018-2025 (8 yr)
+1,trat,0.906169,369,2018-2025 (8 yr)
+1,central_gulf,1.895128,933,2018-2025 (8 yr)
+1,lower_gulf,1.139251,968,2018-2025 (8 yr)
+1,andaman,0.914019,1961,2018-2025 (8 yr)
+2,overall,0.656723,15091,2018-2025 (8 yr)
+2,upper_gulf,2.331977,610,2018-2025 (8 yr)
+2,rayong,0.608291,439,2018-2025 (8 yr)
+2,trat,0.908123,368,2018-2025 (8 yr)
+2,central_gulf,1.571597,934,2018-2025 (8 yr)
+2,lower_gulf,0.866334,968,2018-2025 (8 yr)
+2,andaman,0.928987,1961,2018-2025 (8 yr)
+3,overall,0.549109,15084,2018-2025 (8 yr)
+3,upper_gulf,2.461458,609,2018-2025 (8 yr)
+3,rayong,0.574262,439,2018-2025 (8 yr)
+3,trat,0.851249,366,2018-2025 (8 yr)
+3,central_gulf,1.231341,933,2018-2025 (8 yr)
+3,lower_gulf,0.612926,968,2018-2025 (8 yr)
+3,andaman,0.786301,1960,2018-2025 (8 yr)
+4,overall,0.512563,15077,2018-2025 (8 yr)
+4,upper_gulf,2.658943,606,2018-2025 (8 yr)
+4,rayong,0.568465,439,2018-2025 (8 yr)
+4,trat,0.84592,366,2018-2025 (8 yr)
+4,central_gulf,1.13888,929,2018-2025 (8 yr)
+4,lower_gulf,0.489507,968,2018-2025 (8 yr)
+4,andaman,0.811636,1960,2018-2025 (8 yr)
+5,overall,0.556001,15082,2018-2025 (8 yr)
+5,upper_gulf,3.745292,608,2018-2025 (8 yr)
+5,rayong,0.665917,439,2018-2025 (8 yr)
+5,trat,1.028251,367,2018-2025 (8 yr)
+5,central_gulf,1.325397,932,2018-2025 (8 yr)
+5,lower_gulf,0.506887,968,2018-2025 (8 yr)
+5,andaman,0.742901,1960,2018-2025 (8 yr)
+6,overall,0.629833,15061,2018-2025 (8 yr)
+6,upper_gulf,4.869572,606,2018-2025 (8 yr)
+6,rayong,0.82294,439,2018-2025 (8 yr)
+6,trat,1.306847,363,2018-2025 (8 yr)
+6,central_gulf,1.253753,921,2018-2025 (8 yr)
+6,lower_gulf,0.495586,968,2018-2025 (8 yr)
+6,andaman,0.744834,1960,2018-2025 (8 yr)
+7,overall,0.631927,15067,2018-2025 (8 yr)
+7,upper_gulf,5.03633,607,2018-2025 (8 yr)
+7,rayong,0.840348,439,2018-2025 (8 yr)
+7,trat,1.534357,365,2018-2025 (8 yr)
+7,central_gulf,1.222013,923,2018-2025 (8 yr)
+7,lower_gulf,0.504085,968,2018-2025 (8 yr)
+7,andaman,0.676307,1960,2018-2025 (8 yr)
+8,overall,0.677669,15066,2018-2025 (8 yr)
+8,upper_gulf,6.238021,608,2018-2025 (8 yr)
+8,rayong,0.930988,439,2018-2025 (8 yr)
+8,trat,1.482999,363,2018-2025 (8 yr)
+8,central_gulf,1.204095,927,2018-2025 (8 yr)
+8,lower_gulf,0.48547,968,2018-2025 (8 yr)
+8,andaman,0.644708,1960,2018-2025 (8 yr)
+9,overall,0.634167,15068,2018-2025 (8 yr)
+9,upper_gulf,5.665052,608,2018-2025 (8 yr)
+9,rayong,0.895133,439,2018-2025 (8 yr)
+9,trat,1.469563,365,2018-2025 (8 yr)
+9,central_gulf,1.093381,928,2018-2025 (8 yr)
+9,lower_gulf,0.474027,968,2018-2025 (8 yr)
+9,andaman,0.643044,1957,2018-2025 (8 yr)
+10,overall,0.627628,15084,2018-2025 (8 yr)
+10,upper_gulf,5.027193,609,2018-2025 (8 yr)
+10,rayong,0.826,439,2018-2025 (8 yr)
+10,trat,1.265149,369,2018-2025 (8 yr)
+10,central_gulf,1.272978,932,2018-2025 (8 yr)
+10,lower_gulf,0.531893,968,2018-2025 (8 yr)
+10,andaman,0.64457,1960,2018-2025 (8 yr)
+11,overall,0.685209,15091,2018-2025 (8 yr)
+11,upper_gulf,3.886652,610,2018-2025 (8 yr)
+11,rayong,0.672525,439,2018-2025 (8 yr)
+11,trat,0.986985,369,2018-2025 (8 yr)
+11,central_gulf,2.125654,935,2018-2025 (8 yr)
+11,lower_gulf,0.902894,968,2018-2025 (8 yr)
+11,andaman,0.685229,1960,2018-2025 (8 yr)
+12,overall,0.818338,15093,2018-2025 (8 yr)
+12,upper_gulf,2.575976,610,2018-2025 (8 yr)
+12,rayong,0.658609,439,2018-2025 (8 yr)
+12,trat,0.969528,369,2018-2025 (8 yr)
+12,central_gulf,2.66834,934,2018-2025 (8 yr)
+12,lower_gulf,1.713436,968,2018-2025 (8 yr)
+12,andaman,0.818943,1961,2018-2025 (8 yr)

@@ -17,7 +17,7 @@ This dashboard provides comprehensive visualization and analysis of VIIRS (Visib
 - 📈 **Dual Views** - Absolute (Monthly) and Anomaly views
 - 🏝️ **Land Masking** - Ocean-only display with transparent land areas
 - 🗾 **Marine Zones** - EEZ boundary overlays for 6 marine zones
-- 📅 **Time-series Archive** - Monthly SST and Chlorophyll-a (absolute and anomaly) from January 2018 to August 2026
+- 📅 **Time-series Archive** - Monthly SST (January 2018 – December 2025) and Chlorophyll-a (January 2018 – August 2026), absolute and anomaly
 
 ## 🚀 Quick Start
 
@@ -207,19 +207,49 @@ Returns list of all available year-month combinations.
 
 ### Rebuild everything (recommended)
 
-`build_dashboard_data.py` rebuilds all monthly anomaly/absolute RGB GeoTIFFs, the yearly rasters and
-`data/Yearly_RGB/stats.json` from the source products in one pass, so the maps and charts always use the
-same numbers. It first checks that every anomaly product equals monthly − climatology on the same grid.
+`build_dashboard_data.py` computes everything in Python (no SNAP) from the VIIRS monthly products in
+`E:\SST_Chlor\Monthly` and writes all monthly anomaly/absolute RGB GeoTIFFs, the yearly rasters,
+`data/Yearly_RGB/stats.json` and the CSV tables in one pass, so the maps and charts always use the same numbers.
 
 ```bash
-python build_dashboard_data.py --check   # verify sources only
-python build_dashboard_data.py           # rebuild rasters + stats.json
+python build_dashboard_data.py --check   # audit sources + reproduce the SNAP anomaly products
+python build_dashboard_data.py           # rebuild rasters, stats.json and CSV
 ```
 
-Default sources are `E:\SST_Chlor\Anomaly`, `E:\SST_Chlor\Monthly`, `E:\Monthly Climatology`,
-`E:\SST_Chlor\EEZ_MarineZone`, and the reprocessed SST in `E:\<YYYY>` (used when present, because the SST
-anomaly products for 2024 onward were computed from it). Override them with the environment variables listed
-at the top of the script. All outputs are stored as `<YYYY>/<MM>/` folders.
+Method:
+
+1. **Source check** – the `.dim` of every monthly product lists the NASA files it was made from. Only VIIRS
+   (SNPP / NOAA-20 / NOAA-21) files of the product's own year and month are accepted; products built from
+   MODIS or from another year are rejected. `data/zonal_stats/sources.csv` lists the decision for every month.
+2. **Climatology** – per-pixel mean of the accepted products for 2018–2025, the same 8 years for every month
+   (a pixel needs at least 4 valid years). `--climatology nasa` uses `E:\Monthly Climatology` instead.
+3. **Mask** – land pixels (centres inside `country_Asean.shp`) are removed; for SST, pixels where the observed
+   or climatology value is below 26 °C are removed as likely cloud contamination. This is the same rule as the
+   SNAP anomaly products for 2018–2023: `--check` reproduces all 144 of them with zero difference.
+4. **Anomaly** = monthly − climatology; zonal values are means of pixel centres inside each EEZ zone.
+
+### Filling missing months from NASA (no SNAP)
+
+`download_viirs_monthly.py` downloads NASA OB.DAAC VIIRS L3m monthly files (4 km), cuts them to the dashboard
+grid and averages the VIIRS platforms that have data. `build_dashboard_data.py` uses these files for months
+whose local product was rejected. It needs a free NASA Earthdata login, given as the `EARTHDATA_TOKEN`
+environment variable or in `%USERPROFILE%\_netrc`:
+
+```bash
+python download_viirs_monthly.py --param sst --year 2026 --months 1-8
+python build_dashboard_data.py
+```
+
+### Known data issues
+
+- **SST 2026** is not shown: every local 2026 SST file (`E:\SST_Chlor\Monthly\SST_4km\2026`, `E:\2026`) was
+  made from Aqua/Terra **MODIS**, not VIIRS. Run the download above to add VIIRS 2026.
+- `E:\2024` is MODIS and `E:\2025` contains VIIRS data from **2024**; neither is used.
+- NOAA-20 SST for 2025 reads about 0.4 °C cooler, relative to NOAA OISST, than in 2019–2024
+  (VIIRS − OISST: 0.6–0.9 °C in 2019–2024, 0.3 °C in 2025), so the 2025 SST anomaly is exaggerated by about
+  that much. OISST also shows 2025 cooler than average, but by about −0.2 °C rather than −0.6 °C.
+
+All outputs are stored as `<YYYY>/<MM>/` folders.
 
 Values extracted per EEZ marine zone (`E:\SST_Chlor\EEZ_MarineZone`, pixel centres inside each polygon) are
 also written as CSV in `data/zonal_stats/`:
@@ -227,8 +257,9 @@ also written as CSV in `data/zonal_stats/`:
 | File | Contents |
 |------|----------|
 | `<p>_monthly_zonal.csv` | year, month, zone, absolute mean, climatology, anomaly, valid pixels |
-| `<p>_climatology_zonal.csv` | month, zone, long-term climatology, pixels, source climatology product |
+| `<p>_climatology_zonal.csv` | month, zone, climatology (VIIRS 2018–2025), pixels, years used |
 | `<p>_yearly_zonal.csv` | year, zone, mean of monthly anomalies, months used, yearly anomaly product (`E:\SST_Chlor\*_Yearly_Anomaly`) |
+| `sources.csv` | every month: source file, sensors, used or rejected and why |
 
 `<p>` is `sst` or `chl`; zone `overall` is the whole EEZ (`1_Marine_Zone_Andaman_GoT.shp`).
 
@@ -336,10 +367,10 @@ VIIRS_PORT=5002 python3 server.py
 
 ## 📊 Data Statistics
 
-- **Total Files**: 416 monthly RGB GeoTIFF (208 absolute + 208 anomaly) plus 36 yearly
+- **Total Files**: 400 monthly RGB GeoTIFF (200 absolute + 200 anomaly) plus 34 yearly
 - **Total Size**: 277 MB (compressed)
 - **Average File Size**: 1.5 MB
-- **Time Range**: 2018-01 to 2026-08
+- **Time Range**: SST 2018-01 to 2025-12, Chl-a 2018-01 to 2026-08
 - **Update Frequency**: Monthly
 - **Spatial Coverage**: Gulf of Thailand & Andaman Sea
 - **Pixel Resolution**: 4 km (0.04167°)

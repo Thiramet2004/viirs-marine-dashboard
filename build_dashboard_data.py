@@ -76,6 +76,10 @@ YEARS = range(2018, 2027)
 CLIMATOLOGY_YEARS = range(2018, 2026)
 MIN_CLIMATOLOGY_YEARS = 4
 SST_MIN_VALID = 26.0
+# Months with no VIIRS SST (2026 so far) are estimated from the MODIS products, corrected by the MODIS - VIIRS
+# offset measured in a year that has both (E:\2024 holds MODIS products for 2024).
+MODIS_CALIBRATION_YEAR = 2024
+MODIS_OVERLAP_DIR = Path(os.environ.get("VIIRS_MODIS_OVERLAP_DIR", r"E:\2024"))
 
 # Same zone order and shapefiles as server.py; file 1 is the whole EEZ.
 OVERALL_FILE = "1_Marine_Zone_Andaman_GoT.shp"
@@ -199,6 +203,38 @@ def monthly_source(param, year, month, log=None):
             log.append([param, year, month, str(downloaded), "NASA OB.DAAC download", "used", "NASA L3m VIIRS"])
         return downloaded
     return None
+
+
+def modis_product(param, year, month):
+    """SST product built from MODIS (rejected as a VIIRS source), used only as a calibrated estimate."""
+    path = snap_monthly_product(param, year, month)
+    if param != "sst" or not path:
+        return None
+    text = path.parent.with_suffix(".dim").read_text(encoding="utf-8", errors="replace")
+    return path if "MODIS" in text else None
+
+
+def modis_offset(land):
+    """Per-pixel mean (MODIS - VIIRS) over the calibration year, from months where both Aqua and Terra were merged.
+
+    Leave-one-month-out on 2024 gives zone-month errors of RMSE 0.37 C after this correction (0.55 C without).
+    """
+    differences, months = [], []
+    for month in range(1, 13):
+        modis = first(MODIS_OVERLAP_DIR / f"SST_VIIRS_{month:02d}_*_4km.data" / "sst_mean.img")
+        viirs = monthly_source("sst", MODIS_CALIBRATION_YEAR, month)
+        if not modis or not viirs:
+            continue
+        dim = modis.parent.with_suffix(".dim").read_text(encoding="utf-8", errors="replace")
+        if not ("AQUA_MODIS" in dim and "TERRA_MODIS" in dim):
+            continue
+        m, v = read(modis)[0], read(viirs)[0]
+        ok = ~np.ma.getmaskarray(m) & ~np.ma.getmaskarray(v) & ~land & (m.filled(0) >= SST_MIN_VALID) & (v.filled(0) >= SST_MIN_VALID)
+        differences.append(np.ma.array(m - v, mask=~ok))
+        months.append(month)
+    offset = np.ma.stack(differences).mean(axis=0)
+    scalar = float(offset.mean())
+    return offset.filled(scalar).astype("float32"), scalar, months
 
 
 def nasa_climatology_source(param, month):
@@ -328,15 +364,34 @@ def build(climatology_mode):
         for path in (DATA_DIR / "Yearly_RGB" / param, DATA_DIR / "Yearly_RGB" / "absolute" / param):
             shutil.rmtree(path, ignore_errors=True)
 
+        offset = None
+        if param == "sst":
+            offset, offset_scalar, offset_months = modis_offset(land)
+            stats["method"]["modis_calibration"] = {
+                "year": MODIS_CALIBRATION_YEAR, "months": offset_months, "eez_mean_offset": offset_scalar,
+                "validation_rmse_zone_month": 0.37,
+            }
+        stats["estimated_months"] = stats.get("estimated_months", {})
+
         for year in YEARS:
             monthly_anomalies, records = [], {}
             for month in range(1, 13):
                 monthly_path = monthly_source(param, year, month, source_rows)
+                estimated = False
+                if not monthly_path and offset is not None:
+                    monthly_path = modis_product(param, year, month)
+                    if monthly_path:
+                        estimated = True
+                        source_rows.append([param, year, month, str(monthly_path.parent), "MODIS Aqua+Terra",
+                                            "estimate", f"no VIIRS; MODIS minus the {MODIS_CALIBRATION_YEAR} MODIS-VIIRS offset"])
                 if not monthly_path:
                     continue
                 observed, monthly_transform, _ = read(monthly_path)
                 if not monthly_transform.almost_equals(transform) or observed.shape != shape:
                     raise RuntimeError(f"Grid mismatch for {param} {year}-{month:02d}: {monthly_path}")
+                if estimated:
+                    observed = observed - offset
+                    stats["estimated_months"].setdefault(param, {}).setdefault(str(year), []).append(month)
                 valid = valid_mask(param, observed, climatology[month], land)
                 monthly = np.ma.array(observed, mask=~valid)
                 anomaly = np.ma.array(observed - climatology[month], mask=~valid)
@@ -439,6 +494,11 @@ def build(climatology_mode):
                   ["month", "zone", "climatology", "pixels", "years"], climatology_rows)
         write_csv(output / f"{param}_yearly_zonal.csv",
                   ["year", "zone", "anomaly_mean_of_months", "months", "yearly_anomaly_product"], yearly_rows)
+
+    # Long-term SST reference (fetch_oisst_reference.py), shown next to the short VIIRS trend.
+    reference = DATA_DIR / "zonal_stats" / "oisst_reference.json"
+    if reference.exists():
+        stats["long_term_reference"] = {"sst": json.loads(reference.read_text(encoding="utf-8"))}
 
     write_csv(DATA_DIR / "zonal_stats" / "sources.csv",
               ["param", "year", "month", "source", "sensors", "status", "reason"], source_rows)

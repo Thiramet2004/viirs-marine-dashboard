@@ -96,13 +96,21 @@ sst,2025,10,E:\SST_Chlor\Monthly\SST_4km\2025\SST_VIIRS_10_October_2025_4km.data
 sst,2025,11,E:\SST_Chlor\Monthly\SST_4km\2025\SST_VIIRS_11_November_2025_4km.data,JPSS1_VIIRS,used,accepted
 sst,2025,12,E:\SST_Chlor\Monthly\SST_4km\2025\SST_VIIRS_12_December_2025_4km.data,JPSS1_VIIRS,used,accepted
 sst,2026,1,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_01_January_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_01_January_2026_4km
+sst,2026,1,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_01_January_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,2,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_02_February_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_02_February_2026_4km
+sst,2026,2,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_02_February_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,3,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_03_March_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_03_March_2026_4km
+sst,2026,3,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_03_March_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,4,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_04_April_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_04_April_2026_4km
+sst,2026,4,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_04_April_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,5,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_05_May_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_05_May_2026_4km
+sst,2026,5,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_05_May_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,6,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_06_Jun_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_06_Jun_2026_4km
+sst,2026,6,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_06_Jun_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,7,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_07_July_2026_4km.data,AQUA_MODIS+TERRA_MODIS,rejected,product_name is SST_MODIS_07_July_2026_4km
+sst,2026,7,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_07_July_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 sst,2026,8,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_08_August_2026_4km.data,AQUA_MODIS,rejected,product_name is SST_MODIS_08_August_2026_4km
+sst,2026,8,E:\SST_Chlor\Monthly\SST_4km\2026\SST_VIIRS_08_August_2026_4km.data,MODIS Aqua+Terra,estimate,no VIIRS; MODIS minus the 2024 MODIS-VIIRS offset
 chl,2018,1,E:\SST_Chlor\Monthly\Chlor_a_4km\2018\Chlor_a_VIIRS_01_January_2018_4km.data,JPSS1_VIIRS+SNPP_VIIRS,used,accepted
 chl,2018,2,E:\SST_Chlor\Monthly\Chlor_a_4km\2018\Chlor_a_VIIRS_02_February_2018_4km.data,JPSS1_VIIRS+SNPP_VIIRS,used,accepted
 chl,2018,3,E:\SST_Chlor\Monthly\Chlor_a_4km\2018\Chlor_a_VIIRS_03_March_2018_4km.data,JPSS1_VIIRS+SNPP_VIIRS,used,accepted

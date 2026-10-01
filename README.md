@@ -242,12 +242,33 @@ python build_dashboard_data.py
 
 ### Known data issues
 
-- **SST 2026** is not shown: every local 2026 SST file (`E:\SST_Chlor\Monthly\SST_4km\2026`, `E:\2026`) was
-  made from Aqua/Terra **MODIS**, not VIIRS. Run the download above to add VIIRS 2026.
-- `E:\2024` is MODIS and `E:\2025` contains VIIRS data from **2024**; neither is used.
+- **SST 2026 is an estimate.** Every local 2026 SST file (`E:\SST_Chlor\Monthly\SST_4km\2026`, `E:\2026`) was
+  made from Aqua/Terra **MODIS**, not VIIRS. Until VIIRS is downloaded, 2026 SST = MODIS minus the per-pixel
+  MODIS − VIIRS offset measured in 2024 (`E:\2024` MODIS vs VIIRS, 11 months, EEZ mean −0.44 °C).
+  Leave-one-month-out on 2024: RMSE 0.37 °C per zone-month (0.55 °C uncorrected). Against NOAA OISST the
+  Jan–Aug 2026 mean anomaly is +0.09 °C vs +0.20 °C (monthly RMSE 0.26 °C). The dashboard labels these months
+  "ประมาณการจาก MODIS"; downloaded VIIRS files replace them automatically.
+- `E:\2024` is MODIS and `E:\2025` contains VIIRS data from **2024**; neither is used as observations.
 - NOAA-20 SST for 2025 reads about 0.4 °C cooler, relative to NOAA OISST, than in 2019–2024
   (VIIRS − OISST: 0.6–0.9 °C in 2019–2024, 0.3 °C in 2025), so the 2025 SST anomaly is exaggerated by about
   that much. OISST also shows 2025 cooler than average, but by about −0.2 °C rather than −0.6 °C.
+
+### SST trend and the long-term reference
+
+The VIIRS record (2018–2025) is too short for a climate trend: its fitted slope is about −0.7 ± 1.2 °C/decade
+(95 % interval, not significant) and turns positive if the biased 2025 is left out. `fetch_oisst_reference.py`
+downloads NOAA OISST v2.1 (no login) for the Thai EEZ and writes `data/zonal_stats/oisst_reference.json`, which
+the dashboard shows under Fig. 4:
+
+| NOAA OISST, Thai EEZ (103 grid points) | Trend |
+|---|---|
+| 1982–2025 | +0.15 ± 0.06 °C/decade (p ≈ 10⁻⁶) |
+| 2000–2025 | +0.26 ± 0.10 °C/decade |
+| 2018–2025 | +0.18 ± 0.90 °C/decade (not significant) |
+
+In this warming record, 9 of the 37 eight-year windows still have a negative slope, so a short negative
+VIIRS trend does not contradict long-term warming. (NOAA's server copy of OISST has about half the days
+missing in 1994–1998; those years use the available days, and 1998, which lacks Aug–Dec, is left out.)
 
 All outputs are stored as `<YYYY>/<MM>/` folders.
 

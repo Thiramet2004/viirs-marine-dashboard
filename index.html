@@ -902,6 +902,9 @@ function initLeafletMap() {
     minZoom: 5,
     maxZoom: 10,
   });
+  // Raster below the default overlay pane (z-index 400) that holds the EEZ boundaries.
+  leafletMap.createPane('rasterPane');
+  leafletMap.getPane('rasterPane').style.zIndex = 350;
 
   // OSM Humanitarian — สว่าง สะอาด ฟรี ไม่ต้อง API key
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -954,6 +957,15 @@ function isTiffBuffer(buf) {
 function renderGeorasterCanvas(georaster) {
   const width = georaster.width;
   const height = georaster.height;
+  // The GeoTIFF rows are evenly spaced in latitude (EPSG:4326), but L.imageOverlay stretches the image
+  // evenly in Web Mercator. Output row y is therefore taken from the source row at that row's Mercator latitude.
+  const mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+  const fromMercY = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180 / Math.PI;
+  const topY = mercY(georaster.ymax), bottomY = mercY(georaster.ymin);
+  const sourceRow = Array.from({length: height}, (_, y) => {
+    const lat = fromMercY(topY - (y + 0.5) / height * (topY - bottomY));
+    return Math.min(height - 1, Math.max(0, Math.floor((georaster.ymax - lat) / georaster.pixelHeight)));
+  });
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -966,9 +978,9 @@ function renderGeorasterCanvas(georaster) {
   const bValues = georaster.values[2];
 
   for (let y = 0; y < height; y++) {
-    const rowR = rValues[y];
-    const rowG = gValues[y];
-    const rowB = bValues[y];
+    const rowR = rValues[sourceRow[y]];
+    const rowG = gValues[sourceRow[y]];
+    const rowB = bValues[sourceRow[y]];
     const offset = y * width * 4;
 
     for (let x = 0; x < width; x++) {
@@ -1055,7 +1067,8 @@ async function loadMapGeoTIFF() {
       ];
       const canvas = renderGeorasterCanvas(georaster);
       currentMapLayer = L.imageOverlay(canvas.toDataURL(), bounds, {
-        opacity: 0.85
+        opacity: 0.85,
+        pane: 'rasterPane'
       }).addTo(leafletMap);
       currentMapLayer.georaster = georaster;
 

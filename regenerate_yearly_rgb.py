@@ -54,11 +54,11 @@ def source_path(param, year):
 def main():
     stats = {"years": list(YEARS), "sst": {}, "chl": {}}
     zone_files = [
-        ("upper_gulf", "1_Marine_Zone_Andaman_GoT.shp"),
-        ("rayong", "2_Marine_Zone_GoT_GULF1.shp"),
-        ("trat", "3_Marine_Zone_GoT_GULF21.shp"),
-        ("central_gulf", "4_Marine_Zone_GoT_GULF31.shp"),
-        ("lower_gulf", "5_Marine_Zone_GoT_GULF3.shp"),
+        ("upper_gulf", "2_Marine_Zone_GoT_GULF1.shp"),
+        ("rayong", "3_Marine_Zone_GoT_GULF21.shp"),
+        ("trat", "4_Marine_Zone_GoT_GULF31.shp"),
+        ("central_gulf", "5_Marine_Zone_GoT_GULF3.shp"),
+        ("lower_gulf", "6_Marine_Zone_GoT_GULF4.shp"),
         ("andaman", "7_Marine_Zone_Andaman_GULF41.shp"),
     ]
     zones = []

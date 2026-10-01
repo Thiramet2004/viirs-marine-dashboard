@@ -17,7 +17,7 @@ This dashboard provides comprehensive visualization and analysis of VIIRS (Visib
 - 📈 **Dual Views** - Absolute (Monthly) and Anomaly views
 - 🏝️ **Land Masking** - Ocean-only display with transparent land areas
 - 🗾 **Marine Zones** - EEZ boundary overlays for 6 marine zones
-- 📅 **Time-series Archive** - Data from 2018-2025 plus January-July 2026 SST absolute and SST/Chl-a anomaly data
+- 📅 **Time-series Archive** - Monthly SST and Chlorophyll-a (absolute and anomaly) from January 2018 to August 2026
 
 ## 🚀 Quick Start
 
@@ -205,6 +205,23 @@ Returns list of all available year-month combinations.
 
 ## 🔄 Updating Data
 
+### Rebuild everything (recommended)
+
+`build_dashboard_data.py` rebuilds all monthly anomaly/absolute RGB GeoTIFFs, the yearly rasters and
+`data/Yearly_RGB/stats.json` from the source products in one pass, so the maps and charts always use the
+same numbers. It first checks that every anomaly product equals monthly − climatology on the same grid.
+
+```bash
+python build_dashboard_data.py --check   # verify sources only
+python build_dashboard_data.py           # rebuild rasters + stats.json
+```
+
+Default sources are `E:\SST_Chlor\Anomaly`, `E:\SST_Chlor\Monthly`, `E:\Monthly Climatology`,
+`E:\SST_Chlor\EEZ_MarineZone`, and the reprocessed SST in `E:\<YYYY>` (used when present, because the SST
+anomaly products for 2024 onward were computed from it). Override them with the environment variables listed
+at the top of the script. All outputs are stored as `<YYYY>/<MM>/` folders.
+
+
 ### Convert New Monthly Data
 
 When new VIIRS data is processed in SNAP:
@@ -304,10 +321,10 @@ python3 server.py --port 5002
 
 ## 📊 Data Statistics
 
-- **Total Files**: 192 RGB GeoTIFF
+- **Total Files**: 416 monthly RGB GeoTIFF (208 absolute + 208 anomaly) plus 36 yearly
 - **Total Size**: 277 MB (compressed)
 - **Average File Size**: 1.5 MB
-- **Time Range**: 2018-01 to 2025-12
+- **Time Range**: 2018-01 to 2026-08
 - **Update Frequency**: Monthly
 - **Spatial Coverage**: Gulf of Thailand & Andaman Sea
 - **Pixel Resolution**: 4 km (0.04167°)

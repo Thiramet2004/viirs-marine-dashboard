@@ -79,17 +79,16 @@ def read_envi_img(img_path, hdr_path):
     pixel_size_x = float(map_info[5])
     pixel_size_y = float(map_info[6])
     
-    # Calculate upper-left corner (GDAL convention)
-    # Reference pixel is at (x_ref, y_ref) in pixel coordinates (1-indexed)
-    # We need upper-left corner of (0, 0) pixel
-    ulx = x_coord - (x_ref - 0.5) * pixel_size_x
-    uly = y_coord + (y_ref - 0.5) * pixel_size_y  # Y increases downward in image space
+    # Calculate upper-left corner (GDAL convention).
+    # ENVI reference pixels are 1-based and (1, 1) is the upper-left corner of the image,
+    # so (541.5, 481.5) is the centre of pixel 541/481. Using (ref - 0.5) shifted the grid half a pixel.
+    ulx = x_coord - (x_ref - 1) * pixel_size_x
+    uly = y_coord + (y_ref - 1) * pixel_size_y  # Y increases downward in image space
     
     # Create affine transform
     transform = Affine.translation(ulx, uly) * Affine.scale(pixel_size_x, -pixel_size_y)
     
-    # Read binary .img file (data type 4 = float32, byte order 1 = little-endian BUT actual data is big-endian!)
-    # Try big-endian first (SNAP often exports as big-endian despite .hdr saying little-endian)
+    # Read binary .img file (data type 4 = float32; ENVI byte order 1 = big-endian, as SNAP writes it)
     data = np.fromfile(img_path, dtype='>f4').reshape((lines, samples))
     
     # Mask NaN and fill values

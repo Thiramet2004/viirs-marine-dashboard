@@ -1,207 +1,109 @@
 # VIIRS Marine Dashboard 🌊
 
-Interactive Web GIS Dashboard for monitoring Sea Surface Temperature (SST) and Chlorophyll-a in the Gulf of Thailand and Andaman Sea using VIIRS satellite data.
+Web GIS dashboard for monitoring Sea Surface Temperature (SST) and Chlorophyll-a in the Gulf of Thailand and
+the Andaman Sea from VIIRS satellite data, by GISTDA.
 
-![Dashboard Preview](https://img.shields.io/badge/Status-Active-success)
-![Python](https://img.shields.io/badge/Python-3.9+-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+**Live:** [Monthly dashboard](https://thiramet2004.github.io/viirs-marine-dashboard/) ·
+[Yearly dashboard](https://thiramet2004.github.io/viirs-marine-dashboard/yearly/) ·
+[Embed guide](EMBED_GUIDE.md) · [GitHub Pages notes](GITHUB_PAGES_SETUP.md)
 
 ## 📋 Overview
 
-This dashboard provides comprehensive visualization and analysis of VIIRS (Visible Infrared Imaging Radiometer Suite) satellite data for marine environmental monitoring in Thai waters.
-
-**Features:**
-- 🗺️ **Interactive Raster Map** - Browse satellite imagery with pixel-level query capability
-- 📊 **Statistical Charts** - 4 interactive charts analyzing marine parameters
-- 🌡️ **Dual Parameters** - Sea Surface Temperature (SST) and Chlorophyll-a
-- 📈 **Dual Views** - Absolute (Monthly) and Anomaly views
-- 🏝️ **Land Masking** - Ocean-only display with transparent land areas
-- 🗾 **Marine Zones** - EEZ boundary overlays for 6 marine zones
-- 📅 **Time-series Archive** - Monthly SST (January 2018 – December 2025) and Chlorophyll-a (January 2018 – August 2026), absolute and anomaly
+- 🗺️ **Interactive map** – monthly absolute and anomaly rasters with click-to-query values, a timeline that
+  opens on the newest month, and the 7 EEZ marine-zone boundaries on top
+- 📊 **Charts** – monthly time series, monthly anomalies, inter-annual trend with uncertainty and a long-term
+  reference, and the SST–Chl-a anomaly relationship, per zone or for all zones
+- 📅 **Yearly page** – annual anomaly maps and statistics per zone
+- 🌡️ **Parameters** – SST (°C) and Chlorophyll-a (µg/L)
+- 📆 **Period** – SST January 2018 – August 2026 (2026 is a MODIS-based estimate, see
+  [Known data issues](#known-data-issues)); Chl-a January 2018 – August 2026
+- 📁 **Open tables** – every value shown is also in `data/zonal_stats/*.csv`
 
 ## 🚀 Quick Start
 
-### Prerequisites
+The dashboard runs on GitHub Pages without a server (links above). To run it locally:
 
-- Python 3.9 or higher
-- pip (Python package manager)
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+```bash
+git clone https://github.com/Thiramet2004/viirs-marine-dashboard.git
+cd viirs-marine-dashboard
+pip install -r requirements.txt
+python server.py          # http://localhost:5001  (yearly page: /yearly)
+```
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Thiramet2004/viirs-marine-dashboard.git
-   cd viirs-marine-dashboard
-   ```
-
-2. **Install Python dependencies**
-   ```bash
-   pip3 install flask flask-cors rasterio geopandas numpy pandas
-   ```
-
-3. **Run the server**
-   ```bash
-   python3 server.py
-   ```
-
-4. **Open in browser**
-   ```
-   http://localhost:5001
-   ```
+Python 3.9+ is needed; rebuilding the data also needs the source products on `E:` (see
+[Updating Data](#-updating-data)).
 
 ## 📊 Dashboard Components
 
-### Figure 1: Interactive Raster Map
-- Real-time GeoTIFF rendering with Leaflet
-- Click to query pixel values (lat/lon/value)
-- Month slider for temporal navigation
-- Marine EEZ zone boundaries overlay
+| Figure | Content |
+|--------|---------|
+| Fig. 1 Map | Monthly raster (absolute or anomaly) for the selected month, EEZ zones, click for the pixel value |
+| Fig. 2 Monthly time series | All years overlaid with the selected zone's climatology (VIIRS 2018–2025) |
+| Fig. 3 Monthly anomaly | Anomaly of each month of the selected year (red above normal, blue below) |
+| Fig. 4 Inter-annual trend | Annual means, linear trend from complete years with its 95 % interval, and the NOAA OISST long-term trend for SST. Years with fewer than 12 months are seasonally adjusted (zone climatology + mean anomaly of the available months), drawn as triangles and kept out of the fit |
+| Fig. 5 SST vs Chl-a | SST and Chl-a anomalies of the selected year on two axes |
 
-### Figure 2: Monthly Mean Time Series
-- Multi-year comparison with climatology baseline
-- 8-year average reference line
-- Individual year trends
+"Overall" is the equal-weight mean of the six marine zones. Months estimated from MODIS are labelled
+"ประมาณการจาก MODIS" in the charts.
 
-### Figure 3: Monthly Anomaly Bar Chart
-- Positive (red) and negative (blue) anomalies
-- Deviation from long-term mean
-- Quick identification of unusual patterns
+### Map display
 
-### Figure 4: Inter-annual Trend
-- Year-to-year changes
-- Linear trend with slope calculation
-- Long-term climate analysis
-
-### Figure 5: SST-Chl-a Inverse Relationship
-- Dual-axis overlay chart
-- Inverse correlation visualization
-- Anomaly comparison
+The rasters are 4 km (1/24°). The browser redraws them at 3× with colour blending between neighbouring ocean
+pixels, and resamples rows to Web Mercator so they line up with the basemap (error < 0.5 km). Land and cloud
+gaps are never blended, so the coastline and data gaps stay exactly as in the data.
 
 ## 📁 Project Structure
 
 ```
 viirs-marine-dashboard/
-├── server.py                      # Flask server with API endpoints
-├── index.html                     # Main dashboard UI
-├── convert_monthly_to_rgb.py      # ENVI to RGB GeoTIFF converter
-├── embed_dashboard.html           # Embeddable iframe version
+├── index.html                  # Monthly dashboard
+├── index_yearly.html           # Yearly dashboard (served by server.py at /yearly)
+├── yearly/index.html           # Yearly dashboard with relative paths (GitHub Pages copy source)
+├── embed_dashboard.html        # iframe wrapper with ?mode=map|charts
+├── docs/                       # GitHub Pages site (copies of the pages above + assets)
+├── server.py                   # Optional local Flask server and API
+├── build_dashboard_data.py     # Rebuilds all rasters, stats.json and CSV from the source products
+├── download_viirs_monthly.py   # Fills missing months from NASA OB.DAAC (Earthdata login)
+├── fetch_oisst_reference.py    # NOAA OISST long-term SST reference for the Thai EEZ
+├── convert_monthly_to_rgb.py   # Palettes and colouring used by the build (and the older one-month converter)
+├── regenerate_anomaly_rgb.py   # Anomaly palettes and colouring used by the build
+├── SLD_wq/                     # SLD colour ramps the palettes are taken from
+├── assets/                     # MHESI and GISTDA logos, favicon
 ├── data/
-│   └── Monthly_RGB/               # 192 RGB GeoTIFF files (277 MB)
-│       ├── Chlor_a/               # Chlorophyll-a (2018-2025)
-│       └── SST/                   # Sea Surface Temperature (2018-2025)
-├── data/
-│   └── Anomaly_RGB/               # SST and Chlorophyll-a anomaly GeoTIFF files
-└── README.md
+│   ├── Monthly_RGB/<P>/<YYYY>/<MM>/   # Absolute monthly RGB GeoTIFF
+│   ├── Anomaly_RGB/<P>/<YYYY>/<MM>/   # Anomaly monthly RGB GeoTIFF
+│   ├── Yearly_RGB/                    # Yearly rasters and stats.json (all chart data)
+│   ├── zonal_stats/                   # CSV/JSON tables per EEZ zone, sources, OISST reference
+│   └── marine_zones.geojson           # 7 EEZ marine-zone polygons
+└── requirements.txt
 ```
+
+`<P>` is `SST` or `Chlor_a`. Older one-off scripts (`add_raster_map.py`, `fix_map_rgb.py`, `reorder_map.py`,
+`update_fig_numbers.py`, `generate_tiles.py`, `generate_yearly_absolute.py`, `regenerate_yearly_rgb.py`) are
+superseded by `build_dashboard_data.py` and kept only for history.
 
 ## 🛠️ Technical Stack
 
-### Backend
-- **Flask** - Lightweight web server
-- **rasterio** - Geospatial raster I/O
-- **geopandas** - Vector data processing
-- **numpy/pandas** - Data manipulation
+- **Data processing:** Python – rasterio, numpy, geopandas, scipy, netCDF4 (no SNAP needed)
+- **Frontend:** Leaflet 1.9, georaster (GeoTIFF parsing), Chart.js 4; plain HTML/JS, no build step
+- **Hosting:** GitHub Pages (`docs/`), data read from `raw.githubusercontent.com`
+- **Optional server:** Flask + flask-cors
 
-### Frontend
-- **Leaflet** - Interactive mapping library
-- **georaster-layer-for-leaflet** - GeoTIFF rendering
-- **Chart.js** - Statistical visualizations
-- **geoblaze** - Raster pixel queries
-
-### Data Format
-- **RGB GeoTIFF** - 3-band compressed (LZW)
-- **EPSG:4326** - WGS84 geographic coordinate system
-- **Resolution** - 4 km (~0.04167°)
-- **Extent** - 94-111°E, -4-21°N
+**Raster format:** 3-band RGB GeoTIFF, LZW, EPSG:4326, 1/24° (≈ 4.6 km), 1080 × 960 pixels,
+82.17–127.17 °E, 12.67 °S – 27.33 °N. Black (0, 0, 0) = no data / land.
 
 ## 🗺️ Data Sources
 
-### Satellite Data
-- **Sensor**: VIIRS (Suomi NPP / NOAA-20)
-- **Level**: L3 Monthly Composite
-- **Processing**: SNAP ESA Toolbox
-- **Parameters**:
-  - Sea Surface Temperature (SST) - degrees Celsius
-  - Chlorophyll-a concentration - µg/L
+| Data | Source |
+|------|--------|
+| SST, Chl-a | NASA OB.DAAC VIIRS Level-3 monthly, 4 km (Suomi NPP and NOAA-20), binned to the dashboard grid in SNAP (`E:\SST_Chlor\Monthly`) |
+| SST 2026 (estimate) | NASA Aqua + Terra MODIS L3 monthly, corrected to VIIRS (see Known data issues) |
+| Climatology | Computed from the VIIRS products above, 2018–2025 |
+| Long-term SST reference | NOAA OISST v2.1 (NOAA CoastWatch ERDDAP), 1982–present |
+| Marine zones | `E:\SST_Chlor\EEZ_MarineZone` (7 polygons), land mask `country_Asean.shp` |
 
-### Marine Zones
-- Gulf of Thailand Upper (อ่าวไทยตอนบน)
-- Rayong Bay (อ่าวระยอง)
-- Trat Bay (อ่าวตราด)
-- Gulf of Thailand Central (อ่าวไทยตอนกลาง)
-- Gulf of Thailand Lower (อ่าวไทยตอนล่าง)
-- Andaman Sea (ทะเลอันดามัน)
-
-## 🔧 API Endpoints
-
-### Get GeoTIFF
-```http
-GET /api/tif/<view>/<param>/<year>/<month>
-```
-- `view`: `absolute` or `anomaly`
-- `param`: `chl` or `sst`
-- `year`: 2018-2026, depending on available data
-- `month`: 1-12
-
-**Example:**
-```
-http://localhost:5001/api/tif/absolute/sst/2024/6
-```
-
-### Get Metadata
-```http
-GET /api/metadata/<view>/<param>/<year>/<month>
-```
-
-Returns JSON with file info, units, and availability.
-
-### Get Marine Zones
-```http
-GET /api/geojson/marine_zones
-```
-
-Returns combined GeoJSON of all 7 marine zone boundaries.
-
-### Get Available Dates
-```http
-GET /api/available/<view>/<param>
-```
-
-Returns list of all available year-month combinations.
-
-## 🌐 Embedding in Marine GIS Portal
-
-### Option 1: Full iframe (Recommended)
-```html
-<iframe 
-  src="http://localhost:5001/embed_dashboard.html"
-  width="100%" 
-  height="1200px" 
-  frameborder="0"
-  style="border: 1px solid #e2e8f0; border-radius: 8px;"
-></iframe>
-```
-
-### Option 2: Map Only
-```html
-<iframe 
-  src="http://localhost:5001/embed_dashboard.html?mode=map"
-  width="100%" 
-  height="600px" 
-  frameborder="0"
-></iframe>
-```
-
-### Option 3: Charts Only
-```html
-<iframe 
-  src="http://localhost:5001/embed_dashboard.html?mode=charts"
-  width="100%" 
-  height="800px" 
-  frameborder="0"
-></iframe>
-```
+Marine zones: Thai EEZ overall, Upper Gulf (อ่าวไทยตอนบน), Rayong Bay (อ่าวระยอง), Trat Bay (อ่าวตราด),
+Central Gulf (อ่าวไทยตอนกลาง), Lower Gulf (อ่าวไทยตอนล่าง), Andaman Sea (ทะเลอันดามัน).
 
 ## 🔄 Updating Data
 
@@ -284,156 +186,102 @@ also written as CSV in `data/zonal_stats/`:
 
 `<p>` is `sst` or `chl`; zone `overall` is the whole EEZ (`1_Marine_Zone_Andaman_GoT.shp`).
 
+### Source folder layout
 
-### Convert New Monthly Data
-
-When new VIIRS data is processed in SNAP:
-
-```bash
-# Convert single file
-python3 convert_monthly_to_rgb.py Chlor_a 2025 12
-
-# Convert all data for a year
-for month in {1..12}; do
-  python3 convert_monthly_to_rgb.py Chlor_a 2025 $month
-  python3 convert_monthly_to_rgb.py SST 2025 $month
-done
+```
+E:\SST_Chlor\Monthly\
+├── Chlor_a_4km\<YYYY>\Chlor_a_VIIRS_<MM>_<Month>_<YYYY>_4km.data\chlor_a_mean.img
+└── SST_4km\<YYYY>\SST_VIIRS_<MM>_<Month>_<YYYY>_4km.data\sst_mean.img
+E:\SST_Chlor\EEZ_MarineZone\     1_..7_Marine_Zone_*.shp, country_Asean.shp
+E:\2024\                         MODIS SST 2024 (used only to calibrate MODIS against VIIRS)
 ```
 
-The converter:
-1. Reads ENVI `.img` files from source directory
-2. Applies SNAP ocean color palettes
-3. Masks land using Anomaly RGB reference
-4. Exports to RGB GeoTIFF with LZW compression
-5. Saves to `data/Monthly_RGB/`
+Every path can be changed with the environment variables listed at the top of `build_dashboard_data.py`.
 
-### Data Requirements
+## 🌐 Embedding
 
-**Source data location:** Set `VIIRS_SOURCE_MONTHLY_DIR` to the folder containing the ENVI source data:
-```
-<source>/Monthly/
-├── Chlor_a_4km/YYYY/
-│   └── Chlor_a_VIIRS_MM_MonthName_YYYY_4km.data/
-│       └── chlor_a_mean.img
-└── SST_4km/YYYY/
-    └── SST_VIIRS_MM_MonthName_YYYY_4km.data/
-        └── sst_mean.img
+Use the GitHub Pages URL in an iframe; `?mode=map` or `?mode=charts` shows one part only:
+
+```html
+<iframe src="https://thiramet2004.github.io/viirs-marine-dashboard/?mode=map"
+        width="100%" height="900" frameborder="0" loading="lazy"></iframe>
 ```
 
-**Land mask reference:** Set `VIIRS_SOURCE_ANOMALY_DIR` when the source anomaly rasters are outside the repository:
-```
-<source>/Anomaly/RGB_FINAL/
-```
+More options, sizes and a WordPress shortcode: [EMBED_GUIDE.md](EMBED_GUIDE.md).
+
+## 🔧 API (local server only)
+
+`server.py` serves the same pages plus these endpoints; GitHub Pages reads the files directly instead.
+
+| Endpoint | Returns |
+|----------|---------|
+| `GET /api/tif/<view>/<param>/<year>/<month>` | Monthly RGB GeoTIFF (`view` = `absolute` or `anomaly`, `param` = `sst` or `chl`) |
+| `GET /api/available/<view>/<param>` | Available year-months |
+| `GET /api/metadata/<view>/<param>/<year>/<month>` | File name, unit, label, availability |
+| `GET /api/yearly/<param>/<year>` | Yearly anomaly GeoTIFF |
+| `GET /api/yearly/absolute/<param>/<year>` | Yearly "SST − climatology" GeoTIFF |
+| `GET /api/yearly/stats` | `data/Yearly_RGB/stats.json` (all chart data) |
+| `GET /api/geojson/marine_zones` | Marine-zone polygons (from the shapefiles, or `data/marine_zones.geojson`) |
+
+Example: `http://localhost:5001/api/tif/anomaly/sst/2025/6`
 
 ## 📝 Configuration
 
-### Server Port, Host and Debug Mode
-Set environment variables (defaults shown):
+Server settings (environment variables, defaults shown):
+
 ```bash
 VIIRS_PORT=5001        # port
-VIIRS_HOST=127.0.0.1   # use 0.0.0.0 to allow other machines on the network
-VIIRS_DEBUG=0          # 1 enables Flask debug mode; never enable it on a shared network
-```
-The server only serves dashboard pages and data files (HTML, JSON/GeoJSON, GeoTIFF, images);
-source code and dot-folders such as `.git` are never served.
-
-### Data Paths
-Edit `server.py`:
-```python
-VIIRS_ANOMALY_DIR=/path/to/data/Anomaly_RGB
-VIIRS_MONTHLY_DIR=/path/to/data/Monthly_RGB
+VIIRS_HOST=127.0.0.1   # 0.0.0.0 allows other machines on the network
+VIIRS_DEBUG=0          # 1 enables Flask debug mode; never on a shared network
+VIIRS_MONTHLY_DIR=data/Monthly_RGB    VIIRS_ANOMALY_DIR=data/Anomaly_RGB    VIIRS_YEARLY_DIR=data/Yearly_RGB
 ```
 
-### Color Palettes
-Edit `convert_monthly_to_rgb.py`:
-```python
-CHLOR_A_PALETTE = [
-    (0.0, (0, 0, 100)),    # Dark blue
-    (0.5, (200, 250, 255)), # Light blue
-    (2.0, (240, 53, 1)),    # Red-orange
-    # ... customize ranges
-]
-```
+The server only serves pages and data files (HTML, JSON/GeoJSON, GeoTIFF, images); source code and
+dot-folders such as `.git` are never served.
+
+**Colour ramps** come from `SLD_wq/` and live in `convert_monthly_to_rgb.py` (absolute: `CHLOR_A_PALETTE`,
+`SST_PALETTE`) and `regenerate_anomaly_rgb.py` (anomaly). The legends in the pages use the same stops.
 
 ## 🐛 Troubleshooting
 
-### Server won't start
-```bash
-# Check if port 5001 is in use
-lsof -i :5001
-
-# Kill existing process
-kill -9 <PID>
-
-# Try different port
-VIIRS_PORT=5002 python3 server.py
-```
-
-### GeoTIFF not loading
-1. Check Flask server logs
-2. Verify file exists: `ls data/Monthly_RGB/SST/2024/01/`
-3. Test API directly: `curl http://localhost:5001/api/tif/absolute/sst/2024/1`
-4. Check browser console for CORS errors
-
-### Land mask not working
-1. Ensure Anomaly RGB files exist for the same year/month
-2. Verify paths in `convert_monthly_to_rgb.py`
-3. Re-run converter with `--force` flag
-
-### Slow performance
-1. Enable CORS caching in `server.py`
-2. Use nginx as reverse proxy
-3. Enable GeoTIFF compression
-4. Use CDN for static assets
+- **Old page or favicon after an update** – Ctrl+F5; GitHub Pages caches for a few minutes.
+- **Map stuck on "กำลังโหลด GeoTIFF..."** – files come from `raw.githubusercontent.com` (≈ 1 MB per month);
+  check the browser console and the network.
+- **Port 5001 in use (local)** – `netstat -ano | findstr :5001` (Windows) or `lsof -i :5001`, or run on
+  another port with `VIIRS_PORT=5002 python server.py`.
+- **`PROJ: proj_create_from_database: Cannot find proj.db`** – `PROJ_LIB` points to another installation
+  (for example PostGIS). The build still works because the rasters carry a full WGS 84 definition; unset
+  `PROJ_LIB` to silence it.
+- **A month is missing after a rebuild** – look it up in `data/zonal_stats/sources.csv`; rejected sources
+  (MODIS, wrong year) are listed there with the reason.
 
 ## 📊 Data Statistics
 
-- **Total Files**: 400 monthly RGB GeoTIFF (200 absolute + 200 anomaly) plus 34 yearly
-- **Total Size**: 277 MB (compressed)
-- **Average File Size**: 1.5 MB
-- **Time Range**: SST 2018-01 to 2025-12, Chl-a 2018-01 to 2026-08
-- **Update Frequency**: Monthly
-- **Spatial Coverage**: Gulf of Thailand & Andaman Sea
-- **Pixel Resolution**: 4 km (0.04167°)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **Rasters:** 416 monthly RGB GeoTIFF (208 absolute + 208 anomaly) and 36 yearly, about 450 MB in `data/`
+- **Time range:** 2018-01 to 2026-08 for both parameters (SST 2026 estimated from MODIS)
+- **Update:** monthly – rebuild, copy pages to `docs/` if changed, push
+- **Coverage:** Gulf of Thailand, Andaman Sea and surrounding seas (82–127 °E, 13 °S – 27 °N)
+- **Pixel size:** 1/24° (≈ 4.6 km)
 
 ## 👥 Authors
 
-- **Thiramet** - *Initial work* - [@Thiramet2004](https://github.com/Thiramet2004)
+- **Thiramet** – [@Thiramet2004](https://github.com/Thiramet2004)
 
 ## 🙏 Acknowledgments
 
-- VIIRS data courtesy of NASA/NOAA
-- SNAP ESA Toolbox for data processing
-- Marine zones from Thailand Department of Marine and Coastal Resources
-- Leaflet community for mapping tools
-- Chart.js for visualization components
+- NASA Ocean Biology Processing Group / OB.DAAC for the VIIRS and MODIS Level-3 products
+- NOAA NCEI and NOAA CoastWatch for OISST v2.1
+- ESA SNAP for the binning of the source products
+- Thailand Department of Marine and Coastal Resources for the marine-zone boundaries
+- Leaflet, georaster and Chart.js
+- Logos: Ministry of Higher Education, Science, Research and Innovation (Wikimedia Commons) and GISTDA
 
 ## 📧 Contact
 
-For questions or support:
-- GitHub Issues: https://github.com/Thiramet2004/viirs-marine-dashboard/issues
-- Email: [Your email]
+GitHub Issues: https://github.com/Thiramet2004/viirs-marine-dashboard/issues
 
-## 🔗 Related Projects
+## 🔗 Related
 
-- [VIIRS Data Portal](https://oceancolor.gsfc.nasa.gov/)
-- [SNAP ESA Toolbox](https://step.esa.int/main/download/snap-download/)
-- [Marine GIS Portal](https://marinegis.dmcr.go.th/)
-
----
-
-**Built with ❤️ for marine environmental monitoring in Thailand** 🇹🇭
+- [NASA OceanColor](https://oceancolor.gsfc.nasa.gov/) · [NOAA OISST](https://www.ncei.noaa.gov/products/optimum-interpolation-sst)
+- [SNAP](https://step.esa.int/main/download/snap-download/) · [Marine GIS Portal](https://marinegis.dmcr.go.th/)
+- [GISTDA](https://www.gistda.or.th/)

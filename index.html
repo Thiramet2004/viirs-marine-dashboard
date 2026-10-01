@@ -832,6 +832,9 @@ function setEmbedMode(mode) {
 window.addEventListener('message', event => {
   if (event.data && event.data.type === 'setMode') setEmbedMode(event.data.mode);
 });
+// ?mode=map or ?mode=charts in the URL: embed one part directly (e.g. in an iframe on GitHub Pages)
+const urlMode = new URLSearchParams(location.search).get('mode');
+if (urlMode === 'map' || urlMode === 'charts') setEmbedMode(urlMode);
 
 // =============================================
 // LEAFLET MAP (Fig. 1)

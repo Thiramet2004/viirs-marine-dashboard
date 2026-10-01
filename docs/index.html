@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รายงานข้อมูลดาวเทียม VIIRS | SST & Chlorophyll-a</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -32,7 +36,7 @@ body.embed-charts #mapSection{display:none}
 .map-nav-btn{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center}
 .map-nav-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .map-nav-btn .material-icons-outlined{font-size:18px}
-.map-body{position:relative;height:600px}
+.map-body{position:relative;height:min(82vh,900px);min-height:560px}
 #leafletMap{height:100%;width:100%;background:#a8c8e8}
 .map-legend{position:absolute;bottom:16px;right:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:180px;z-index:999;box-shadow:var(--shadow)}
 .legend-title{font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-align:center}
@@ -50,7 +54,7 @@ body.embed-charts #mapSection{display:none}
 .map-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.92);padding:12px 18px;border-radius:8px;display:none;align-items:center;gap:8px;font-size:.8rem;color:var(--text2);z-index:10000;box-shadow:var(--shadow)}
 .map-loading.show{display:flex}
 .leaflet-container{font-family:var(--font)}
-.agency-logos{display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:4px 10px;height:44px;flex-shrink:0}.agency-logos img{height:34px;width:auto;display:block}.agency-logos .sep{width:1px;height:26px;background:#cbd5e1}@media (max-width:520px){.agency-logos{height:38px;padding:3px 8px;gap:6px}.agency-logos img{height:28px}}
+.agency-logos{display:flex;align-items:center;gap:14px;background:#fff;border-radius:10px;padding:5px 14px;height:60px;flex-shrink:0}.agency-logos img{height:50px;width:auto;display:block}.agency-logos .sep{width:1px;height:38px;background:#cbd5e1}@media (max-width:520px){.agency-logos{height:46px;padding:4px 9px;gap:8px}.agency-logos img{height:38px}.agency-logos .sep{height:28px}}
 </style>
 </head>
 <body>
@@ -214,7 +218,7 @@ body.embed-charts #mapSection{display:none}
 <!-- References + Dynamic Summary -->
 <section class="section" id="references" style="grid-column:1/-1">
 <h3 class="section-title"><span class="section-num">3</span> แหล่งข้อมูลและข้อจำกัด</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch">
+<div class="ref-grid">
 
 <!-- ตารางซ้าย -->
 <div class="ref-content" style="height:100%;box-sizing:border-box">
@@ -238,7 +242,7 @@ body.embed-charts #mapSection{display:none}
     </div>
     <div id="summaryBadge" style="flex-shrink:0;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.15);border-radius:5px;padding:5px 12px;white-space:nowrap;margin-top:2px;">—</div>
   </div>
-  <div id="summaryStats" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;"></div>
+  <div id="summaryStats" class="summary-stats"></div>
   <div id="summaryInsight" style="font-size:.78rem;line-height:1.75;color:rgba(255,255,255,.85);border-top:1px solid rgba(255,255,255,.15);padding-top:14px;"></div>
 </div>
 
@@ -349,7 +353,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .map-nav-btn{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center}
 .map-nav-btn:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .map-nav-btn .material-icons-outlined{font-size:18px}
-.map-body{position:relative;height:600px}
+.map-body{position:relative;height:min(82vh,900px);min-height:560px}
 #leafletMap{height:100%;width:100%;background:#a8c8e8}
 .map-legend{position:absolute;bottom:16px;right:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:180px;z-index:999;box-shadow:var(--shadow)}
 .legend-title{font-size:.7rem;font-weight:700;color:var(--accent);margin-bottom:6px;text-align:center}
@@ -367,6 +371,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .map-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.92);padding:12px 18px;border-radius:8px;display:none;align-items:center;gap:8px;font-size:.8rem;color:var(--text2);z-index:10000;box-shadow:var(--shadow)}
 .map-loading.show{display:flex}
 .leaflet-container{font-family:var(--font)}
+@media (max-width:600px){.map-body{height:70vh;min-height:420px}}
+@media (max-width:520px){.nav-inner{padding:8px 12px}.nav-brand{gap:8px;min-width:0}.agency-text{min-width:0}.agency-name{font-size:.78rem;line-height:1.25;white-space:normal}.agency-sub{display:none}}
+.chart-grid>*,.chart-panel{min-width:0}.chart-panel table{display:block;overflow-x:auto;max-width:100%}
+.ref-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}.summary-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}@media (max-width:900px){.ref-grid{grid-template-columns:minmax(0,1fr)}}@media (max-width:520px){.summary-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 
 <script>

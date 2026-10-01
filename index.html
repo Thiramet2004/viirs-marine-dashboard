@@ -393,6 +393,8 @@ let currentParam='sst', currentView='absolute';
 const yc={'2018':{l:'rgba(100,160,200,0.3)',f:'rgba(100,160,200,0.04)'},'2019':{l:'rgba(120,180,160,0.3)',f:'rgba(120,180,160,0.04)'},'2020':{l:'rgba(160,180,120,0.3)',f:'rgba(160,180,120,0.04)'},'2021':{l:'rgba(180,160,100,0.3)',f:'rgba(180,160,100,0.04)'},'2022':{l:'rgba(200,140,100,0.3)',f:'rgba(200,140,100,0.04)'},'2023':{l:'rgba(180,120,160,0.3)',f:'rgba(180,120,160,0.04)'},'2024':{l:'rgba(37,99,235,0.6)',f:'rgba(37,99,235,0.06)'},'2025':{l:'rgba(220,38,38,1)',f:'rgba(220,38,38,0.08)'},'2026':{l:'rgba(168,85,247,1)',f:'rgba(168,85,247,0.08)'}};
 let c1,c2,c3,c4,yearlyTrendStats=null;
 let currentMapMonth=1,timelineDates=[],currentTimelineIndex=0;
+// Open on the newest month; keep the user's choice once they move the timeline.
+let userPickedDate=false;
 // Months with data per param/year; refreshed from stats.json (monthly.<param>.<year>.available_months).
 const availableMonths={sst:{},chl:{}};
 // Months estimated from MODIS (no VIIRS yet), from stats.json estimated_months.<param>.<year>.
@@ -789,7 +791,7 @@ function updateKPI(zone,yr){
 function renderAll(){
   const z=document.getElementById('zoneSelect').value,y=document.getElementById('yearSelect').value;
   renderMain(z,y);
-  const selectedMainDataset=c1.data.datasets.find(dataset=>dataset.label===String(y));
+  const selectedMainDataset=c1.data.datasets.find(dataset=>dataset.label.split(' ')[0]===String(y));
   if(selectedMainDataset)selectedMainDataset.pointRadius=months.map((_,index)=>index===currentMapMonth-1?7:2);
   c1.update('none');
   renderBar(z,y);
@@ -802,6 +804,7 @@ function renderAll(){
 document.querySelectorAll('.param-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.param-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentParam=b.dataset.param;renderAll();});});
 document.querySelectorAll('.view-tab').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');currentView=b.dataset.view;renderAll();});});
 document.getElementById('zoneSelect').addEventListener('change',renderAll);
+syncMapMonthRange();
 renderAll();
 const trendStatsUrl=['localhost','127.0.0.1'].includes(location.hostname)?'/api/yearly/stats':'https://raw.githubusercontent.com/Thiramet2004/viirs-marine-dashboard/main/data/Yearly_RGB/stats.json';
 fetch(trendStatsUrl).then(response=>response.ok?response.json():null).then(data=>{if(!data)return;yearlyTrendStats=data;applyMonthlyZonalStats(data);syncMapMonthRange();renderAll();}).catch(()=>{});
@@ -909,7 +912,7 @@ function syncMapMonthRange() {
     return (availableMonths[currentParam][year] || []).map(month => ({year, month}));
   });
   if (!timelineDates.length) return;
-  let index = timelineDates.findIndex(date => date.year === selectedYear && date.month === selectedMonth);
+  let index = userPickedDate ? timelineDates.findIndex(date => date.year === selectedYear && date.month === selectedMonth) : timelineDates.length - 1;
   if (index < 0) {
     const nextDate = timelineDates.findIndex(date => date.year > selectedYear || (date.year === selectedYear && date.month > selectedMonth));
     index = nextDate < 0 ? timelineDates.length - 1 : Math.max(0, nextDate - 1);
@@ -1284,6 +1287,7 @@ function changeMapMonth(delta) {
   const index = Math.max(0, Math.min(timelineDates.length - 1, currentTimelineIndex + delta));
   const date = timelineDates[index];
   if (!date) return;
+  userPickedDate = true;
   currentTimelineIndex = index;
   document.getElementById('yearSelect').value = date.year;
   currentMapMonth = date.month;
@@ -1294,6 +1298,7 @@ document.getElementById('mapMonthSlider').addEventListener('input', function() {
   const index = Number(this.value);
   const date = timelineDates[index];
   if (!date) return;
+  userPickedDate = true;
   currentTimelineIndex = index;
   document.getElementById('yearSelect').value = date.year;
   currentMapMonth = date.month;

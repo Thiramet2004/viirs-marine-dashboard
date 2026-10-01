@@ -6,6 +6,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2018,central_gulf,0.222091,12,0.134454
 2018,lower_gulf,0.105314,12,0.025973
 2018,andaman,0.24237,12,0.2099
+2018,gulf_of_thailand,0.135679,12,0.075459
+2018,andaman_sea,0.23158,12,0.196475
 2019,overall,0.171626,12,0.117863
 2019,upper_gulf,0.154653,12,0.040343
 2019,rayong,0.248259,12,0.177466
@@ -13,6 +15,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2019,central_gulf,0.262252,12,0.168212
 2019,lower_gulf,0.177656,12,0.098315
 2019,andaman,0.130258,12,0.097344
+2019,gulf_of_thailand,0.205083,12,0.141088
+2019,andaman_sea,0.114386,12,0.078113
 2020,overall,0.113635,12,0.059492
 2020,upper_gulf,0.275921,12,0.15945
 2020,rayong,0.155311,12,0.084406
@@ -20,6 +24,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2020,central_gulf,0.141531,12,0.046014
 2020,lower_gulf,-0.008861,12,-0.088813
 2020,andaman,-0.015693,12,-0.048193
+2020,gulf_of_thailand,0.164999,12,0.100489
+2020,andaman_sea,0.025756,12,-0.010674
 2021,overall,-0.078257,12,-0.132069
 2021,upper_gulf,-0.051147,12,-0.165984
 2021,rayong,0.01904,12,-0.051865
@@ -27,6 +33,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2021,central_gulf,-0.248263,12,-0.343299
 2021,lower_gulf,-0.077982,12,-0.157237
 2021,andaman,-0.128433,12,-0.161077
+2021,gulf_of_thailand,-0.069071,12,-0.133212
+2021,andaman_sea,-0.094045,12,-0.130111
 2022,overall,-0.139127,12,-0.191708
 2022,upper_gulf,-0.019893,12,-0.135592
 2022,rayong,-0.181523,12,-0.252428
@@ -34,6 +42,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2022,central_gulf,-0.149918,12,-0.243555
 2022,lower_gulf,-0.15287,12,-0.230212
 2022,andaman,-0.048218,12,-0.080089
+2022,gulf_of_thailand,-0.176695,12,-0.239482
+2022,andaman_sea,-0.074536,12,-0.109943
 2023,overall,0.004157,12,-0.049851
 2023,upper_gulf,0.08252,12,-0.033459
 2023,rayong,0.060072,12,-0.010828
@@ -41,6 +51,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2023,central_gulf,-0.047791,12,-0.141507
 2023,lower_gulf,0.058286,12,-0.025581
 2023,andaman,-0.010837,12,-0.04392
+2023,gulf_of_thailand,0.011711,12,-0.052352
+2023,andaman_sea,-0.008993,12,-0.045569
 2024,overall,0.408347,12,0.359471
 2024,upper_gulf,0.279262,12,0.195161
 2024,rayong,0.406414,12,0.351581
@@ -48,6 +60,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2024,central_gulf,0.467006,12,0.375389
 2024,lower_gulf,0.317279,12,0.239227
 2024,andaman,0.414321,12,0.385003
+2024,gulf_of_thailand,0.38587,12,0.331083
+2024,andaman_sea,0.441248,12,0.408056
 2025,overall,-0.669374,12,-0.721761
 2025,upper_gulf,-1.057009,12,-1.106458
 2025,rayong,-0.908324,12,-0.979077
@@ -55,6 +69,8 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2025,central_gulf,-0.680086,12,-0.773753
 2025,lower_gulf,-0.419418,12,-0.498501
 2025,andaman,-0.590227,12,-0.626014
+2025,gulf_of_thailand,-0.682504,12,-0.744868
+2025,andaman_sea,-0.647814,12,-0.682214
 2026,overall,0.091673,8,
 2026,upper_gulf,-0.111907,8,
 2026,rayong,0.047087,8,
@@ -62,3 +78,5 @@ year,zone,anomaly_mean_of_months,months,yearly_anomaly_product
 2026,central_gulf,0.001997,8,
 2026,lower_gulf,-0.008614,8,
 2026,andaman,0.190521,8,
+2026,gulf_of_thailand,0.026252,8,
+2026,andaman_sea,0.203603,8,

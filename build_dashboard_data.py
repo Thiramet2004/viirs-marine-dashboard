@@ -92,6 +92,9 @@ ZONE_FILES = {
     "lower_gulf": "6_Marine_Zone_GoT_GULF4.shp",
     "andaman": "7_Marine_Zone_Andaman_GULF41.shp",
 }
+# Whole-sea regions: the two parts of the Thai EEZ polygon (OVERALL_FILE), east = Gulf of Thailand.
+REGION_IDS = ("gulf_of_thailand", "andaman_sea")
+ZONE_IDS = [*ZONE_FILES, *REGION_IDS]
 
 PARAMS = {
     "sst": {"folder": "SST", "var": "sst_mean", "palette": SST_PALETTE, "anomaly_palette": SST_ANOMALY_PALETTE},
@@ -141,10 +144,21 @@ def polygon_mask(filename, shape, transform):
     return ~geometry_mask([geometry], out_shape=shape, transform=transform, all_touched=False)
 
 
+def region_masks(shape, transform):
+    """Gulf of Thailand and Andaman Sea parts of the Thai EEZ polygon (pixel centres)."""
+    eez = gpd.read_file(ZONE_DIR / OVERALL_FILE).to_crs(4326).geometry.union_all()
+    parts = sorted(getattr(eez, "geoms", [eez]), key=lambda part: part.area, reverse=True)[:2]
+    if len(parts) != 2:
+        raise RuntimeError(f"Expected the EEZ polygon to have a Gulf and an Andaman part, found {len(parts)}")
+    gulf, andaman = sorted(parts, key=lambda part: part.centroid.x, reverse=True)
+    inside = lambda geometry: ~geometry_mask([geometry], out_shape=shape, transform=transform, all_touched=False)
+    return {"gulf_of_thailand": inside(gulf), "andaman_sea": inside(andaman)}
+
+
 def zone_masks(shape, transform):
-    return polygon_mask(OVERALL_FILE, shape, transform), {
-        zone_id: polygon_mask(filename, shape, transform) for zone_id, filename in ZONE_FILES.items()
-    }
+    masks = {zone_id: polygon_mask(filename, shape, transform) for zone_id, filename in ZONE_FILES.items()}
+    masks.update(region_masks(shape, transform))
+    return polygon_mask(OVERALL_FILE, shape, transform), masks
 
 
 def zone_mean(values, inside):
@@ -420,13 +434,13 @@ def build(climatology_mode):
 
             months = sorted(records)
             stats["monthly"][param][str(year)] = {
-                "absolute": {"zones": {z: [records.get(m, {}).get("absolute_zones", {}).get(z) for m in range(1, 13)] for z in ZONE_FILES}},
-                "anomaly": {"zones": {z: [records.get(m, {}).get("anomaly_zones", {}).get(z) for m in range(1, 13)] for z in ZONE_FILES}},
+                "absolute": {"zones": {z: [records.get(m, {}).get("absolute_zones", {}).get(z) for m in range(1, 13)] for z in ZONE_IDS}},
+                "anomaly": {"zones": {z: [records.get(m, {}).get("anomaly_zones", {}).get(z) for m in range(1, 13)] for z in ZONE_IDS}},
                 "available_months": months,
             }
             anomaly_means = [records[m]["anomaly_mean"] for m in months if records[m]["anomaly_mean"] is not None]
-            anomaly_zone_values = {z: [records[m]["anomaly_zones"][z] for m in months if records[m]["anomaly_zones"][z] is not None] for z in ZONE_FILES}
-            absolute_zone_values = {z: [records[m]["absolute_zones"][z] for m in months if records[m]["absolute_zones"][z] is not None] for z in ZONE_FILES}
+            anomaly_zone_values = {z: [records[m]["anomaly_zones"][z] for m in months if records[m]["anomaly_zones"][z] is not None] for z in ZONE_IDS}
+            absolute_zone_values = {z: [records[m]["absolute_zones"][z] for m in months if records[m]["absolute_zones"][z] is not None] for z in ZONE_IDS}
             record = {
                 "mean": mean_or_none(anomaly_means),
                 "min": float(min(anomaly_means)) if anomaly_means else None,
@@ -473,7 +487,7 @@ def build(climatology_mode):
 
         # Climatology per zone, on the same ocean pixels (land and SST threshold applied).
         climatology_rows, eez_climatology = [], []
-        zones_climatology = {zone_id: [] for zone_id in ZONE_FILES}
+        zones_climatology = {zone_id: [] for zone_id in ZONE_IDS}
         for month in range(1, 13):
             values = climatology[month]
             usable = ~np.ma.getmaskarray(values) & ~land

@@ -43,7 +43,9 @@ Python 3.9+ is needed; rebuilding the data also needs the source products on `E:
 | Fig. 4 Inter-annual trend | Annual means, linear trend from complete years with its 95 % interval, and the NOAA OISST long-term trend for SST. Years with fewer than 12 months are seasonally adjusted (zone climatology + mean anomaly of the available months), drawn as triangles and kept out of the fit |
 | Fig. 5 SST vs Chl-a | SST and Chl-a anomalies of the selected year on two axes |
 
-"Overall" is the equal-weight mean of the six marine zones. Months estimated from MODIS are labelled
+"Overall" is the equal-weight mean of the six marine zones. Besides the zones, the area selector has two
+whole-sea areas, **อ่าวไทย (ทั้งหมด)** and **ทะเลอันดามัน (ทั้งหมด)**: the Gulf of Thailand and Andaman parts of the
+Thai EEZ polygon (`1_Marine_Zone_Andaman_GoT.shp` has exactly these two parts), averaged over all their pixels. Months estimated from MODIS are labelled
 "ประมาณการจาก MODIS" in the charts.
 
 ### Map display
@@ -184,7 +186,8 @@ also written as CSV in `data/zonal_stats/`:
 | `<p>_yearly_zonal.csv` | year, zone, mean of monthly anomalies, months used, yearly anomaly product (`E:\SST_Chlor\*_Yearly_Anomaly`) |
 | `sources.csv` | every month: source file, sensors, used or rejected and why |
 
-`<p>` is `sst` or `chl`; zone `overall` is the whole EEZ (`1_Marine_Zone_Andaman_GoT.shp`).
+`<p>` is `sst` or `chl`; zone `overall` is the whole EEZ (`1_Marine_Zone_Andaman_GoT.shp`), and
+`gulf_of_thailand` / `andaman_sea` are its two parts (their pixel counts add up to `overall`).
 
 ### Source folder layout
 

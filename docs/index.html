@@ -332,10 +332,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .chart-body-anomaly{padding:16px 20px 20px;height:440px;position:relative}
 .chart-desc{padding:12px 20px 14px;border-top:1px solid var(--border-lt);background:#f9fafb;font-size:.73rem;color:var(--text2);line-height:1.6}
 .chart-desc strong{color:var(--accent)}
-.corr-matrix{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.72rem;text-align:center}
-.corr-matrix th{padding:8px 6px;font-size:.68rem;font-weight:600;color:var(--text2);background:var(--bg);border:1px solid var(--border)}
-.corr-matrix td{padding:8px 4px;border:1px solid var(--border);font-weight:500;min-width:50px}
-.corr-matrix .row-header{font-weight:600;color:var(--text2);background:var(--bg);text-align:right;padding-right:10px;font-family:var(--font);font-size:.72rem}
 .insight-box{background:var(--white);border:2px solid #dbeafe;border-radius:var(--r);padding:20px 24px;margin-bottom:32px;display:flex;gap:16px;align-items:flex-start;box-shadow:var(--shadow)}
 .insight-icon{width:40px;height:40px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#d97706;font-size:22px;flex-shrink:0}
 .insight-content h4{font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:8px}
@@ -489,78 +485,6 @@ function renderMain(zone,yr){
   }
   const yLab=currentView==='absolute'?d.n+' ('+d.u+')':d.n+' Anomaly ('+d.u+')';
   c1=new Chart(ctx,{type:'line',data:{labels:months,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:'#475569',font:{size:11},boxWidth:14,padding:10,usePointStyle:true}},tooltip:{backgroundColor:'#fff',titleColor:'#1e293b',bodyColor:'#475569',borderColor:'#e2e8f0',borderWidth:1,cornerRadius:6,callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y?.toFixed(currentParam==='chl'?3:2)+' '+d.u}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:11}},title:{display:true,text:'Month',color:'#1e293b',font:{size:11,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151'},title:{display:true,text:yLab,color:'#1e293b',font:{size:11,weight:'600'}}}}}}); 
-}
-
-function renderHeatmap(zone){
-  // Compute Pearson r between SST anomaly and Chl-a anomaly for each month (across 8 years)
-  const table=document.getElementById('corrTable');
-  // For each month, collect SST anomaly and Chl-a anomaly across all years
-  const sstAn=anomalyTable('sst',zone);
-  const chlAn=anomalyTable('chl',zone);
-
-  // Compute correlation per month (r across 8 years for that month)
-  const rByMonth=[];
-  for(let mi=0;mi<12;mi++){
-    const xs=[],ys=[];
-    years.forEach(y=>{
-      const sv=sstAn[String(y)][mi], cv=chlAn[String(y)][mi];
-      if(sv!==null&&cv!==null){xs.push(sv);ys.push(cv);}
-    });
-    if(xs.length>=3){
-      const n=xs.length,xm=xs.reduce((a,b)=>a+b,0)/n,ym=ys.reduce((a,b)=>a+b,0)/n;
-      let num=0,dx=0,dy=0;
-      for(let i=0;i<n;i++){num+=(xs[i]-xm)*(ys[i]-ym);dx+=(xs[i]-xm)**2;dy+=(ys[i]-ym)**2;}
-      rByMonth.push(dx&&dy?num/Math.sqrt(dx*dy):0);
-    } else {rByMonth.push(null);}
-  }
-
-  // Also compute per-year correlation (r across 12 months for that year)
-  const rByYear=[];
-  years.forEach(y=>{
-    const xs=[],ys=[];
-    for(let mi=0;mi<12;mi++){
-      const sv=sstAn[String(y)][mi],cv=chlAn[String(y)][mi];
-      if(sv!==null&&cv!==null){xs.push(sv);ys.push(cv);}
-    }
-    if(xs.length>=3){
-      const n=xs.length,xm=xs.reduce((a,b)=>a+b,0)/n,ym=ys.reduce((a,b)=>a+b,0)/n;
-      let num=0,dx=0,dy=0;
-      for(let i=0;i<n;i++){num+=(xs[i]-xm)*(ys[i]-ym);dx+=(xs[i]-xm)**2;dy+=(ys[i]-ym)**2;}
-      rByYear.push(dx&&dy?num/Math.sqrt(dx*dy):0);
-    } else {rByYear.push(null);}
-  });
-
-  // Build table: rows = years, columns = months, extra row for monthly r, extra col for yearly r
-  function cellColor(r){
-    if(r===null)return'background:#f1f5f9;color:#94a3b8';
-    const abs=Math.abs(r);
-    if(r>0){const a=Math.min(abs*1.2,1);return`background:rgba(37,99,235,${(a*0.7).toFixed(2)});color:${abs>0.4?'#fff':'#1e293b'}`;}
-    else{const a=Math.min(abs*1.2,1);return`background:rgba(220,38,38,${(a*0.7).toFixed(2)});color:${abs>0.4?'#fff':'#1e293b'}`;}
-  }
-
-  let html='<thead><tr><th></th>';
-  months.forEach(m=>{html+='<th>'+m+'</th>';});
-  html+='<th style="background:#e0f2fe">r (ปี)</th></tr></thead><tbody>';
-  years.forEach((y,yi)=>{
-    html+='<tr><td class="row-header">'+y+'</td>';
-    for(let mi=0;mi<12;mi++){
-      const sv=sstAn[String(y)][mi],cv=chlAn[String(y)][mi];
-      if(sv!==null&&cv!==null){
-        // Show product of normalized values as cell indicator
-        const val=sv*cv; // simplified: positive=same direction, negative=opposite
-        const norm=Math.max(Math.min(val/1.5,1),-1);
-        html+='<td style="'+cellColor(norm)+'">'+val.toFixed(2)+'</td>';
-      } else {html+='<td style="background:#f8fafc;color:#cbd5e1">—</td>';}
-    }
-    html+='<td style="'+cellColor(rByYear[yi])+';font-weight:700">'+(rByYear[yi]!==null?rByYear[yi].toFixed(2):'—')+'</td>';
-    html+='</tr>';
-  });
-  // Bottom row: monthly correlation
-  html+='<tr><td class="row-header" style="background:#e0f2fe">r (เดือน)</td>';
-  rByMonth.forEach(r=>{html+='<td style="'+cellColor(r)+';font-weight:700">'+(r!==null?r.toFixed(2):'—')+'</td>';});
-  html+='<td style="background:#dbeafe;font-weight:700">—</td></tr>';
-  html+='</tbody>';
-  table.innerHTML=html;
 }
 
 function renderBar(zone,yr){

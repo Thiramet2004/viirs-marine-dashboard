@@ -1,0 +1,116 @@
+{
+  "sst": {
+    "2026-01": {
+      "file": "ci/monthly/sst/2026/sst_2026_01.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-02": {
+      "file": "ci/monthly/sst/2026/sst_2026_02.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-03": {
+      "file": "ci/monthly/sst/2026/sst_2026_03.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-04": {
+      "file": "ci/monthly/sst/2026/sst_2026_04.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-05": {
+      "file": "ci/monthly/sst/2026/sst_2026_05.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-06": {
+      "file": "ci/monthly/sst/2026/sst_2026_06.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-07": {
+      "file": "ci/monthly/sst/2026/sst_2026_07.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    },
+    "2026-08": {
+      "file": "ci/monthly/sst/2026/sst_2026_08.tif",
+      "source": "MODIS Aqua+Terra",
+      "status": "estimate"
+    }
+  },
+  "climatology_labels": {
+    "sst": {
+      "1": "2018-2025 (8 yr)",
+      "2": "2018-2025 (8 yr)",
+      "3": "2018-2025 (8 yr)",
+      "4": "2018-2025 (8 yr)",
+      "5": "2018-2025 (8 yr)",
+      "6": "2018-2025 (8 yr)",
+      "7": "2018-2025 (8 yr)",
+      "8": "2018-2025 (8 yr)",
+      "9": "2018-2025 (8 yr)",
+      "10": "2018-2025 (8 yr)",
+      "11": "2018-2025 (8 yr)",
+      "12": "2018-2025 (8 yr)"
+    },
+    "chl": {
+      "1": "2018-2025 (8 yr)",
+      "2": "2018-2025 (8 yr)",
+      "3": "2018-2025 (8 yr)",
+      "4": "2018-2025 (8 yr)",
+      "5": "2018-2025 (8 yr)",
+      "6": "2018-2025 (8 yr)",
+      "7": "2018-2025 (8 yr)",
+      "8": "2018-2025 (8 yr)",
+      "9": "2018-2025 (8 yr)",
+      "10": "2018-2025 (8 yr)",
+      "11": "2018-2025 (8 yr)",
+      "12": "2018-2025 (8 yr)"
+    }
+  },
+  "chl": {
+    "2026-01": {
+      "file": "ci/monthly/chl/2026/chl_2026_01.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-02": {
+      "file": "ci/monthly/chl/2026/chl_2026_02.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-03": {
+      "file": "ci/monthly/chl/2026/chl_2026_03.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-04": {
+      "file": "ci/monthly/chl/2026/chl_2026_04.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-05": {
+      "file": "ci/monthly/chl/2026/chl_2026_05.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-06": {
+      "file": "ci/monthly/chl/2026/chl_2026_06.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-07": {
+      "file": "ci/monthly/chl/2026/chl_2026_07.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    },
+    "2026-08": {
+      "file": "ci/monthly/chl/2026/chl_2026_08.tif",
+      "source": "JPSS1_VIIRS+SNPP_VIIRS",
+      "status": "viirs"
+    }
+  }
+}

@@ -208,7 +208,7 @@ body.embed-charts #mapSection{display:none}
 <div class="chart-header"><div class="chart-title"><span class="fig-num">Fig. 4</span> แนวโน้มรายปี (Inter-annual Trend)</div>
 <div class="chart-caption">ภาพรวม = เฉลี่ย 6 Marine zones เท่า ๆ กัน; จุดสามเหลี่ยม = ปีที่ข้อมูลไม่ครบ 12 เดือน (ปรับฤดูกาลแล้ว) | เส้นแดง = แนวโน้มจากปีที่ครบ 12 เดือนเท่านั้น</div></div>
 <div class="chart-body"><canvas id="chartTrend"></canvas></div>
-<div class="chart-desc"><strong>วิธีอ่าน:</strong> เฉลี่ยรายเดือนในแต่ละ Marine zone ก่อน แล้วเฉลี่ย 6 โซนแบบน้ำหนักเท่ากัน; ปีที่ไม่ครบ 12 เดือน (เช่น 2026 ม.ค.–ส.ค.) ไม่ได้เฉลี่ยตรง ๆ เพราะเดือนที่ขาดเป็นคนละฤดู แต่ใช้ค่า climatology รายปีของโซน + anomaly เฉลี่ยของเดือนที่มีข้อมูล และไม่นำไปคำนวณเส้นแนวโน้ม</div>
+<div class="chart-desc"><strong>วิธีอ่าน:</strong> เฉลี่ยรายเดือนในแต่ละ Marine zone ก่อน แล้วเฉลี่ย 6 โซนแบบน้ำหนักเท่ากัน; ปีที่ไม่ครบ 12 เดือน (เช่น ปีล่าสุดที่ยังไม่จบปี) ไม่ได้เฉลี่ยตรง ๆ เพราะเดือนที่ขาดเป็นคนละฤดู แต่ใช้ค่า climatology รายปีของโซน + anomaly เฉลี่ยของเดือนที่มีข้อมูล และไม่นำไปคำนวณเส้นแนวโน้ม</div>
 <div class="chart-desc" id="trendContext" hidden></div>
 </div>
 
@@ -242,7 +242,7 @@ body.embed-charts #mapSection{display:none}
 <tr><td>Chl-a Product</td><td>Chlor_a VIIRS Monthly Composite</td></tr>
 <tr><td>Climatology</td><td>Per-pixel monthly mean of the VIIRS products 2018–2025 (same 8 years for every month), averaged over each EEZ marine zone</td></tr>
 <tr><td>Anomaly</td><td>Observed − Climatology</td></tr>
-<tr><td>Limitation</td><td>Cloud-masked pixels excluded; land (country_Asean) removed; SST pixels below 26 °C removed as likely cloud contamination. SST 2026 (Jan–Aug) is an estimate: no VIIRS file yet, so MODIS Aqua+Terra is used minus the MODIS−VIIRS offset measured in 2024 (validation RMSE 0.37 °C per zone-month; Jan–Aug mean within 0.1 °C of NOAA OISST). NOAA-20 SST for 2025 reads about 0.4 °C cooler relative to NOAA OISST than in 2019–2024.</td></tr>
+<tr><td>Limitation</td><td>Cloud-masked pixels excluded; land (country_Asean) removed; SST pixels below 26 °C removed as likely cloud contamination. <span id="estimateNote">SST 2026 (Jan–Aug) is an estimate: no VIIRS file yet, so MODIS Aqua+Terra is used minus the MODIS−VIIRS offset measured in 2024 (validation RMSE 0.37 °C per zone-month). </span>NOAA-20 SST for 2025 reads about 0.4 °C cooler relative to NOAA OISST than in 2019–2024.</td></tr>
 </tbody></table>
 </div>
 
@@ -391,7 +391,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 <script>
 const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const monthsFull=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-const years=[2018,2019,2020,2021,2022,2023,2024,2025,2026];
+// years with data; replaced by stats.json "years" when it loads (new years need no code change)
+let years=[2018,2019,2020,2021,2022,2023,2024,2025,2026];
 
 const sstClimatology={mean:[28.904,29.187,30.103,31.138,31.447,30.785,30.374,30.187,30.248,30.043,29.727,28.805],zones:{"upper_gulf":[27.989,28.652,29.768,31.255,32.146,31.412,31.143,30.381,30.941,30.272,29.486,28.191],"rayong":[28.74,29.072,29.93,31.123,31.752,30.848,30.263,29.931,30.265,30.063,29.866,28.844],"trat":[29.125,29.276,30.208,31.339,31.795,30.624,30.241,30.028,30.194,30.24,30.013,29.151],"central_gulf":[28.863,29.256,30.567,31.674,32.065,31.241,30.761,30.628,30.515,30.459,29.678,28.429],"lower_gulf":[28.726,28.846,29.912,31.102,31.735,31.367,31.066,30.871,30.71,30.452,29.97,28.537],"andaman":[29.365,29.851,30.75,31.429,31.597,30.982,30.629,30.559,30.491,30.333,30.069,29.361]},regions:{"gulf_of_thailand":[28.697,28.907,29.887,31.057,31.561,30.966,30.486,30.278,30.369,30.042,29.701,28.616],"andaman_sea":[29.258,29.667,30.474,31.275,31.251,30.475,30.183,30.031,30.04,30.045,29.773,29.127]}};
 const sstMonthly={"2018":[28.85,28.91,30.54,30.95,32.22,30.88,30.3,29.85,30.98,30.78,30.39,29.84],"2019":[28.97,29.46,30.47,31.84,32.34,31.44,30.93,30.02,30.36,30.87,30.1,28.58],"2020":[29.13,29.0,30.25,31.54,31.89,31.45,31.07,31.12,30.92,29.82,29.54,28.65],"2021":[28.03,28.9,29.94,31.18,31.68,31.32,31.05,30.45,31.25,30.17,29.7,28.22],"2022":[29.03,29.37,30.64,31.29,30.75,30.85,30.67,30.45,30.58,29.56,29.68,28.43],"2023":[28.48,28.8,29.5,31.35,32.13,31.25,30.77,30.38,30.39,30.71,30.34,29.37],"2024":[29.67,29.66,30.66,31.85,32.65,31.03,30.8,30.9,30.12,30.86,30.48,28.86],"2025":[28.26,29.18,29.52,30.55,31.04,30.33,29.46,29.86,29.48,29.63,28.54,28.07],"2026":[28.48,29.2,30.18,31.12,31.44,31.38,31.01,30.83,null,null,null,null]};
@@ -416,6 +417,7 @@ Chart.defaults.font.family="'IBM Plex Sans Thai',sans-serif";
 Chart.defaults.font.size=11;
 let currentParam='sst', currentView='absolute';
 const yc={'2018':{l:'rgba(100,160,200,0.3)',f:'rgba(100,160,200,0.04)'},'2019':{l:'rgba(120,180,160,0.3)',f:'rgba(120,180,160,0.04)'},'2020':{l:'rgba(160,180,120,0.3)',f:'rgba(160,180,120,0.04)'},'2021':{l:'rgba(180,160,100,0.3)',f:'rgba(180,160,100,0.04)'},'2022':{l:'rgba(200,140,100,0.3)',f:'rgba(200,140,100,0.04)'},'2023':{l:'rgba(180,120,160,0.3)',f:'rgba(180,120,160,0.04)'},'2024':{l:'rgba(37,99,235,0.6)',f:'rgba(37,99,235,0.06)'},'2025':{l:'rgba(220,38,38,1)',f:'rgba(220,38,38,0.08)'},'2026':{l:'rgba(168,85,247,1)',f:'rgba(168,85,247,0.08)'}};
+const yearColor=y=>yc[y]||(yc[y]={l:`hsla(${(Number(y)*67)%360},45%,50%,0.3)`,f:`hsla(${(Number(y)*67)%360},45%,50%,0.04)`});
 let c1,c2,c3,c4,yearlyTrendStats=null;
 let currentMapMonth=1,timelineDates=[],currentTimelineIndex=0;
 // Open on the newest month; keep the user's choice once they move the timeline.
@@ -433,13 +435,23 @@ function D(){
 function avg(a){const v=a.filter(x=>x!==null);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}
 function zonalMeanSeries(zones,year){return months.map((_,index)=>avg(Object.values(zones).map(series=>series[year]?.[index]).filter(Number.isFinite)));}
 function climFor(z,d){if(d.clim.regions?.[z])return d.clim.regions[z];if(z!=='overall'&&d.clim.zones?.[z])return d.clim.zones[z];const zones=Object.values(d.clim.zones||{});return zones.length?months.map((_,index)=>avg(zones.map(series=>series[index]).filter(Number.isFinite))):d.clim.mean;}
-function gM(z,y,d){if(d.region[z])return d.region[z][y]||Array(12).fill(null);return z==='overall'?zonalMeanSeries(d.zone,y):d.zone[z][y];}
-function gA(z,y,d){if(d.ra[z])return d.ra[z][y]||Array(12).fill(null);return z==='overall'?zonalMeanSeries(d.za,y):d.za[z][y];}
+function gM(z,y,d){if(d.region[z])return d.region[z][y]||Array(12).fill(null);return z==='overall'?zonalMeanSeries(d.zone,y):(d.zone[z][y]||Array(12).fill(null));}
+function gA(z,y,d){if(d.ra[z])return d.ra[z][y]||Array(12).fill(null);return z==='overall'?zonalMeanSeries(d.za,y):(d.za[z][y]||Array(12).fill(null));}
 // year -> 12 monthly anomalies for a parameter and area (overall, zone or region)
 function anomalyTable(param,zone){if(REGION_IDS.includes(zone))return param==='sst'?sstRegionAnom[zone]:chlRegionAnom[zone];if(zone==='overall')return param==='sst'?sstAnomaly:chlAnomaly;return param==='sst'?sstZoneAnom[zone]:chlZoneAnom[zone];}
+// Limitation text: which months are MODIS-based estimates (none once VIIRS has replaced them)
+function renderEstimateNote(stats){
+  const el=document.getElementById('estimateNote');if(!el)return;
+  const parts=Object.entries(stats.estimated_months||{}).flatMap(([param,byYear])=>Object.entries(byYear).filter(([,list])=>list.length)
+    .map(([year,list])=>`${param==='sst'?'SST':'Chl-a'} ${year} (${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][list[0]-1]}–${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][list[list.length-1]-1]})`));
+  const cal=stats.method?.modis_calibration;
+  el.textContent=parts.length?`${parts.join(', ')} ${parts.length>1?'are estimates':'is an estimate'}: no VIIRS file yet, so MODIS Aqua+Terra is used minus the MODIS−VIIRS offset measured in ${cal?.year??2024} (validation RMSE ${cal?.validation_rmse_zone_month??0.37} °C per zone-month). `:'';
+}
 function applyMonthlyZonalStats(stats){
   const tables={sst:[sstZone,sstZoneAnom],chl:[chlZone,chlZoneAnom]};
   const regionTables={sst:[sstRegion,sstRegionAnom],chl:[chlRegion,chlRegionAnom]};
+  if(Array.isArray(stats.years)&&stats.years.length)years=stats.years.map(Number).sort((a,b)=>a-b);
+  renderEstimateNote(stats);
   for(const [param,[zoneTable,anomalyTable]] of Object.entries(tables)){
     for(const [year,record] of Object.entries(stats.monthly?.[param]||{})){
       for(const zone of Object.keys(zoneTable)){
@@ -476,11 +488,11 @@ function renderMain(zone,yr){
   const d=D(),ds=[];
   if(currentView==='absolute'){
     years.forEach(y=>{const data=gM(zone,String(y),d),f=String(y)===yr;
-      ds.push({label:yearLabel(currentParam,String(y)),data,borderColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):yc[y].l,backgroundColor:f?yc[y].f.replace(/[\d.]+\)$/,'0.12)'):yc[y].f,borderWidth:f?2.5:1,pointRadius:f?4:0,pointBackgroundColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):undefined,fill:f,tension:.4,order:f?0:1});});
+      ds.push({label:yearLabel(currentParam,String(y)),data,borderColor:f?yearColor(y).l.replace(/[\d.]+\)$/,'1)'):yearColor(y).l,backgroundColor:f?yearColor(y).f.replace(/[\d.]+\)$/,'0.12)'):yearColor(y).f,borderWidth:f?2.5:1,pointRadius:f?4:0,pointBackgroundColor:f?yearColor(y).l.replace(/[\d.]+\)$/,'1)'):undefined,fill:f,tension:.4,order:f?0:1});});
     ds.push({label:'Climatology (ค่าเฉลี่ย VIIRS 2018–2025)',data:climFor(zone,d),borderColor:'#1e293b',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:.4,order:-1});
   } else {
     years.forEach(y=>{const data=gA(zone,String(y),d),f=String(y)===yr;
-      ds.push({label:yearLabel(currentParam,String(y)),data,borderColor:f?yc[y].l.replace(/[\d.]+\)$/,'1)'):yc[y].l,backgroundColor:f?yc[y].f.replace(/[\d.]+\)$/,'0.12)'):yc[y].f,borderWidth:f?2.5:1,pointRadius:f?4:0,fill:f,tension:.4,order:f?0:1});});
+      ds.push({label:yearLabel(currentParam,String(y)),data,borderColor:f?yearColor(y).l.replace(/[\d.]+\)$/,'1)'):yearColor(y).l,backgroundColor:f?yearColor(y).f.replace(/[\d.]+\)$/,'0.12)'):yearColor(y).f,borderWidth:f?2.5:1,pointRadius:f?4:0,fill:f,tension:.4,order:f?0:1});});
     ds.push({label:'เส้นฐาน (0)',data:Array(12).fill(0),borderColor:'#1e293b',borderWidth:1.5,borderDash:[4,2],pointRadius:0,fill:false,tension:0,order:-1});
   }
   const yLab=currentView==='absolute'?d.n+' ('+d.u+')':d.n+' Anomaly ('+d.u+')';

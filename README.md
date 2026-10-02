@@ -111,7 +111,26 @@ Central Gulf (อ่าวไทยตอนกลาง), Lower Gulf (อ่า
 
 ## 🔄 Updating Data
 
-### Rebuild everything (recommended)
+### Automatic monthly update (GitHub Actions)
+
+`.github/workflows/update-data.yml` runs on the 12th of every month (and on demand from the Actions tab,
+"Update data from NASA" → Run workflow). It needs no local machine:
+
+1. `update_from_nasa.py` downloads the new months from NASA OB.DAAC (VIIRS L3m monthly 4 km; the near-real-time
+   file while the standard one is not out yet), replaces MODIS estimates and NRT months as soon as standard VIIRS
+   files exist, and recomputes every changed year with the same functions as `build_dashboard_data.py`.
+2. It uses the inputs the full build saves in `data/ci/`: zone/land masks, the per-pixel climatology and the
+   monthly values of the open year (tested: recomputing a month this way matches the full build to 2 × 10⁻⁷).
+3. The NOAA OISST reference is refreshed, the changes are committed and GitHub Pages is rebuilt.
+   Runs without new data commit nothing.
+
+Setup (once): create a NASA Earthdata user token at https://urs.earthdata.nasa.gov/profile → Generate Token and add
+it as the repository secret `EARTHDATA_TOKEN` (Settings → Secrets and variables → Actions → New repository secret).
+The token expires after 60 days at NASA; generate a new one and update the secret before then.
+
+New years need no code change: the pages read the list of years from `stats.json`.
+
+### Rebuild everything locally
 
 `build_dashboard_data.py` computes everything in Python (no SNAP) from the VIIRS monthly products in
 `E:\SST_Chlor\Monthly` and writes all monthly anomaly/absolute RGB GeoTIFFs, the yearly rasters,

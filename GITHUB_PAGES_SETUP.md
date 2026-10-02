@@ -25,7 +25,17 @@ Dashboard ทั้งหมดรันบน GitHub Pages ได้เต็�
 | `docs/assets/` | `assets/` (โลโก้ อว./GISTDA และ favicon) |
 | `docs/favicon.ico` | `favicon.ico` |
 
-## อัปเดตข้อมูลหรือหน้าเว็บ
+## อัปเดตข้อมูลอัตโนมัติ (GitHub Actions)
+
+workflow `.github/workflows/update-data.yml` ทำงานทุกวันที่ 12 ของเดือน (10:00 น. เวลาไทย) และสั่งเองได้จากแท็บ
+**Actions → Update data from NASA → Run workflow**: ดาวน์โหลดเดือนใหม่จาก NASA, คำนวณ, commit และ rebuild GitHub Pages
+โดยไม่ต้องใช้เครื่อง local ถ้าไม่มีข้อมูลใหม่จะไม่ commit อะไร
+
+ตั้งค่าครั้งเดียว: สร้าง token ที่ https://urs.earthdata.nasa.gov/profile (Generate Token) แล้วเพิ่มเป็น secret ชื่อ
+`EARTHDATA_TOKEN` ที่ Settings → Secrets and variables → Actions → New repository secret
+(token ของ NASA หมดอายุใน 60 วัน ต้องสร้างใหม่และอัปเดต secret ก่อนหมดอายุ)
+
+## อัปเดตข้อมูลหรือหน้าเว็บด้วยมือ
 
 ```bash
 # 1) สร้างข้อมูลใหม่ (เมื่อมีเดือนใหม่) – ดู README หัวข้อ "Updating Data"

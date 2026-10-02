@@ -55,9 +55,11 @@ WGS84 = CRS.from_wkt('GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137
 ROW0, COL0 = round((90 - NORTH) * 24), round((WEST + 180) * 24)
 
 
-def file_name(platform, param, year, month):
+def file_name(platform, param, year, month, nrt=False):
+    """NASA file name; nrt=True gives the near-real-time version published before the standard one."""
     last = calendar.monthrange(year, month)[1]
-    return f"{platform}_VIIRS.{year}{month:02d}01_{year}{month:02d}{last}.L3m.MO.{PRODUCTS[param]['suite']}.4km.nc"
+    return (f"{platform}_VIIRS.{year}{month:02d}01_{year}{month:02d}{last}.L3m.MO.{PRODUCTS[param]['suite']}.4km"
+            f"{'.NRT' if nrt else ''}.nc")
 
 
 def session():

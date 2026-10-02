@@ -67,7 +67,12 @@ def trend(years, values):
 
 
 def main():
-    eez = gpd.read_file(ZONE_DIR / "1_Marine_Zone_Andaman_GoT.shp").to_crs(4326).geometry.union_all()
+    shapefile = ZONE_DIR / "1_Marine_Zone_Andaman_GoT.shp"
+    if shapefile.exists():
+        eez = gpd.read_file(shapefile).to_crs(4326).geometry.union_all()
+    else:   # GitHub Actions: the same polygon from the repository copy of the marine zones
+        zones = gpd.read_file(PROJECT_DIR / "data" / "marine_zones.geojson")
+        eez = zones[zones["zone_id"] == "eez_overall"].geometry.union_all()
     # Last month the server covers completely (the dataset runs a few weeks behind real time).
     info = requests.get(ERDDAP.replace("/griddap/", "/info/").replace(".csv", "/index.csv"), timeout=120).text
     coverage_end = dt.date.fromisoformat(next(line for line in info.splitlines() if "time_coverage_end" in line).split(",")[-1][:10])

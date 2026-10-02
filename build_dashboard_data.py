@@ -32,7 +32,7 @@ Outputs:
   data/Anomaly_RGB/<P>/<YYYY>/<MM>/<P>_Anomaly_RGB_<MM>_<YYYY>.tif
   data/Monthly_RGB/<P>/<YYYY>/<MM>/<P>_Monthly_RGB_<MM>_<YYYY>.tif
   data/Yearly_RGB/{sst,chl}/<p>_Yearly_Anomaly_RGB_<YYYY>.tif
-  data/Yearly_RGB/absolute/{sst,chl}/<p>_Yearly_Absolute_RGB_<YYYY>.tif   (annual mean of SST - climatology)
+  data/Yearly_RGB/absolute/{sst,chl}/<p>_Yearly_Absolute_RGB_<YYYY>.tif   (annual absolute value, absolute colour scale)
   data/Yearly_RGB/stats.json
   data/zonal_stats/<p>_monthly_zonal.csv       year, month, zone, absolute, climatology, anomaly, pixels
   data/zonal_stats/<p>_climatology_zonal.csv   month, zone, climatology, pixels, years
@@ -387,6 +387,35 @@ def build(climatology_mode):
             }
         stats["estimated_months"] = stats.get("estimated_months", {})
 
+        # Climatology per zone, on the same ocean pixels (land and SST threshold applied).
+        climatology_rows, eez_climatology = [], []
+        zones_climatology = {zone_id: [] for zone_id in ZONE_IDS}
+        for month in range(1, 13):
+            values = climatology[month]
+            usable = ~np.ma.getmaskarray(values) & ~land
+            if param == "sst":
+                usable &= values.filled(-999) >= SST_MIN_VALID
+            values = np.ma.array(values, mask=~usable)
+            for zone_id, mask in all_zones:
+                value = zone_mean(values, mask)
+                climatology_rows.append([month, zone_id, value, zone_count(values, mask), climatology_labels[month]])
+                (eez_climatology if zone_id == "overall" else zones_climatology[zone_id]).append(value)
+        stats["climatology"][param] = {"eez": eez_climatology, "zones": zones_climatology, "periods": climatology_labels}
+        stats["baseline"][param] = mean_or_none(eez_climatology)
+        # Annual climatology (mean of the 12 monthly values) per area and per pixel, for absolute annual values.
+        annual_climatology = {"overall": mean_or_none(eez_climatology),
+                              **{zone_id: mean_or_none(values) for zone_id, values in zones_climatology.items()}}
+        climatology_stack = []
+        for month in range(1, 13):
+            values = climatology[month]
+            usable = ~np.ma.getmaskarray(values) & ~land
+            if param == "sst":
+                usable &= values.filled(-999) >= SST_MIN_VALID
+            climatology_stack.append(np.ma.array(values, mask=~usable))
+        climatology_stack = np.ma.stack(climatology_stack)
+        pixel_annual_climatology = np.ma.array(climatology_stack.mean(axis=0),
+                                               mask=climatology_stack.count(axis=0) < 12)
+
         for year in YEARS:
             monthly_anomalies, records = [], {}
             for month in range(1, 13):
@@ -448,7 +477,24 @@ def build(climatology_mode):
                 "zones": {z: float(np.mean(v)) for z, v in anomaly_zone_values.items() if v},
             }
             stats[param][str(year)] = record
-            stats["absolute"][param][str(year)] = record
+            # Absolute annual values: the plain mean when all 12 months are present, otherwise seasonally adjusted
+            # (annual climatology + mean anomaly of the available months), the same rule as the monthly page.
+            def absolute_annual(zone_id, absolute_values, anomaly_values):
+                if len(absolute_values) == 12:
+                    return float(np.mean(absolute_values))
+                if not anomaly_values or annual_climatology.get(zone_id) is None:
+                    return None
+                return annual_climatology[zone_id] + float(np.mean(anomaly_values))
+            absolute_months = [records[m]["absolute_mean"] for m in months if records[m]["absolute_mean"] is not None]
+            absolute_record = {
+                "mean": absolute_annual("overall", absolute_months, anomaly_means),
+                "min": float(min(absolute_months)) if absolute_months else None,
+                "max": float(max(absolute_months)) if absolute_months else None,
+                "zones": {z: value for z in ZONE_IDS
+                          if (value := absolute_annual(z, absolute_zone_values[z], anomaly_zone_values[z])) is not None},
+                "seasonally_adjusted": len(months) < 12,
+            }
+            stats["absolute"][param][str(year)] = absolute_record
             anomaly_trend = {
                 "mean": record["mean"],
                 "zones": record["zones"],
@@ -456,7 +502,10 @@ def build(climatology_mode):
                 "zone_months": {z: len(v) for z, v in anomaly_zone_values.items()},
             }
             stats["trend"]["anomaly"][param][str(year)] = anomaly_trend
-            stats["trend"]["absolute"][param][str(year)] = anomaly_trend
+            stats["trend"]["absolute"][param][str(year)] = {
+                "mean": absolute_record["mean"], "zones": absolute_record["zones"],
+                "months": len(absolute_months), "zone_months": {z: len(v) for z, v in absolute_zone_values.items()},
+            }
             absolute_means = [records[m]["absolute_mean"] for m in months if records[m]["absolute_mean"] is not None]
             stats["trend"]["monthly_absolute"][param][str(year)] = {
                 "mean": mean_or_none(absolute_means),
@@ -465,11 +514,16 @@ def build(climatology_mode):
                 "zone_months": {z: len(v) for z, v in absolute_zone_values.items()},
             }
 
-            # Annual raster = pixel-wise mean of the available monthly anomalies (SST - climatology).
+            # Annual anomaly raster = pixel-wise mean of the available monthly anomalies.
             annual = np.ma.masked_invalid(np.ma.stack(monthly_anomalies).mean(axis=0))
-            rgb = colorize_anomaly(annual, config["anomaly_palette"])
-            write_rgb(DATA_DIR / "Yearly_RGB" / param / f"{param}_Yearly_Anomaly_RGB_{year}.tif", rgb, transform, crs)
-            write_rgb(DATA_DIR / "Yearly_RGB" / "absolute" / param / f"{param}_Yearly_Absolute_RGB_{year}.tif", rgb, transform, crs)
+            write_rgb(DATA_DIR / "Yearly_RGB" / param / f"{param}_Yearly_Anomaly_RGB_{year}.tif",
+                      colorize_anomaly(annual, config["anomaly_palette"]), transform, crs)
+            # Annual absolute raster = pixel annual climatology + pixel mean anomaly (equals the plain mean of the
+            # monthly values where a pixel has all 12 months), in the absolute colour scale.
+            annual_absolute = np.ma.array(pixel_annual_climatology + annual,
+                                          mask=np.ma.getmaskarray(pixel_annual_climatology) | np.ma.getmaskarray(annual))
+            write_rgb(DATA_DIR / "Yearly_RGB" / "absolute" / param / f"{param}_Yearly_Absolute_RGB_{year}.tif",
+                      apply_color_palette(annual_absolute, config["palette"]), transform, crs)
 
             # Zonal means of the SNAP yearly anomaly product, kept next to the monthly-derived values for comparison.
             product_path = yearly_product_source(param, year)
@@ -485,21 +539,6 @@ def build(climatology_mode):
                 yearly_rows.append([year, zone_id, derived, len(months),
                                     None if product is None else zone_mean(product, mask)])
 
-        # Climatology per zone, on the same ocean pixels (land and SST threshold applied).
-        climatology_rows, eez_climatology = [], []
-        zones_climatology = {zone_id: [] for zone_id in ZONE_IDS}
-        for month in range(1, 13):
-            values = climatology[month]
-            usable = ~np.ma.getmaskarray(values) & ~land
-            if param == "sst":
-                usable &= values.filled(-999) >= SST_MIN_VALID
-            values = np.ma.array(values, mask=~usable)
-            for zone_id, mask in all_zones:
-                value = zone_mean(values, mask)
-                climatology_rows.append([month, zone_id, value, zone_count(values, mask), climatology_labels[month]])
-                (eez_climatology if zone_id == "overall" else zones_climatology[zone_id]).append(value)
-        stats["climatology"][param] = {"eez": eez_climatology, "zones": zones_climatology, "periods": climatology_labels}
-        stats["baseline"][param] = mean_or_none(eez_climatology)
 
         output = DATA_DIR / "zonal_stats"
         write_csv(output / f"{param}_monthly_zonal.csv",

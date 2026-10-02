@@ -13,7 +13,7 @@ the Andaman Sea from VIIRS satellite data, by GISTDA.
   opens on the newest month, and the 7 EEZ marine-zone boundaries on top
 - 📊 **Charts** – monthly time series, monthly anomalies, inter-annual trend with uncertainty and a long-term
   reference, and the SST–Chl-a anomaly relationship, per zone or for all zones
-- 📅 **Yearly page** – annual anomaly maps and statistics per zone
+- 📅 **Yearly page** – annual maps and statistics per area, as absolute values (°C, µg/L) or anomalies
 - 🌡️ **Parameters** – SST (°C) and Chlorophyll-a (µg/L)
 - 📆 **Period** – SST January 2018 – August 2026 (2026 is a MODIS-based estimate, see
   [Known data issues](#known-data-issues)); Chl-a January 2018 – August 2026
@@ -224,7 +224,7 @@ More options, sizes and a WordPress shortcode: [EMBED_GUIDE.md](EMBED_GUIDE.md).
 | `GET /api/available/<view>/<param>` | Available year-months |
 | `GET /api/metadata/<view>/<param>/<year>/<month>` | File name, unit, label, availability |
 | `GET /api/yearly/<param>/<year>` | Yearly anomaly GeoTIFF |
-| `GET /api/yearly/absolute/<param>/<year>` | Yearly "SST − climatology" GeoTIFF |
+| `GET /api/yearly/absolute/<param>/<year>` | Yearly absolute GeoTIFF (annual mean in °C / µg/L) |
 | `GET /api/yearly/stats` | `data/Yearly_RGB/stats.json` (all chart data) |
 | `GET /api/geojson/marine_zones` | Marine-zone polygons (from the shapefiles, or `data/marine_zones.geojson`) |
 

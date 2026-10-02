@@ -67,17 +67,20 @@ viirs-marine-dashboard/
 ├── docs/                       # GitHub Pages site (copies of the pages above + assets)
 ├── server.py                   # Optional local Flask server and API
 ├── build_dashboard_data.py     # Rebuilds all rasters, stats.json and CSV from the source products
+├── update_from_nasa.py         # Monthly update from NASA without the E: drive (used by GitHub Actions)
 ├── download_viirs_monthly.py   # Fills missing months from NASA OB.DAAC (Earthdata login)
 ├── fetch_oisst_reference.py    # NOAA OISST long-term SST reference for the Thai EEZ
 ├── convert_monthly_to_rgb.py   # Palettes and colouring used by the build (and the older one-month converter)
 ├── regenerate_anomaly_rgb.py   # Anomaly palettes and colouring used by the build
 ├── SLD_wq/                     # SLD colour ramps the palettes are taken from
 ├── assets/                     # MHESI and GISTDA logos, favicon
+├── .github/workflows/update-data.yml  # Monthly GitHub Actions update (see "Automatic monthly update")
 ├── data/
 │   ├── Monthly_RGB/<P>/<YYYY>/<MM>/   # Absolute monthly RGB GeoTIFF
 │   ├── Anomaly_RGB/<P>/<YYYY>/<MM>/   # Anomaly monthly RGB GeoTIFF
 │   ├── Yearly_RGB/                    # Yearly rasters and stats.json (all chart data)
 │   ├── zonal_stats/                   # CSV/JSON tables per EEZ zone, sources, OISST reference
+│   ├── ci/                            # Inputs for update_from_nasa.py: masks, climatology, open-year values
 │   └── marine_zones.geojson           # 7 EEZ marine-zone polygons
 └── requirements.txt
 ```
@@ -129,6 +132,11 @@ it as the repository secret `EARTHDATA_TOKEN` (Settings → Secrets and variable
 The token expires after 60 days at NASA; generate a new one and update the secret before then.
 
 New years need no code change: the pages read the list of years from `stats.json`.
+
+> **Status (October 2026): not active yet.** `update_from_nasa.py` and `data/ci/` are in the repository, but the
+> workflow file `.github/workflows/update-data.yml` still has to be pushed. GitHub only accepts workflow files
+> from a login with the `workflow` permission: run `gh auth refresh -h github.com -s workflow`, then commit and
+> push the file. Until then, update the data locally (below) and push.
 
 ### Rebuild everything locally
 
@@ -281,9 +289,10 @@ dot-folders such as `.git` are never served.
 
 ## 📊 Data Statistics
 
-- **Rasters:** 416 monthly RGB GeoTIFF (208 absolute + 208 anomaly) and 36 yearly, about 450 MB in `data/`
+- **Rasters:** 416 monthly RGB GeoTIFF (208 absolute + 208 anomaly) and 36 yearly, about 450 MB in `data/`,
+  plus about 80 MB of update inputs in `data/ci/`
 - **Time range:** 2018-01 to 2026-08 for both parameters (SST 2026 estimated from MODIS)
-- **Update:** monthly – rebuild, copy pages to `docs/` if changed, push
+- **Update:** monthly – automatic with GitHub Actions once activated; otherwise rebuild locally and push
 - **Coverage:** Gulf of Thailand, Andaman Sea and surrounding seas (82–127 °E, 13 °S – 27 °N)
 - **Pixel size:** 1/24° (≈ 4.6 km)
 

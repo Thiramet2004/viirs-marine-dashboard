@@ -25,6 +25,9 @@ Dashboard ทั้งหมดรันบน GitHub Pages ได้เต็�
 | `docs/assets/` | `assets/` (โลโก้ อว./GISTDA และ favicon) |
 | `docs/favicon.ico` | `favicon.ico` |
 
+ข้อมูลที่ระบบอัปเดตอัตโนมัติใช้ (`data/ci/`: mask ของเขต, climatology รายพิกเซล, ค่ารายเดือนของปีปัจจุบัน) อยู่ใน `data/`
+ไม่ได้อยู่ใน `docs/` เพราะหน้าเว็บไม่ได้ใช้โดยตรง
+
 ## อัปเดตข้อมูลอัตโนมัติ (GitHub Actions)
 
 workflow `.github/workflows/update-data.yml` ทำงานทุกวันที่ 12 ของเดือน (10:00 น. เวลาไทย) และสั่งเองได้จากแท็บ
@@ -34,6 +37,11 @@ workflow `.github/workflows/update-data.yml` ทำงานทุกวัน�
 ตั้งค่าครั้งเดียว: สร้าง token ที่ https://urs.earthdata.nasa.gov/profile (Generate Token) แล้วเพิ่มเป็น secret ชื่อ
 `EARTHDATA_TOKEN` ที่ Settings → Secrets and variables → Actions → New repository secret
 (token ของ NASA หมดอายุใน 60 วัน ต้องสร้างใหม่และอัปเดต secret ก่อนหมดอายุ)
+
+> **สถานะ (ต.ค. 2026): ยังไม่เปิดใช้งาน** สคริปต์ `update_from_nasa.py` และไฟล์ `data/ci/` อยู่ใน repo แล้ว
+> แต่ไฟล์ `.github/workflows/update-data.yml` ยังไม่ได้ push เพราะ GitHub รับไฟล์ workflow เฉพาะจาก login ที่มีสิทธิ์
+> `workflow` ให้รัน `gh auth refresh -h github.com -s workflow` แล้ว commit และ push ไฟล์นี้
+> ระหว่างนี้อัปเดตข้อมูลด้วยมือตามหัวข้อด้านล่าง
 
 ## อัปเดตข้อมูลหรือหน้าเว็บด้วยมือ
 

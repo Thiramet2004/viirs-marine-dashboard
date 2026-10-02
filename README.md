@@ -51,9 +51,10 @@ Thai EEZ polygon (`1_Marine_Zone_Andaman_GoT.shp` has exactly these two parts), 
 
 ### Map display
 
-The rasters are 4 km (1/24°). The browser redraws them at 3× with colour blending between neighbouring ocean
-pixels, and resamples rows to Web Mercator so they line up with the basemap (error < 0.5 km). Land and cloud
-gaps are never blended, so the coastline and data gaps stay exactly as in the data.
+The rasters are 4 km (1/24°). The browser draws only the visible part of the map at screen resolution and redraws it
+after every zoom or pan, so the image is never stretched (sharp at every zoom). Colours are blended between
+neighbouring ocean pixels, rows are resampled to Web Mercator so they line up with the basemap (error < 0.5 km),
+and land and cloud gaps are never blended, so the coastline and data gaps are exactly the data's 4 km pixels.
 
 ## 📁 Project Structure
 

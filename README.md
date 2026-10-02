@@ -201,7 +201,8 @@ the dashboard shows under Fig. 4:
 
 In this warming record, 9 of the 37 eight-year windows still have a negative slope, so a short negative
 VIIRS trend does not contradict long-term warming. (NOAA's server copy of OISST has about half the days
-missing in 1994–1998; those years use the available days, and 1998, which lacks Aug–Dec, is left out.)
+missing in 1994–1998 (most months of 1994–1997 and January–July 1998); those months use the available days.
+All 44 years, 1998 included, have 12 months and are in the trend.)
 
 All outputs are stored as `<YYYY>/<MM>/` folders.
 

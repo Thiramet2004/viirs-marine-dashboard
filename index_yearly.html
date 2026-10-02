@@ -68,50 +68,55 @@
 <section class="chart-row"><article class="panel"><h2 id="trendTitle">แนวโน้มรายปี (Inter-annual Trend)</h2><p class="figure-caption" id="trendCaption">Fig. 4 แนวโน้มรายปี (Inter-annual Trend) · จุดสีน้ำเงิน = ค่าเฉลี่ยรายปี | เส้นประสีแดง = เส้นแนวโน้มเชิงเส้น (Linear Regression)</p><div class="chart"><canvas id="trendChart"></canvas></div></article><article class="panel"><h2 id="zoneTitle">เปรียบเทียบ anomaly ตามพื้นที่</h2><div class="chart"><canvas id="zoneChart"></canvas></div></article><article class="panel"><h2 id="rangeTitle">ช่วงค่า anomaly รายปี</h2><div class="chart"><canvas id="rangeChart"></canvas></div></article></section>
 </main>
 <script>
-function renderGeorasterCanvas(georaster) {
-  // Display only: the data stay 4 km (1/24 degree). The image is drawn at DISPLAY_SCALE times the raster size,
-  // with colours blended bilinearly between neighbouring ocean pixels, so it looks smooth when zoomed in.
-  // A display pixel is transparent when its nearest data pixel is land / no data, so the coastline and
-  // the land mask stay exactly as in the data; land pixels are never blended into the sea.
-  const DISPLAY_SCALE = 3;
-  const width = georaster.width, height = georaster.height;
-  const outWidth = width * DISPLAY_SCALE, outHeight = height * DISPLAY_SCALE;
-  // The GeoTIFF rows are evenly spaced in latitude (EPSG:4326), but L.imageOverlay stretches the image
-  // evenly in Web Mercator, so each output row is sampled at its Mercator latitude.
+function renderViewportCanvas(georaster, map) {
+  // Display only: the data stay 4 km (1/24 degree). The visible part of the raster (+15 % margin) is drawn at
+  // screen resolution, so it stays sharp at every zoom. Colours are blended bilinearly between neighbouring
+  // ocean pixels; a screen pixel is transparent when the data pixel under it is land / no data, so the
+  // coastline and cloud gaps are exactly the data's 4 km pixels and land is never blended into the sea.
+  const view = map.getBounds().pad(0.15);
+  const south = Math.max(view.getSouth(), georaster.ymin), north = Math.min(view.getNorth(), georaster.ymax);
+  const west = Math.max(view.getWest(), georaster.xmin), east = Math.min(view.getEast(), georaster.xmax);
+  if (!(south < north && west < east)) return null;
+  const nw = map.latLngToContainerPoint([north, west]), se = map.latLngToContainerPoint([south, east]);
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const outWidth = Math.max(1, Math.min(4096, Math.round((se.x - nw.x) * ratio)));
+  const outHeight = Math.max(1, Math.min(4096, Math.round((se.y - nw.y) * ratio)));
+  // L.imageOverlay stretches the image evenly in Web Mercator, so rows are sampled at their Mercator latitude.
   const mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
   const fromMercY = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180 / Math.PI;
-  const topY = mercY(georaster.ymax), bottomY = mercY(georaster.ymin);
-
+  const topY = mercY(north), bottomY = mercY(south);
+  const width = georaster.width, height = georaster.height;
+  const pw = georaster.pixelWidth, ph = georaster.pixelHeight;
   const [rValues, gValues, bValues] = georaster.values;
-  const valid = new Uint8Array(width * height);
-  for (let row = 0; row < height; row++) {
-    const r = rValues[row], g = gValues[row], b = bValues[row];
-    for (let col = 0; col < width; col++) {
-      valid[row * width + col] = Number.isFinite(r[col]) && !(r[col] === 0 && g[col] === 0 && b[col] === 0) ? 1 : 0;
+  if (!georaster._valid) {
+    const valid = new Uint8Array(width * height);
+    for (let row = 0; row < height; row++) {
+      const r = rValues[row], g = gValues[row], b = bValues[row];
+      for (let col = 0; col < width; col++) {
+        valid[row * width + col] = Number.isFinite(r[col]) && !(r[col] === 0 && g[col] === 0 && b[col] === 0) ? 1 : 0;
+      }
     }
+    georaster._valid = valid;   // computed once per month
   }
-
+  const valid = georaster._valid;
   const canvas = document.createElement('canvas');
   canvas.width = outWidth;
   canvas.height = outHeight;
   const ctx = canvas.getContext('2d');
   const imgData = ctx.createImageData(outWidth, outHeight);
   const d = imgData.data;
-
-  // horizontal sample positions are the same for every row
   const col0 = new Int32Array(outWidth), colFrac = new Float32Array(outWidth), colNear = new Int32Array(outWidth);
   for (let x = 0; x < outWidth; x++) {
-    const fc = (x + 0.5) / DISPLAY_SCALE - 0.5;
-    col0[x] = Math.floor(fc);
-    colFrac[x] = fc - col0[x];
-    colNear[x] = Math.min(width - 1, Math.max(0, Math.round(fc)));
+    const t = (west + (x + 0.5) / outWidth * (east - west) - georaster.xmin) / pw;
+    colNear[x] = Math.min(width - 1, Math.max(0, Math.floor(t)));
+    col0[x] = Math.floor(t - 0.5);
+    colFrac[x] = t - 0.5 - col0[x];
   }
-
   for (let y = 0; y < outHeight; y++) {
     const lat = fromMercY(topY - (y + 0.5) / outHeight * (topY - bottomY));
-    const fr = (georaster.ymax - lat) / georaster.pixelHeight - 0.5;
-    const row0 = Math.floor(fr), rowFrac = fr - row0;
-    const rowNear = Math.min(height - 1, Math.max(0, Math.round(fr)));
+    const t = (georaster.ymax - lat) / ph;
+    const rowNear = Math.min(height - 1, Math.max(0, Math.floor(t)));
+    const row0 = Math.floor(t - 0.5), rowFrac = t - 0.5 - row0;
     const rows = [Math.min(height - 1, Math.max(0, row0)), Math.min(height - 1, Math.max(0, row0 + 1))];
     const offset = y * outWidth * 4;
     for (let x = 0; x < outWidth; x++) {
@@ -137,7 +142,23 @@ function renderGeorasterCanvas(georaster) {
     }
   }
   ctx.putImageData(imgData, 0, 0);
-  return canvas;
+  return {canvas, bounds: [[south, west], [north, east]]};
+}
+// yearly map: the visible part of the raster is drawn at screen resolution, again after every zoom / pan
+let yearlyGeoraster=null,yearlyViewportSeq=0,yearlyViewportUrl=null;
+async function drawYearlyViewport(){
+  if(!yearlyGeoraster||!map)return;
+  const seq=++yearlyViewportSeq,georaster=yearlyGeoraster;
+  const rendered=renderViewportCanvas(georaster,map);
+  if(!rendered)return;
+  const blob=await new Promise(resolve=>rendered.canvas.toBlob(resolve,'image/png'));
+  if(seq!==yearlyViewportSeq||georaster!==yearlyGeoraster)return;
+  if(!map.getPane('rasterPane')){map.createPane('rasterPane');map.getPane('rasterPane').style.zIndex=350}
+  const url=URL.createObjectURL(blob);
+  map.eachLayer(item=>{if(item instanceof L.ImageOverlay&&item.options.pane==='rasterPane')map.removeLayer(item)});
+  layer=L.imageOverlay(url,rendered.bounds,{opacity:1,pane:'rasterPane'}).addTo(map);
+  if(yearlyViewportUrl)URL.revokeObjectURL(yearlyViewportUrl);
+  yearlyViewportUrl=url;
 }
 const isLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1';
 const API=isLocal?'/api':'https://raw.githubusercontent.com/Thiramet2004/viirs-marine-dashboard/main';
@@ -160,7 +181,7 @@ function update(){const p=palette[param],data=currentData(),record=data?.[String
 function chartOptions(axisTitle){const modeLabel=view==='absolute'?'SST − climatology':'ค่าผิดปกติ';return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},onClick:(event,items,chart)=>{if(!items.length)return;const index=items[0].index;if(chart.canvas.id==='trendChart'){selectedYear=stats.years[index];document.getElementById('year').value=selectedYear;update()}else if(chart.canvas.id==='zoneChart'){document.getElementById('zone').value=chartZones[index];update()}},plugins:{legend:{position:'bottom',labels:{boxWidth:12,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(param==='sst'?2:3)} ${palette[param].unit}`}}},scales:{x:{title:{display:true,text:axisTitle||'ปี ค.ศ.'}},y:{title:{display:true,text:`${modeLabel} (${palette[param].unit})`}}}}}
 function linearTrend(years,values){const points=years.map((year,index)=>({year,value:values[index]})).filter(point=>point.year!==2026&&Number.isFinite(point.value));if(points.length<2)return{values:years.map(()=>null),slope:null};const meanYear=points.reduce((sum,point)=>sum+point.year,0)/points.length,meanValue=points.reduce((sum,point)=>sum+point.value,0)/points.length,denominator=points.reduce((sum,point)=>sum+(point.year-meanYear)**2,0),slope=points.reduce((sum,point)=>sum+(point.year-meanYear)*(point.value-meanValue),0)/denominator,intercept=meanValue-slope*meanYear;return{values:years.map(year=>Number.isFinite(slope)?intercept+slope*year:null),slope}}
 function renderCharts(){if(!stats)return;const years=stats.years,d=currentData()||{},trend=trendData()||{},selected=d[String(selectedYear)]||{},zone=document.getElementById('zone').value,modeLabel=view==='absolute'?'SST - climatology':'Anomaly',p=palette[param],trendValues=years.map(y=>{const item=trend[String(y)];return item?(zone==='overall'?item.mean:item.zones?.[zone]??null):null}),regression=linearTrend(years,trendValues),slopeLabel=regression.slope===null?'':` (slope ${(regression.slope*10).toFixed(param==='sst'?2:3)} ${p.unit}/decade)`,destroyChart=canvas=>{const chart=Chart.getChart(canvas);if(chart)chart.destroy()};document.getElementById('trendCaption').textContent='Fig. 4 \u0e41\u0e19\u0e27\u0e42\u0e19\u0e49\u0e21\u0e23\u0e32\u0e22\u0e1b\u0e35 (Inter-annual Trend)  -  '+p.label+' ('+modeLabel+')  -  \u0e04\u0e48\u0e32\u0e23\u0e32\u0e22\u0e1b\u0e35\u0e25\u0e1a\u0e04\u0e48\u0e32\u0e40\u0e09\u0e25\u0e35\u0e48\u0e22 climatology \u0e23\u0e32\u0e22\u0e40\u0e14\u0e37\u0e2d\u0e19\u0e08\u0e32\u0e01 VIIRS 2018–2025  -  \u0e08\u0e38\u0e14\u0e2a\u0e35\u0e19\u0e49\u0e33\u0e40\u0e07\u0e34\u0e19 = \u0e04\u0e48\u0e32\u0e40\u0e09\u0e25\u0e35\u0e48\u0e22\u0e23\u0e32\u0e22\u0e1b\u0e35 | \u0e40\u0e2a\u0e49\u0e19\u0e1b\u0e23\u0e30\u0e2a\u0e35\u0e41\u0e14\u0e07 = \u0e40\u0e2a\u0e49\u0e19\u0e41\u0e19\u0e27\u0e42\u0e19\u0e49\u0e21\u0e40\u0e0a\u0e34\u0e07\u0e40\u0e2a\u0e49\u0e19 (Linear Regression)';destroyChart(document.getElementById('trendChart'));destroyChart(document.getElementById('zoneChart'));destroyChart(document.getElementById('rangeChart'));const options=chartOptions(),trendDatasets=[{label:`ค่ารายปีจริง · ${p.label} (${modeLabel})`,data:trendValues,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',fill:true,tension:0,pointRadius:4},{label:`เส้นแนวโน้มเชิงเส้น${slopeLabel}`,data:regression.values,borderColor:'#dc2626',borderDash:[7,5],fill:false,tension:0,pointRadius:0}];if(false){trendDatasets.push({label:`ค่าเฉลี่ยสถิติย้อนหลัง (${stats.baseline[param].toFixed(param==='sst'?2:3)} ${p.unit})`,data:years.map(()=>stats.baseline[param]),borderColor:'#64748b',borderDash:[3,3],pointRadius:0,fill:false})}trendChart=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:years.map(y=>`${y} (${y+543})`),datasets:trendDatasets},options});const zones=chartZones;zoneChart=new Chart(document.getElementById('zoneChart'),{type:'bar',data:{labels:zones.map(z=>zoneNames[z]),datasets:[{label:`${p.label} ${modeLabel} ${selectedYear}`,data:zones.map(z=>selected.zones?.[z]??null),backgroundColor:zones.map(z=>color(selected.zones?.[z]??0))}]},options:chartOptions('พื้นที่ทะเล')});rangeChart=new Chart(document.getElementById('rangeChart'),{type:'line',data:{labels:years.map(y=>`${y} (${y+543})`),datasets:[{label:`ต่ำสุด (${modeLabel})`,data:years.map(y=>d[String(y)]?.min??null),borderColor:'#2563eb',pointRadius:2},{label:`ค่าเฉลี่ย (${modeLabel})`,data:years.map(y=>d[String(y)]?.mean??null),borderColor:'#059669',pointRadius:2},{label:`สูงสุด (${modeLabel})`,data:years.map(y=>d[String(y)]?.max??null),borderColor:'#dc2626',pointRadius:2}]},options:chartOptions()})}
-async function loadMap(){const seq=(window._yearlyLoadSeq=(window._yearlyLoadSeq||0)+1);const stale=()=>seq!==window._yearlyLoadSeq;if(!map)map=L.map('map',{worldCopyJump:false}).setView([7.3333333333,104.6666666667],4);if(!map._layers||Object.keys(map._layers).length<2)L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);if(!boundaryLayer){try{const boundaryResponse=await fetch(isLocal?`${API}/geojson/marine_zones`:`${RAW}/data/marine_zones.geojson`,{cache:'no-store'});if(!boundaryResponse.ok)throw Error(`HTTP ${boundaryResponse.status}`);const boundaryGeoJson=await boundaryResponse.json();boundaryLayer=L.geoJSON(boundaryGeoJson,{style:feature=>({color:feature?.properties?.zone_id?'#2563eb':'#0f172a',weight:feature?.properties?.zone_id?1.5:2.5,opacity:.9,fill:false}),onEachFeature:(feature,featureLayer)=>{featureLayer.bindTooltip('ขอบเขต EEZ Marine Zone',{sticky:true})}}).addTo(map);boundaryLayer.bringToFront()}catch(error){document.getElementById('insight').textContent+=` · โหลดขอบเขต EEZ ไม่สำเร็จ: ${error.message}`}}if(layer)map.removeLayer(layer);try{const tifUrl=rasterUrl(selectedYear);const response=await fetch(tifUrl,{cache:'no-store'});if(!response.ok)throw Error(`HTTP ${response.status}`);if(stale())return;const georaster=await parseGeoraster(await response.arrayBuffer());if(stale())return;const pixelValuesToColorFn=values=>{const r=values[0],g=values[1],b=values[2];return r===0&&g===0&&b===0?null:`rgb(${r},${g},${b})`};const rasterBounds=[[georaster.ymin,georaster.xmin],[georaster.ymax,georaster.xmax]];const fitRaster=()=>{if(!map)return;map.invalidateSize({pan:false});map.fitBounds(rasterBounds,{animate:false})};map.invalidateSize({pan:false});const canvas=renderGeorasterCanvas(georaster);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(window._rasterObjectUrl)URL.revokeObjectURL(window._rasterObjectUrl);window._rasterObjectUrl=URL.createObjectURL(blob);if(!map.getPane('rasterPane')){map.createPane('rasterPane');map.getPane('rasterPane').style.zIndex=350}if(stale())return;map.eachLayer(item=>{if(item instanceof L.ImageOverlay&&item.options.pane==='rasterPane')map.removeLayer(item)});layer=L.imageOverlay(window._rasterObjectUrl,rasterBounds,{opacity:1,pane:'rasterPane'});layer.once('load',fitRaster);layer.addTo(map);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));fitRaster();setTimeout(()=>{fitRaster();boundaryLayer?.bringToFront()},500);}catch(error){if(selectedYear===2026)document.getElementById('insight').textContent+=' · ยังไม่มี Raster รายปี 2026 ใน GitHub (กราฟใช้ค่าเฉลี่ย ม.ค.–ก.ค.)';else document.getElementById('insight').textContent=`โหลด raster ไม่สำเร็จ: ${error.message}`}}
+async function loadMap(){const seq=(window._yearlyLoadSeq=(window._yearlyLoadSeq||0)+1);const stale=()=>seq!==window._yearlyLoadSeq;if(!map)map=L.map('map',{worldCopyJump:false}).setView([7.3333333333,104.6666666667],4);if(!map._layers||Object.keys(map._layers).length<2)L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);if(!boundaryLayer){try{const boundaryResponse=await fetch(isLocal?`${API}/geojson/marine_zones`:`${RAW}/data/marine_zones.geojson`,{cache:'no-store'});if(!boundaryResponse.ok)throw Error(`HTTP ${boundaryResponse.status}`);const boundaryGeoJson=await boundaryResponse.json();boundaryLayer=L.geoJSON(boundaryGeoJson,{style:feature=>({color:feature?.properties?.zone_id?'#2563eb':'#0f172a',weight:feature?.properties?.zone_id?1.5:2.5,opacity:.9,fill:false}),onEachFeature:(feature,featureLayer)=>{featureLayer.bindTooltip('ขอบเขต EEZ Marine Zone',{sticky:true})}}).addTo(map);boundaryLayer.bringToFront()}catch(error){document.getElementById('insight').textContent+=` · โหลดขอบเขต EEZ ไม่สำเร็จ: ${error.message}`}}if(layer)map.removeLayer(layer);try{const tifUrl=rasterUrl(selectedYear);const response=await fetch(tifUrl,{cache:'no-store'});if(!response.ok)throw Error(`HTTP ${response.status}`);if(stale())return;const georaster=await parseGeoraster(await response.arrayBuffer());if(stale())return;const pixelValuesToColorFn=values=>{const r=values[0],g=values[1],b=values[2];return r===0&&g===0&&b===0?null:`rgb(${r},${g},${b})`};const rasterBounds=[[georaster.ymin,georaster.xmin],[georaster.ymax,georaster.xmax]];const fitRaster=()=>{if(!map)return;map.invalidateSize({pan:false});map.fitBounds(rasterBounds,{animate:false})};map.invalidateSize({pan:false});if(stale())return;yearlyGeoraster=georaster;fitRaster();await drawYearlyViewport();if(!map._viewportHook){map._viewportHook=true;map.on('moveend',()=>{clearTimeout(map._viewportTimer);map._viewportTimer=setTimeout(drawYearlyViewport,60)})}await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));fitRaster();setTimeout(()=>{fitRaster();boundaryLayer?.bringToFront()},500);}catch(error){if(selectedYear===2026)document.getElementById('insight').textContent+=' · ยังไม่มี Raster รายปี 2026 ใน GitHub (กราฟใช้ค่าเฉลี่ย ม.ค.–ก.ค.)';else document.getElementById('insight').textContent=`โหลด raster ไม่สำเร็จ: ${error.message}`}}
 function recalculate2025OverallAnomaly(source){const climatology={sst:extractGithubConst(source,'sstClimatology'),chl:extractGithubConst(source,'chlClimatology')},monthly={sst:extractGithubConst(source,'sstMonthly'),chl:extractGithubConst(source,'chlMonthly')};for(const key of ['sst','chl']){const values=monthly[key]?.['2025']||[],baseline=climatology[key]?.mean||[],derived=values.map((value,index)=>Number.isFinite(value)&&Number.isFinite(baseline[index])?value-baseline[index]:null).filter(Number.isFinite);if(!derived.length)continue;stats[key]['2025'].mean=derived.reduce((sum,value)=>sum+value,0)/derived.length;stats[key]['2025'].min=Math.min(...derived);stats[key]['2025'].max=Math.max(...derived)}}
 async function init(){try{const response=await fetch(isLocal?`${API}/yearly/stats`:`${RAW}/data/Yearly_RGB/stats.json`);if(!response.ok)throw Error(`HTTP ${response.status}`);stats=await response.json();const years=stats.years;const select=document.getElementById('year');years.forEach(year=>{const option=document.createElement('option');option.value=year;option.textContent=`${year+543} (${year})`;select.appendChild(option)});selectedYear=years[years.length-1];select.value=selectedYear;document.querySelectorAll('.param-tab').forEach(button=>button.onclick=()=>{document.querySelectorAll('.param-tab').forEach(item=>item.classList.remove('active'));button.classList.add('active');param=button.dataset.param;update()});document.querySelectorAll('.view-tab[data-view]').forEach(button=>button.onclick=()=>{document.querySelectorAll('.view-tab').forEach(item=>item.classList.remove('active'));button.classList.add('active');view=button.dataset.view;update()});select.onchange=()=>{selectedYear=Number(select.value);update()};document.getElementById('zone').onchange=update;update()}catch(error){document.getElementById('insight').className='insight error';document.getElementById('insight').textContent=`โหลดข้อมูลรายปีไม่สำเร็จ: ${error.message}`}}
 init();

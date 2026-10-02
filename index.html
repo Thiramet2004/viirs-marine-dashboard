@@ -1050,6 +1050,12 @@ function initLeafletMap() {
   // Raster below the default overlay pane (z-index 400) that holds the EEZ boundaries.
   leafletMap.createPane('rasterPane');
   leafletMap.getPane('rasterPane').style.zIndex = 350;
+  // redraw the visible part at screen resolution after zooming or panning (keeps it sharp)
+  leafletMap.on('moveend', () => {
+    if (!currentEntry) return;
+    clearTimeout(viewportTimer);
+    viewportTimer = setTimeout(() => showRaster(currentEntry), 60);
+  });
 
   // OSM Humanitarian — สว่าง สะอาด ฟรี ไม่ต้อง API key
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1099,50 +1105,55 @@ function isTiffBuffer(buf) {
 }
 
 // Convert 3-band RGB georaster directly to HTML5 Canvas in < 20ms
-function renderGeorasterCanvas(georaster) {
-  // Display only: the data stay 4 km (1/24 degree). The image is drawn at DISPLAY_SCALE times the raster size,
-  // with colours blended bilinearly between neighbouring ocean pixels, so it looks smooth when zoomed in.
-  // A display pixel is transparent when its nearest data pixel is land / no data, so the coastline and
-  // the land mask stay exactly as in the data; land pixels are never blended into the sea.
-  const DISPLAY_SCALE = 3;
-  const width = georaster.width, height = georaster.height;
-  const outWidth = width * DISPLAY_SCALE, outHeight = height * DISPLAY_SCALE;
-  // The GeoTIFF rows are evenly spaced in latitude (EPSG:4326), but L.imageOverlay stretches the image
-  // evenly in Web Mercator, so each output row is sampled at its Mercator latitude.
+function renderViewportCanvas(georaster, map) {
+  // Display only: the data stay 4 km (1/24 degree). The visible part of the raster (+15 % margin) is drawn at
+  // screen resolution, so it stays sharp at every zoom. Colours are blended bilinearly between neighbouring
+  // ocean pixels; a screen pixel is transparent when the data pixel under it is land / no data, so the
+  // coastline and cloud gaps are exactly the data's 4 km pixels and land is never blended into the sea.
+  const view = map.getBounds().pad(0.15);
+  const south = Math.max(view.getSouth(), georaster.ymin), north = Math.min(view.getNorth(), georaster.ymax);
+  const west = Math.max(view.getWest(), georaster.xmin), east = Math.min(view.getEast(), georaster.xmax);
+  if (!(south < north && west < east)) return null;
+  const nw = map.latLngToContainerPoint([north, west]), se = map.latLngToContainerPoint([south, east]);
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const outWidth = Math.max(1, Math.min(4096, Math.round((se.x - nw.x) * ratio)));
+  const outHeight = Math.max(1, Math.min(4096, Math.round((se.y - nw.y) * ratio)));
+  // L.imageOverlay stretches the image evenly in Web Mercator, so rows are sampled at their Mercator latitude.
   const mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
   const fromMercY = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180 / Math.PI;
-  const topY = mercY(georaster.ymax), bottomY = mercY(georaster.ymin);
-
+  const topY = mercY(north), bottomY = mercY(south);
+  const width = georaster.width, height = georaster.height;
+  const pw = georaster.pixelWidth, ph = georaster.pixelHeight;
   const [rValues, gValues, bValues] = georaster.values;
-  const valid = new Uint8Array(width * height);
-  for (let row = 0; row < height; row++) {
-    const r = rValues[row], g = gValues[row], b = bValues[row];
-    for (let col = 0; col < width; col++) {
-      valid[row * width + col] = Number.isFinite(r[col]) && !(r[col] === 0 && g[col] === 0 && b[col] === 0) ? 1 : 0;
+  if (!georaster._valid) {
+    const valid = new Uint8Array(width * height);
+    for (let row = 0; row < height; row++) {
+      const r = rValues[row], g = gValues[row], b = bValues[row];
+      for (let col = 0; col < width; col++) {
+        valid[row * width + col] = Number.isFinite(r[col]) && !(r[col] === 0 && g[col] === 0 && b[col] === 0) ? 1 : 0;
+      }
     }
+    georaster._valid = valid;   // computed once per month
   }
-
+  const valid = georaster._valid;
   const canvas = document.createElement('canvas');
   canvas.width = outWidth;
   canvas.height = outHeight;
   const ctx = canvas.getContext('2d');
   const imgData = ctx.createImageData(outWidth, outHeight);
   const d = imgData.data;
-
-  // horizontal sample positions are the same for every row
   const col0 = new Int32Array(outWidth), colFrac = new Float32Array(outWidth), colNear = new Int32Array(outWidth);
   for (let x = 0; x < outWidth; x++) {
-    const fc = (x + 0.5) / DISPLAY_SCALE - 0.5;
-    col0[x] = Math.floor(fc);
-    colFrac[x] = fc - col0[x];
-    colNear[x] = Math.min(width - 1, Math.max(0, Math.round(fc)));
+    const t = (west + (x + 0.5) / outWidth * (east - west) - georaster.xmin) / pw;
+    colNear[x] = Math.min(width - 1, Math.max(0, Math.floor(t)));
+    col0[x] = Math.floor(t - 0.5);
+    colFrac[x] = t - 0.5 - col0[x];
   }
-
   for (let y = 0; y < outHeight; y++) {
     const lat = fromMercY(topY - (y + 0.5) / outHeight * (topY - bottomY));
-    const fr = (georaster.ymax - lat) / georaster.pixelHeight - 0.5;
-    const row0 = Math.floor(fr), rowFrac = fr - row0;
-    const rowNear = Math.min(height - 1, Math.max(0, Math.round(fr)));
+    const t = (georaster.ymax - lat) / ph;
+    const rowNear = Math.min(height - 1, Math.max(0, Math.floor(t)));
+    const row0 = Math.floor(t - 0.5), rowFrac = t - 0.5 - row0;
     const rows = [Math.min(height - 1, Math.max(0, row0)), Math.min(height - 1, Math.max(0, row0 + 1))];
     const offset = y * outWidth * 4;
     for (let x = 0; x < outWidth; x++) {
@@ -1168,7 +1179,7 @@ function renderGeorasterCanvas(georaster) {
     }
   }
   ctx.putImageData(imgData, 0, 0);
-  return canvas;
+  return {canvas, bounds: [[south, west], [north, east]]};
 }
 
 // Only the newest request may draw: every call takes a number, and a call that is no longer the newest
@@ -1179,13 +1190,26 @@ function scheduleMapLoad(delay = 150) {
   clearTimeout(mapLoadTimer);
   mapLoadTimer = setTimeout(loadMapGeoTIFF, delay);
 }
-function showRaster(entry) {
+// The month on screen; its visible part is redrawn at screen resolution after every zoom / pan.
+let currentEntry = null, viewportSeq = 0, viewportUrl = null, viewportTimer = null;
+async function showRaster(entry) {
+  currentEntry = entry;
+  const seq = ++viewportSeq;
+  const rendered = renderViewportCanvas(entry.georaster, leafletMap);
+  if (!rendered) return;
+  const blob = await new Promise(resolve => rendered.canvas.toBlob(resolve, 'image/png'));
+  if (seq !== viewportSeq || currentEntry !== entry) return;   // a newer month or view is being drawn
+  const url = URL.createObjectURL(blob);
   // remove every raster overlay (not only the last one) so exactly one image is on the map
   leafletMap.eachLayer(layer => { if (layer instanceof L.ImageOverlay && layer.options.pane === 'rasterPane') leafletMap.removeLayer(layer); });
-  currentMapLayer = L.imageOverlay(entry.url, entry.bounds, {opacity: 0.85, pane: 'rasterPane'}).addTo(leafletMap);
+  currentMapLayer = L.imageOverlay(url, rendered.bounds, {opacity: 0.85, pane: 'rasterPane'}).addTo(leafletMap);
   currentMapLayer.georaster = entry.georaster;
+  if (viewportUrl) URL.revokeObjectURL(viewportUrl);
+  viewportUrl = url;
 }
 function clearRaster() {
+  currentEntry = null;
+  viewportSeq++;
   leafletMap.eachLayer(layer => { if (layer instanceof L.ImageOverlay && layer.options.pane === 'rasterPane') leafletMap.removeLayer(layer); });
   currentMapLayer = null;
 }
@@ -1257,16 +1281,10 @@ async function loadMapGeoTIFF() {
         [georaster.ymin, georaster.xmin],
         [georaster.ymax, georaster.xmax]
       ];
-      const canvas = renderGeorasterCanvas(georaster);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      const entry = {url: URL.createObjectURL(blob), bounds, georaster};
+      const entry = {bounds, georaster};
       rasterCache.set(cacheKey, entry);
-      while (rasterCache.size > RASTER_CACHE_SIZE) {
-        const [oldKey, oldEntry] = rasterCache.entries().next().value;
-        rasterCache.delete(oldKey);
-        URL.revokeObjectURL(oldEntry.url);
-      }
-      if (seq !== mapLoadSeq) return;   // a newer month was requested while this one was drawn
+      while (rasterCache.size > RASTER_CACHE_SIZE) rasterCache.delete(rasterCache.keys().next().value);
+      if (seq !== mapLoadSeq) return;   // a newer month was requested meanwhile
       showRaster(entry);
 
       if (!window._mapBoundsFitted) {
